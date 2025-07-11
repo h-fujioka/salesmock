@@ -166,34 +166,41 @@ const HomePage: React.FC<HomePageProps> = ({ onShowAllTasks }) => {
   const statusTabs = [
     { key: 'progress', label: '進捗' },
     { key: 'mail', label: '未読メール' },
-    { key: 'risk', label: 'リスク' },
     { key: 'kpi', label: 'KPI' },
   ];
   const [activeStatusTab, setActiveStatusTab] = React.useState('progress');
-  const statusTabData: Record<string, { title: string; desc: string; value: string; badgeColor?: string }> = {
+
+  const statusTabData: Record<string, { title: string; descList: (string | { label: string; value: number })[]; value: string; badgeColor?: string }> = {
     progress: {
       title: '今日の進捗',
-      desc: '契約書作成、会議参加、メール返信など10件完了',
+      descList: [
+        'A社 契約書レビュー完了',
+        'B社 提案書送付',
+        'C社 顧問契約更新連絡済み',
+        'D社 NDAドラフト作成',
+      ],
       value: '10/10タスク完了（100%）',
       badgeColor: 'bg-blue-100 text-blue-700',
     },
     mail: {
       title: '未読メール',
-      desc: 'B社：至急 契約書レビュー依頼',
+      descList: [
+        '[重要] D社：至急 契約書修正依頼',
+        'E社：NDAドラフトのご確認',
+      ],
       value: '2件（重要:1件）',
       badgeColor: 'bg-red-100 text-red-700',
     },
-    risk: {
-      title: 'リスク案件',
-      desc: 'B社の契約書レビューが期限切れ',
-      value: '1件',
-      badgeColor: 'bg-yellow-100 text-yellow-800',
-    },
     kpi: {
-      title: '受注見込み',
-      desc: '今月目標1,500万円のうち80%達成',
-      value: '1,200万円（今月目標の80%）',
-      badgeColor: 'bg-green-100 text-green-700',
+      title: '営業KPI',
+      descList: [
+        { label: '新規案件メール数', value: 8 },
+        { label: '未対応案件メール数', value: 2 },
+        { label: '進行中案件メール数', value: 15 },
+        { label: '至急・重要メール数', value: 3 },
+      ],
+      value: '',
+      badgeColor: '',
     },
   };
 
@@ -258,16 +265,39 @@ const HomePage: React.FC<HomePageProps> = ({ onShowAllTasks }) => {
                 </button>
               ))}
             </div>
-            {/* カード型UIで表示 */}
-            <div className="border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-[#fcfcfd] shadow-sm">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full border bg-gray-100 text-gray-700 border-gray-200">{statusTabs.find(t => t.key === activeStatusTab)?.label}</span>
-                </div>
-                <div className="font-semibold text-gray-900 truncate text-base leading-tight mb-1">{statusTabData[activeStatusTab].title}{statusTabData[activeStatusTab].value && <span className={cn('ml-2 text-base font-bold px-3 py-1 rounded-full', statusTabData[activeStatusTab].badgeColor)}>{statusTabData[activeStatusTab].value}</span>}</div>
-                <div className="text-sm text-gray-500 truncate mb-1">{statusTabData[activeStatusTab].desc}</div>
+            {/* カード型UIで表示（descListを1件ごとにカード表示） */}
+            {activeStatusTab === 'kpi' && (
+              <div className="flex flex-col gap-3">
+                {Array.isArray(statusTabData.kpi.descList) && statusTabData.kpi.descList.map((desc, idx) => {
+                  if (typeof desc === 'object' && 'label' in desc && 'value' in desc) {
+                    return (
+                      <div key={idx} className="border border-gray-200 rounded-xl p-5 bg-[#fcfcfd]">
+                        <div className="font-bold text-base mb-1">{desc.label}</div>
+                        <div className="text-2xl font-extrabold text-blue-700">{desc.value}件</div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
               </div>
-            </div>
+            )}
+            {activeStatusTab !== 'kpi' && (
+              <div className="flex flex-col gap-3">
+                {statusTabData[activeStatusTab].descList
+                  .filter((desc) => typeof desc === 'string')
+                  .map((desc, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-[#fcfcfd] shadow-sm">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full border bg-gray-100 text-gray-700 border-gray-200">{statusTabs.find(t => t.key === activeStatusTab)?.label}</span>
+                        </div>
+                        <div className="font-semibold text-gray-900 truncate text-base leading-tight mb-1">{statusTabData[activeStatusTab].title}{statusTabData[activeStatusTab].value && idx === 0 && <span className={cn('ml-2 text-base font-bold px-3 py-1 rounded-full', statusTabData[activeStatusTab].badgeColor)}>{statusTabData[activeStatusTab].value}</span>}</div>
+                        <div className="text-sm text-gray-500 truncate mb-1">{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         )}
         {/* 未対応事項リスト＋タブ（statusエリアは削除） */}

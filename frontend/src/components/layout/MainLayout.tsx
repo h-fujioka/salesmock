@@ -1,10 +1,10 @@
 "use client";
 
-import AgentInbox from "@/components/features/AgentInbox/AgentInbox";
 import EmailInbox from "@/components/features/EmailManagement/EmailInbox";
+import HomePage from "@/components/features/Home/HomePage";
 import TaskList from "@/components/features/TaskManagement/TaskList";
-import { useState } from "react";
 import { usePathname } from 'next/navigation';
+import { useState } from "react";
 import Navigation from "./Navigation";
 
 export default function MainLayout() {
@@ -20,13 +20,13 @@ export default function MainLayout() {
     // その他のページは従来通り内部状態で管理
     switch (currentPage) {
       case "dashboard":
-        return <AgentInbox />;
+        return <HomePage />;
       case "tasks":
         return <TaskList />;
       case "emails":
         return <EmailInbox />;
       default:
-        return <AgentInbox />;
+        return <HomePage />;
     }
   };
 
