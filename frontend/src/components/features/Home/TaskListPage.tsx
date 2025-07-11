@@ -211,113 +211,115 @@ const TaskListPage: React.FC = () => {
   });
 
   return (
-    <div className="max-w-[1280px] w-full mx-auto py-8 px-2">
-      {/* タイトル */}
-      <h1 className="text-2xl font-bold mb-4">タスク管理</h1>
+    <div className="min-h-screen bg-[#f7f8fa]">
+      <div className="w-full px-8 py-8">
+        {/* タイトル */}
+        <h1 className="text-[20px] font-bold mb-4">タスク管理</h1>
 
-      {/* Sela対話エリア */}
-      {/* Cardごと削除 */}
+        {/* Sela対話エリア */}
+        {/* Cardごと削除 */}
 
-      {/* 4エリアサマリー（状況確認・次のアクション・承認・補完） */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        {/* 状況確認 */}
-        <Card>
-          <div className="p-4">
-            <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='状況'>📊</span>状況確認</div>
-            <div className="mb-2"><span className="font-bold">5/8</span> タスク完了</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-              <div className="bg-blue-500 h-2 rounded-full" style={{width: '62%'}}></div>
-            </div>
-            <div className="text-xs text-gray-500">未読: 2件</div>
-          </div>
-        </Card>
-        {/* 次のアクション */}
-        <Card>
-          <div className="p-4">
-            <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='アクション'>🔥</span>次のアクション</div>
-            <div className="font-bold text-red-600 mb-1">A社へ緊急連絡</div>
-            <div className="text-xs text-gray-500">期限: 今日17時</div>
-            <div className="text-xs text-gray-500">B社提案書作成（明日）</div>
-          </div>
-        </Card>
-        {/* 承認・確認 */}
-        <Card>
-          <div className="p-4">
-            <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='承認'>✅</span>承認・確認</div>
-            <div>承認待ち: 見積書(D社)</div>
-            <Button size="sm" variant="outline" className="mt-2">承認画面へ</Button>
-          </div>
-        </Card>
-        {/* 補完・リスク管理 */}
-        <Card>
-          <div className="p-4">
-            <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='リスク'>🔍</span>補完・リスク</div>
-            <div className="text-red-500 mb-1">期限切れ: 1件</div>
-            <div className="text-xs text-gray-500">AI提案あり</div>
-          </div>
-        </Card>
-      </div>
-
-      {/* 検索・フィルタバー（タスク一覧の直上に移動） */}
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="タスク名・案件名で検索"
-          className="w-48"
-        />
-        <select
-          className="border rounded px-2 py-1 text-sm"
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
-          <option value="">ステータス</option>
-          <option value="pending">未着手</option>
-          <option value="in-progress">進行中</option>
-          <option value="completed">完了</option>
-        </select>
-        <select
-          className="border rounded px-2 py-1 text-sm"
-          value={filterPriority}
-          onChange={(e) => setFilterPriority(e.target.value)}
-        >
-          <option value="">優先度</option>
-          <option value="high">高</option>
-          <option value="medium">中</option>
-          <option value="low">低</option>
-        </select>
-        <Button variant="outline" size="icon">
-          <Search className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* タスク一覧（常に表示） */}
-      <div className="space-y-3 mb-4">
-        {filteredTasks.map((task) => (
-          <Card key={task.id} className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                {getStatusIcon(task.status)}
-                <span className="text-xs text-gray-500">{getStatusLabel(task.status)}</span>
+        {/* 4エリアサマリー（状況確認・次のアクション・承認・補完） */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
+          {/* 状況確認 */}
+          <Card>
+            <div className="p-2">
+              <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='状況'>📊</span>状況確認</div>
+              <div className="mb-2"><span className="font-bold">5/8</span> タスク完了</div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div className="bg-blue-500 h-2 rounded-full" style={{width: '62%'}}></div>
               </div>
-              <div className="font-medium text-gray-900 truncate text-base leading-tight">{task.title}</div>
-              <div className="text-xs text-gray-500 truncate mb-1">{task.project}</div>
-            </div>
-            <div className="flex flex-col items-end justify-between h-full min-w-[60px]">
-              <Badge className={getPriorityColor(task.priority)}>{getPriorityLabel(task.priority)}</Badge>
-              <span className="text-xs text-gray-400 mt-2">{task.dueDate}</span>
+              <div className="text-xs text-gray-500">未読: 2件</div>
             </div>
           </Card>
-        ))}
-        {filteredTasks.length === 0 && (
-          <div className="text-center text-gray-400 text-sm py-8">タスクがありません</div>
-        )}
-      </div>
+          {/* 次のアクション */}
+          <Card>
+            <div className="p-2">
+              <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='アクション'>🔥</span>次のアクション</div>
+              <div className="font-bold text-red-600 mb-1">A社へ緊急連絡</div>
+              <div className="text-xs text-gray-500">期限: 今日17時</div>
+              <div className="text-xs text-gray-500">B社提案書作成（明日）</div>
+            </div>
+          </Card>
+          {/* 承認・確認 */}
+          <Card>
+            <div className="p-2">
+              <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='承認'>✅</span>承認・確認</div>
+              <div>承認待ち: 見積書(D社)</div>
+              <Button size="sm" variant="outline" className="mt-2">承認画面へ</Button>
+            </div>
+          </Card>
+          {/* 補完・リスク管理 */}
+          <Card>
+            <div className="p-2">
+              <div className="font-semibold mb-2 flex items-center gap-2"><span role='img' aria-label='リスク'>🔍</span>補完・リスク</div>
+              <div className="text-red-500 mb-1">期限切れ: 1件</div>
+              <div className="text-xs text-gray-500">AI提案あり</div>
+            </div>
+          </Card>
+        </div>
 
-      {/* 新規タスク追加ボタン */}
-      <Button variant="default" className="w-full" size="lg">
-        <Plus className="w-4 h-4 mr-2" /> 新規タスク追加
-      </Button>
+        {/* 検索・フィルタバー（タスク一覧の直上に移動） */}
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="タスク名・案件名で検索"
+            className="w-48"
+          />
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">ステータス</option>
+            <option value="pending">未着手</option>
+            <option value="in-progress">進行中</option>
+            <option value="completed">完了</option>
+          </select>
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+          >
+            <option value="">優先度</option>
+            <option value="high">高</option>
+            <option value="medium">中</option>
+            <option value="low">低</option>
+          </select>
+          <Button variant="outline" size="icon">
+            <Search className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* タスク一覧（常に表示） */}
+        <div className="space-y-3 mb-4">
+          {filteredTasks.map((task) => (
+            <Card key={task.id} className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  {getStatusIcon(task.status)}
+                  <span className="text-xs text-gray-500">{getStatusLabel(task.status)}</span>
+                </div>
+                <div className="font-medium text-gray-900 truncate text-base leading-tight">{task.title}</div>
+                <div className="text-base text-gray-500 truncate mb-1">{task.project}</div>
+              </div>
+              <div className="flex flex-col items-end justify-between h-full min-w-[60px]">
+                <Badge className={getPriorityColor(task.priority)}>{getPriorityLabel(task.priority)}</Badge>
+                <span className="text-base text-gray-400 mt-2">{task.dueDate}</span>
+              </div>
+            </Card>
+          ))}
+          {filteredTasks.length === 0 && (
+            <div className="text-center text-gray-400 text-base py-8">タスクがありません</div>
+          )}
+        </div>
+
+        {/* 新規タスク追加ボタン */}
+        <Button variant="default" className="w-full text-base" size="lg">
+          <Plus className="w-4 h-4 mr-2" /> 新規タスク追加
+        </Button>
+      </div>
     </div>
   );
 };

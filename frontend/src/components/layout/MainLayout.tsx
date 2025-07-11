@@ -6,7 +6,6 @@ import EmailInbox from "@/components/features/EmailManagement/EmailInbox";
 import TaskList from "@/components/features/TaskManagement/TaskList";
 import { useState } from "react";
 import Navigation from "./Navigation";
-import SelaPanel from "./SelaPanel";
 
 export default function  MainLayout() {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -34,7 +33,6 @@ export default function  MainLayout() {
           {renderPage()}
         </div>
       </div>
-      <SelaPanel />
     </div>
   );
 } 

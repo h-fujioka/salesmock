@@ -214,7 +214,7 @@ export default function EmailInbox() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1280px] w-full mx-auto py-8 px-2">
+      <div className="w-full px-8 py-8">
         {/* メール一覧 */}
         <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
           <div className="p-4 border-b border-gray-200">
@@ -260,7 +260,7 @@ export default function EmailInbox() {
                       >
                         <div className="flex items-start space-x-3">
                           <Avatar className="w-8 h-8">
-                            <AvatarFallback className="text-xs">
+                            <AvatarFallback className="text-base">
                               {email.sender.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
@@ -268,7 +268,7 @@ export default function EmailInbox() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <span className={`font-medium text-sm ${!email.isRead ? 'font-bold' : ''}`}>
+                                <span className={`font-medium text-base ${!email.isRead ? 'font-bold' : ''}`}>
                                   {email.sender}
                                 </span>
                                 {email.isStarred && <Star className="w-3 h-3 text-yellow-500" />}
@@ -277,7 +277,7 @@ export default function EmailInbox() {
                               <span className="text-xs text-gray-500">{email.timestamp}</span>
                             </div>
                             
-                            <h3 className={`text-sm ${!email.isRead ? 'font-bold' : ''} truncate`}>
+                            <h3 className={`text-base ${!email.isRead ? 'font-bold' : ''} truncate`}>
                               {email.subject}
                             </h3>
                             
@@ -320,7 +320,7 @@ export default function EmailInbox() {
                           >
                             <div className="flex items-start space-x-3">
                               <Avatar className="w-8 h-8">
-                                <AvatarFallback className="text-xs">
+                                <AvatarFallback className="text-base">
                                   {email.sender.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
@@ -328,7 +328,7 @@ export default function EmailInbox() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-2">
-                                    <span className={`font-medium text-sm ${!email.isRead ? 'font-bold' : ''}`}>
+                                    <span className={`font-medium text-base ${!email.isRead ? 'font-bold' : ''}`}>
                                       {email.sender}
                                     </span>
                                     {email.isStarred && <Star className="w-3 h-3 text-yellow-500" />}
@@ -337,7 +337,7 @@ export default function EmailInbox() {
                                   <span className="text-xs text-gray-500">{email.timestamp}</span>
                                 </div>
                                 
-                                <h3 className={`text-sm ${!email.isRead ? 'font-bold' : ''} truncate`}>
+                                <h3 className={`text-base ${!email.isRead ? 'font-bold' : ''} truncate`}>
                                   {email.subject}
                                 </h3>
                                 
@@ -419,13 +419,13 @@ export default function EmailInbox() {
                   <div className="bg-white rounded-lg shadow-sm border p-6">
                     <div className="flex items-center space-x-4 mb-6">
                       <Avatar className="w-12 h-12">
-                        <AvatarFallback className="text-lg">
+                        <AvatarFallback className="text-base">
                           {selectedEmail.sender.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{selectedEmail.sender}</h3>
+                        <h3 className="font-semibold text-gray-900 text-base">{selectedEmail.sender}</h3>
                         <p className="text-sm text-gray-500">{selectedEmail.senderEmail}</p>
                         <p className="text-sm text-gray-500">{selectedEmail.timestamp}</p>
                       </div>

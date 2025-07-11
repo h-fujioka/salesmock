@@ -165,13 +165,13 @@ export default function CaseList() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1280px] w-full mx-auto py-8 px-2">
+      <div className="w-full px-8 py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
           <div className="mb-4 md:mb-0 md:mr-4 flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">案件管理</h1>
-                <p className="text-gray-600">営業案件の一覧と管理</p>
+                <h1 className="text-[20px] font-bold text-gray-900">案件管理</h1>
+                <p className="text-sm text-gray-600">営業案件の一覧と管理</p>
               </div>
               <div className="flex gap-2">
                 <Button variant={viewType === 'table' ? 'default' : 'outline'} size="sm" onClick={() => setViewType('table')}>テーブル表示</Button>
@@ -188,7 +188,7 @@ export default function CaseList() {
               <MessageCircle className="w-5 h-5 text-blue-500 mr-2" />
               <span className="font-semibold text-gray-800">AIのおすすめ</span>
             </div>
-            <ul className="text-sm text-gray-700 space-y-1">
+            <ul className="text-base text-gray-700 space-y-1">
               <li>・リスクが高い案件: <span className="font-bold">DEF社クラウド移行</span></li>
               <li>・未対応アクション: <span className="font-bold">2件</span></li>
               <li>・今日の優先案件: <span className="font-bold">ABC社システム導入</span></li>
@@ -314,7 +314,7 @@ export default function CaseList() {
                         <TableRow key={caseItem.id}>
                           <TableCell>
                             <div>
-                              <div className="font-medium flex items-center gap-2">
+                              <div className="font-medium flex items-center gap-2 text-base">
                                 {caseItem.name}
                                 {(caseItem.progress < 30 || caseItem.priority === 'high') && (
                                   <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded ml-1">
@@ -323,7 +323,7 @@ export default function CaseList() {
                                   </span>
                                 )}
                               </div>
-                              <div className="text-sm text-gray-500">{caseItem.description}</div>
+                              <div className="text-base text-gray-500">{caseItem.description}</div>
                             </div>
                           </TableCell>
                           <TableCell>{caseItem.company}</TableCell>
@@ -346,7 +346,7 @@ export default function CaseList() {
                                   {caseItem.assignedTo.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="text-sm">{caseItem.assignedTo}</span>
+                              <span className="text-base">{caseItem.assignedTo}</span>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -407,7 +407,7 @@ export default function CaseList() {
                             <TableRow key={caseItem.id}>
                               <TableCell>
                                 <div>
-                                  <div className="font-medium flex items-center gap-2">
+                                  <div className="font-medium flex items-center gap-2 text-base">
                                     {caseItem.name}
                                     {(caseItem.progress < 30 || caseItem.priority === 'high') && (
                                       <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded ml-1">
@@ -416,7 +416,7 @@ export default function CaseList() {
                                       </span>
                                     )}
                                   </div>
-                                  <div className="text-sm text-gray-500">{caseItem.description}</div>
+                                  <div className="text-base text-gray-500">{caseItem.description}</div>
                                 </div>
                               </TableCell>
                               <TableCell>{caseItem.company}</TableCell>
@@ -439,7 +439,7 @@ export default function CaseList() {
                                       {caseItem.assignedTo.charAt(0)}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <span className="text-sm">{caseItem.assignedTo}</span>
+                                  <span className="text-base">{caseItem.assignedTo}</span>
                                 </div>
                               </TableCell>
                               <TableCell>
@@ -492,7 +492,7 @@ export default function CaseList() {
                         </span>
                       )}
                     </div>
-                    <div className="text-sm text-gray-500 mb-1">{caseItem.description}</div>
+                    <div className="text-base text-gray-500 mb-1">{caseItem.description}</div>
                     <div className="flex flex-wrap gap-2 items-center mb-1">
                       <Badge className={getStatusColor(caseItem.status)}>{getStatusText(caseItem.status)}</Badge>
                       <Badge className={getPriorityColor(caseItem.priority)}>{getPriorityText(caseItem.priority)}</Badge>
@@ -502,7 +502,7 @@ export default function CaseList() {
                       <Avatar className="w-6 h-6">
                         <AvatarFallback className="text-xs">{caseItem.assignedTo.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{caseItem.assignedTo}</span>
+                      <span className="text-base">{caseItem.assignedTo}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
                       <Calendar className="w-4 h-4 mr-1" />

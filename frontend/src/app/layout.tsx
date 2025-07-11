@@ -30,11 +30,8 @@ export default function RootLayout({
           <main className="flex-1 bg-gray-50">
             {children}
           </main>
-          {/* Selaパネル */}
-          <div className="w-[360px] flex-shrink-0 hidden lg:block">
-            <SelaPanel />
-          </div>
         </div>
+        <SelaPanel />
       </body>
     </html>
   );
