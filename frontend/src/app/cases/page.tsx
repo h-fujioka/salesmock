@@ -1,12 +1,8 @@
-'use client';
-import HomePage from '@/components/features/Home/HomePage';
+import CaseList from '@/components/features/CaseManagement/CaseList';
 import Header from '@/components/layout/Header';
 import SideNavigation from '@/components/layout/SideNavigation';
-import SelaPanel from '@/components/layout/SelaPanel';
-import { useRouter } from 'next/navigation';
 
-export default function Page() {
-  const router = useRouter();
+export default function CasesPage() {
   return (
     <>
       <Header />
@@ -17,10 +13,9 @@ export default function Page() {
         </div>
         {/* 中央コンテンツ */}
         <main className="flex-1 bg-gray-50">
-          <HomePage onShowAllTasks={() => router.push('/tasks')} />
+          <CaseList />
         </main>
       </div>
-      <SelaPanel />
     </>
   );
 }
