@@ -21,7 +21,10 @@ import {
     MessageCircle,
     Plus,
     Search,
-    Trash2
+    Trash2,
+    User,
+    Mail,
+    Bell
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -38,12 +41,22 @@ interface Case {
   assignedTo: string;
   priority: 'low' | 'medium' | 'high';
   description: string;
+  isMyCase: boolean;
+  unreadMessages: number;
+  pendingActions: number;
+  nextAction?: string;
+  riskLevel?: 'low' | 'medium' | 'high';
+  aiSuggestion?: {
+    status?: string;
+    action?: string;
+    approval?: string;
+    risk?: string;
+  };
 }
 
 export default function CaseList() {
   const [searchQuery, setSearchQuery] = useState("");
-  // const [selectedStatus, setSelectedStatus] = useState("all");
-  const [viewType, setViewType] = useState<'table' | 'card'>("table");
+  const [caseFilter, setCaseFilter] = useState<'my' | 'all'>("my");
 
   const cases: Case[] = [
     {
@@ -57,7 +70,18 @@ export default function CaseList() {
       endDate: "2024-04-15",
       assignedTo: "田中太郎",
       priority: "high",
-      description: "基幹システムの導入プロジェクト"
+      description: "基幹システムの導入プロジェクト",
+      isMyCase: true,
+      unreadMessages: 2,
+      pendingActions: 1,
+      nextAction: "提案書の最終確認",
+      riskLevel: "medium",
+      aiSuggestion: {
+        status: "未読メール2件、進捗75%",
+        action: "次は提案書の最終確認",
+        approval: "承認待ち書類あり",
+        risk: "顧客から進捗確認の連絡あり"
+      }
     },
     {
       id: "2",
@@ -70,7 +94,18 @@ export default function CaseList() {
       endDate: "2024-12-31",
       assignedTo: "佐藤花子",
       priority: "medium",
-      description: "年間保守契約の更新"
+      description: "年間保守契約の更新",
+      isMyCase: false,
+      unreadMessages: 0,
+      pendingActions: 0,
+      nextAction: "契約書のレビュー",
+      riskLevel: "low",
+      aiSuggestion: {
+        status: "進捗90%",
+        action: "契約書のレビュー",
+        approval: "－",
+        risk: "－"
+      }
     },
     {
       id: "3",
@@ -83,7 +118,18 @@ export default function CaseList() {
       endDate: "2024-08-31",
       assignedTo: "山田次郎",
       priority: "high",
-      description: "オンプレミスからクラウドへの移行"
+      description: "オンプレミスからクラウドへの移行",
+      isMyCase: true,
+      unreadMessages: 5,
+      pendingActions: 3,
+      nextAction: "緊急会議の設定",
+      riskLevel: "high",
+      aiSuggestion: {
+        status: "未読メール5件、進捗25%",
+        action: "緊急会議の設定",
+        approval: "－",
+        risk: "顧客から問い合わせあり、緊急対応推奨"
+      }
     },
     {
       id: "4",
@@ -96,7 +142,18 @@ export default function CaseList() {
       endDate: "2024-03-31",
       assignedTo: "田中太郎",
       priority: "medium",
-      description: "セキュリティシステムの導入"
+      description: "セキュリティシステムの導入",
+      isMyCase: true,
+      unreadMessages: 0,
+      pendingActions: 0,
+      nextAction: "完了報告書作成",
+      riskLevel: "low",
+      aiSuggestion: {
+        status: "完了済み",
+        action: "完了報告書作成",
+        approval: "－",
+        risk: "－"
+      }
     }
   ];
 
@@ -140,15 +197,38 @@ export default function CaseList() {
     }
   };
 
+  const getRiskColor = (riskLevel?: string) => {
+    switch (riskLevel) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getRiskText = (riskLevel?: string) => {
+    switch (riskLevel) {
+      case 'high': return '高リスク';
+      case 'medium': return '中リスク';
+      case 'low': return '低リスク';
+      default: return 'リスクなし';
+    }
+  };
+
   const filteredCases = cases.filter(caseItem => {
     const matchesSearch = caseItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          caseItem.company.toLowerCase().includes(searchQuery.toLowerCase());
-    // const matchesStatus = selectedStatus === "all" || caseItem.status === selectedStatus;
-    return matchesSearch; // && matchesStatus;
+    const matchesFilter = caseFilter === 'all' || caseItem.isMyCase;
+    return matchesSearch && matchesFilter;
   });
 
+  const myCases = cases.filter(c => c.isMyCase);
+  const riskCases = myCases.filter(c => c.riskLevel === 'high');
+  const pendingActions = myCases.reduce((sum, c) => sum + c.pendingActions, 0);
+  const unreadMessages = myCases.reduce((sum, c) => sum + c.unreadMessages, 0);
+
   const handleNewCase = () => {
-    toast.success("新規案件作成画面を開きます");
+    toast.success("新規案件作成画面を開きます（メール起点での作成をお勧めします）");
   };
 
   const handleViewCase = (caseId: string) => {
@@ -165,94 +245,29 @@ export default function CaseList() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-8 py-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
-          <div className="mb-4 md:mb-0 md:mr-4 flex-1">
-            <div className="flex items-center justify-between">
+      <div className="max-w-[1280px] w-full mx-auto py-4 px-2">
+        {/* ヘッダー */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4">
+          <div className="mb-4 lg:mb-0 lg:mr-4 flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-[20px] font-bold text-gray-900">案件管理</h1>
                 <p className="text-sm text-gray-600">営業案件の一覧と管理</p>
               </div>
-              <div className="flex gap-2">
-                <Button variant={viewType === 'table' ? 'default' : 'outline'} size="sm" onClick={() => setViewType('table')}>テーブル表示</Button>
-                <Button variant={viewType === 'card' ? 'default' : 'outline'} size="sm" onClick={() => setViewType('card')}>カード表示</Button>
-                <Button onClick={handleNewCase}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  新規案件
-                </Button>
+              <div className="flex flex-wrap gap-2">
+                {/* 新規案件ボタンは削除 */}
               </div>
             </div>
           </div>
-          <div className="w-full md:w-80 bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center mb-2">
-              <MessageCircle className="w-5 h-5 text-blue-500 mr-2" />
-              <span className="font-semibold text-gray-800">AIのおすすめ</span>
-            </div>
-            <ul className="text-base text-gray-700 space-y-1">
-              <li>・リスクが高い案件: <span className="font-bold">DEF社クラウド移行</span></li>
-              <li>・未対応アクション: <span className="font-bold">2件</span></li>
-              <li>・今日の優先案件: <span className="font-bold">ABC社システム導入</span></li>
-            </ul>
-          </div>
+          
+          {/* AIのおすすめ */}
+          {/* AIのおすすめエリアを削除 */}
         </div>
 
-        {/* 統計カード */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">総案件数</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{cases.length}</div>
-              <p className="text-xs text-muted-foreground">+2 from last month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">進行中</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {cases.filter(c => c.status === 'proposal' || c.status === 'negotiation').length}
-              </div>
-              <p className="text-xs text-muted-foreground">+1 from last month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">完了案件</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {cases.filter(c => c.status === 'closed').length}
-              </div>
-              <p className="text-xs text-muted-foreground">+0 from last month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">総予算</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                ¥{(cases.reduce((sum, c) => sum + c.budget, 0) / 1000000).toFixed(1)}M
-              </div>
-              <p className="text-xs text-muted-foreground">+20% from last month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 検索・フィルター */}
+        {/* 案件フィルタ */}
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -265,275 +280,81 @@ export default function CaseList() {
                 </div>
               </div>
               <div className="flex gap-2">
+                <Tabs value={caseFilter} onValueChange={(value) => setCaseFilter(value as 'my' | 'all')} className="w-auto">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="my">自分の案件</TabsTrigger>
+                    <TabsTrigger value="all">すべての案件</TabsTrigger>
+                  </TabsList>
+                </Tabs>
                 <Button variant="outline" size="sm">
                   <Filter className="w-4 h-4 mr-2" />
                   フィルター
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  期間
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* 案件一覧 */}
+        {/* 案件一覧（カード表示のみ・横一列・高さ抑えめ） */}
         <Card>
           <CardHeader>
             <CardTitle>案件一覧</CardTitle>
           </CardHeader>
           <CardContent>
-            {viewType === 'table' ? (
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="all">全て</TabsTrigger>
-                  <TabsTrigger value="prospecting">リード</TabsTrigger>
-                  <TabsTrigger value="proposal">提案中</TabsTrigger>
-                  <TabsTrigger value="negotiation">交渉中</TabsTrigger>
-                  <TabsTrigger value="closed">完了</TabsTrigger>
-                  <TabsTrigger value="lost">失注</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="all" className="mt-4">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>案件名</TableHead>
-                        <TableHead>会社名</TableHead>
-                        <TableHead>ステータス</TableHead>
-                        <TableHead>進捗</TableHead>
-                        <TableHead>予算</TableHead>
-                        <TableHead>担当者</TableHead>
-                        <TableHead>優先度</TableHead>
-                        <TableHead>操作</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredCases.map((caseItem) => (
-                        <TableRow key={caseItem.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium flex items-center gap-2 text-base">
-                                {caseItem.name}
-                                {(caseItem.progress < 30 || caseItem.priority === 'high') && (
-                                  <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded ml-1">
-                                    <AlertCircle className="w-3 h-3 mr-1 text-red-500" />
-                                    リスク
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-base text-gray-500">{caseItem.description}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{caseItem.company}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(caseItem.status)}>
-                              {getStatusText(caseItem.status)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Progress value={caseItem.progress} className="w-20" />
-                              <span className="text-sm">{caseItem.progress}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>¥{(caseItem.budget / 10000).toFixed(0)}万</TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Avatar className="w-6 h-6">
-                                <AvatarFallback className="text-xs">
-                                  {caseItem.assignedTo.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-base">{caseItem.assignedTo}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getPriorityColor(caseItem.priority)}>
-                              {getPriorityText(caseItem.priority)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleViewCase(caseItem.id)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditCase(caseItem.id)}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteCase(caseItem.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabsContent>
-                
-                {['prospecting', 'proposal', 'negotiation', 'closed', 'lost'].map((status) => (
-                  <TabsContent key={status} value={status} className="mt-4">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>案件名</TableHead>
-                          <TableHead>会社名</TableHead>
-                          <TableHead>ステータス</TableHead>
-                          <TableHead>進捗</TableHead>
-                          <TableHead>予算</TableHead>
-                          <TableHead>担当者</TableHead>
-                          <TableHead>優先度</TableHead>
-                          <TableHead>操作</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredCases
-                          .filter(caseItem => caseItem.status === status)
-                          .map((caseItem) => (
-                            <TableRow key={caseItem.id}>
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium flex items-center gap-2 text-base">
-                                    {caseItem.name}
-                                    {(caseItem.progress < 30 || caseItem.priority === 'high') && (
-                                      <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded ml-1">
-                                        <AlertCircle className="w-3 h-3 mr-1 text-red-500" />
-                                        リスク
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-base text-gray-500">{caseItem.description}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell>{caseItem.company}</TableCell>
-                              <TableCell>
-                                <Badge className={getStatusColor(caseItem.status)}>
-                                  {getStatusText(caseItem.status)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Progress value={caseItem.progress} className="w-20" />
-                                  <span className="text-sm">{caseItem.progress}%</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>¥{(caseItem.budget / 10000).toFixed(0)}万</TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Avatar className="w-6 h-6">
-                                    <AvatarFallback className="text-xs">
-                                      {caseItem.assignedTo.charAt(0)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-base">{caseItem.assignedTo}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={getPriorityColor(caseItem.priority)}>
-                                  {getPriorityText(caseItem.priority)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleViewCase(caseItem.id)}
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEditCase(caseItem.id)}
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeleteCase(caseItem.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCases.map((caseItem) => (
-                  <Card key={caseItem.id} className="p-4 flex flex-col gap-2 relative">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg font-bold">{caseItem.name}</span>
-                      {(caseItem.progress < 30 || caseItem.priority === 'high') && (
-                        <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded ml-1">
-                          <AlertCircle className="w-3 h-3 mr-1 text-red-500" />
-                          リスク
-                        </span>
-                      )}
+            <div className="flex flex-col gap-6 pb-2">
+              {filteredCases.map((caseItem) => (
+                <Card key={caseItem.id} className="w-full flex flex-col border rounded-2xl shadow-sm bg-white p-0">
+                  {/* タイトル＋バッジ */}
+                  <div className="flex items-center gap-2 px-5 pt-4 pb-2 rounded-t-2xl bg-white border-b border-gray-100">
+                    <span className="text-xl font-extrabold text-gray-900 truncate">{caseItem.name}</span>
+                    {caseItem.aiSuggestion && (
+                      <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full ml-2">AIおすすめ</span>
+                    )}
+                  </div>
+                  {/* 担当・ステータス・進捗・優先度 */}
+                  <div className="text-xs text-gray-600 px-5 pt-2 pb-1 flex flex-wrap gap-x-4 gap-y-1">
+                    <span>担当：{caseItem.assignedTo}</span>
+                    <span>ステータス：{getStatusText(caseItem.status)}</span>
+                    <span>進捗：{caseItem.progress}%</span>
+                    <span>優先度：{getPriorityText(caseItem.priority)}</span>
+                  </div>
+                  {/* 未完了タスク・次のアクション */}
+                  <div className="text-sm px-5 pt-1 pb-0.5 font-bold text-gray-800">
+                    未完了タスク：<span className="font-normal">{caseItem.pendingActions}件{caseItem.nextAction && `（次のアクション：${caseItem.nextAction}）`}</span>
+                  </div>
+                  {/* 最新のやり取り */}
+                  <div className="text-sm px-5 pb-1 font-bold text-gray-800">
+                    最新：<span className="font-normal">{caseItem.description}</span>
+                  </div>
+                  {/* AI提案（4分類） */}
+                  {caseItem.aiSuggestion && (
+                    <div className="mx-4 my-2 p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-900 flex flex-col gap-1">
+                      <div><span className="font-bold text-blue-800">状況：</span>{caseItem.aiSuggestion.status || "－"}</div>
+                      <div><span className="font-bold text-blue-800">アクション：</span>{caseItem.aiSuggestion.action || "－"}</div>
+                      <div><span className="font-bold text-blue-800">承認：</span>{caseItem.aiSuggestion.approval || "－"}</div>
+                      <div><span className="font-bold text-blue-800">リスク：</span>{caseItem.aiSuggestion.risk || "－"}</div>
                     </div>
-                    <div className="text-base text-gray-500 mb-1">{caseItem.description}</div>
-                    <div className="flex flex-wrap gap-2 items-center mb-1">
-                      <Badge className={getStatusColor(caseItem.status)}>{getStatusText(caseItem.status)}</Badge>
-                      <Badge className={getPriorityColor(caseItem.priority)}>{getPriorityText(caseItem.priority)}</Badge>
-                      <span className="text-xs text-gray-500">進捗: {caseItem.progress}%</span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Avatar className="w-6 h-6">
-                        <AvatarFallback className="text-xs">{caseItem.assignedTo.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-base">{caseItem.assignedTo}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {caseItem.startDate} ~ {caseItem.endDate}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      予算: ¥{(caseItem.budget / 10000).toFixed(0)}万
-                    </div>
-                    {/* AI提案・次のアクション例 */}
-                    <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-900">
-                      <span className="font-semibold">AI提案:</span> 次のアクションは「顧客へ進捗報告メールを送信」です。
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <Button variant="outline" size="sm" onClick={() => handleViewCase(caseItem.id)}>
-                        <Eye className="w-4 h-4 mr-1" /> 詳細
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleEditCase(caseItem.id)}>
-                        <Edit className="w-4 h-4 mr-1" /> 編集
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDeleteCase(caseItem.id)}>
-                        <Trash2 className="w-4 h-4 mr-1" /> 削除
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
+                  )}
+                  {/* 操作ボタン */}
+                  <div className="flex justify-between items-center gap-2 px-5 pb-4 pt-2 mt-auto">
+                    <Button variant="outline" size="sm" className="flex-1 flex items-center justify-center gap-1 h-8 px-0.5 py-0 text-xs rounded-lg border-gray-300 hover:bg-gray-100 transition" onClick={() => handleViewCase(caseItem.id)}>
+                      <Eye className="w-4 h-4 mr-1" />詳細
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1 flex items-center justify-center gap-1 h-8 px-0.5 py-0 text-xs rounded-lg border-gray-300 hover:bg-blue-50 transition" onClick={() => handleEditCase(caseItem.id)}>
+                      <Edit className="w-4 h-4 mr-1" />編集
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1 flex items-center justify-center gap-1 h-8 px-0.5 py-0 text-xs rounded-lg border-gray-300 hover:bg-red-50 transition" onClick={() => handleDeleteCase(caseItem.id)}>
+                      <Trash2 className="w-4 h-4 mr-1" />削除
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
+      
+      {/* AIチャットボタン */}
       <button
         className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-4 flex items-center"
         onClick={() => toast.info('AIチャットUI（ダミー）を開きます')}

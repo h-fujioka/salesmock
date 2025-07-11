@@ -58,7 +58,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ className }) => {
 
   return (
     <div className={`flex flex-col h-full ${className || ''}`}>
-
       
       {/* メッセージエリア */}
       <div className="flex-1 overflow-y-auto px-6 pb-2">

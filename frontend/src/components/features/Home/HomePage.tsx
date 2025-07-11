@@ -7,7 +7,6 @@ import {
     Clock
 } from 'lucide-react';
 import React from 'react';
-// ChatAreaのimportは削除
 
 interface Task {
   id: string;

@@ -15,6 +15,7 @@ import {
     Users
 } from "lucide-react";
 import { useState } from "react";
+import { useRouter, usePathname } from 'next/navigation';
 
 interface NavigationProps {
   currentPage: string;
@@ -22,7 +23,8 @@ interface NavigationProps {
 }
 
 export default function Navigation({ currentPage, onPageChange }: NavigationProps) {
-  // const [notifications] = useState(5);
+  const router = useRouter();
+  const pathname = usePathname();
   const [unreadEmails] = useState(3);
   const [urgentTasks] = useState(2);
 
@@ -85,19 +87,34 @@ export default function Navigation({ currentPage, onPageChange }: NavigationProp
     }
   ];
 
+  const handleNavigation = (itemId: string) => {
+    if (itemId === "cases") {
+      // 案件管理の場合はURLルーティングを使用
+      router.push('/cases');
+    } else {
+      // その他のページは従来の内部状態管理を使用
+      onPageChange(itemId);
+    }
+  };
+
+  // 案件管理ページの場合はactive状態を判定
+  const isCasesActive = pathname === '/cases';
+
   return (
     <div className="w-[68px] bg-white border-r border-gray-200 flex flex-col h-screen">
-      {/* ヘッダー削除済み */}
-      {/* メインナビゲーション */}
       <div className="flex-1 py-4 flex flex-col items-center overflow-y-auto">
         <div className="space-y-2 w-full flex flex-col items-center">
-          {/* ラベル非表示 or アイコンのみ表示に最適化 */}
           {navigationItems.map((item) => (
             <Button
               key={item.id}
-              variant={currentPage === item.id ? "default" : "ghost"}
+              variant={
+                (item.id === "cases" && isCasesActive) || 
+                (item.id !== "cases" && currentPage === item.id) 
+                  ? "default" 
+                  : "ghost"
+              }
               className="w-12 h-12 flex items-center justify-center p-0 mb-2"
-              onClick={() => onPageChange(item.id)}
+              onClick={() => handleNavigation(item.id)}
               title={item.name}
             >
               <item.icon className="w-6 h-6" />
@@ -125,7 +142,6 @@ export default function Navigation({ currentPage, onPageChange }: NavigationProp
         </div>
       </div>
 
-      {/* フッター */}
       <div className="py-4 border-t border-gray-200 flex flex-col items-center">
         <Button variant="ghost" className="w-12 h-12 flex items-center justify-center p-0 mb-2" title="設定">
           <Settings className="w-6 h-6" />
@@ -136,4 +152,4 @@ export default function Navigation({ currentPage, onPageChange }: NavigationProp
       </div>
     </div>
   );
-} 
+}

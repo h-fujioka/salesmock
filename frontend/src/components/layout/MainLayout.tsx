@@ -1,21 +1,26 @@
 "use client";
 
 import AgentInbox from "@/components/features/AgentInbox/AgentInbox";
-import CaseList from "@/components/features/CaseManagement/CaseList";
 import EmailInbox from "@/components/features/EmailManagement/EmailInbox";
 import TaskList from "@/components/features/TaskManagement/TaskList";
 import { useState } from "react";
+import { usePathname } from 'next/navigation';
 import Navigation from "./Navigation";
 
-export default function  MainLayout() {
+export default function MainLayout() {
   const [currentPage, setCurrentPage] = useState("dashboard");
+  const pathname = usePathname();
 
   const renderPage = () => {
+    // 案件管理ページの場合は何も表示しない（専用ページで表示される）
+    if (pathname === '/cases') {
+      return null;
+    }
+
+    // その他のページは従来通り内部状態で管理
     switch (currentPage) {
       case "dashboard":
         return <AgentInbox />;
-      case "cases":
-        return <CaseList />;
       case "tasks":
         return <TaskList />;
       case "emails":
@@ -35,4 +40,4 @@ export default function  MainLayout() {
       </div>
     </div>
   );
-} 
+}
