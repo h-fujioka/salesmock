@@ -173,8 +173,8 @@ const HomePage: React.FC<HomePageProps> = ({ onShowAllTasks }) => {
   const statusTabData: Record<string, { title: string; desc: string; value: string; badgeColor?: string }> = {
     progress: {
       title: '今日の進捗',
-      desc: '契約書作成、会議参加、メール返信など7件完了',
-      value: '7/10タスク完了（70%）',
+      desc: '契約書作成、会議参加、メール返信など10件完了',
+      value: '10/10タスク完了（100%）',
       badgeColor: 'bg-blue-100 text-blue-700',
     },
     mail: {
