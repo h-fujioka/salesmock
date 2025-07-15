@@ -29,14 +29,25 @@ export default function Home() {
         <div className="w-full max-w-[1000px] flex flex-col gap-6">
           {/* コマンド入力欄（添付画像風デザイン） */}
           <div className="flex flex-col items-center w-full">
-            <label className="text-center font-semibold text-xl mb-2 mt-6">何をしたいですか？</label>
+            <label className="text-center font-semibold text-[64px] mb-2 mt-6">SalesOn</label>
             <div className="relative w-full">
-              <input className="w-full border border-black rounded-xl py-5 pl-4 pr-16 text-lg placeholder-gray-400 focus:outline-none" placeholder="Selaにやってほしいことを入力してください" />
-              <div className="absolute left-2 bottom-2 flex gap-2">
-                <Button variant="ghost" size="icon" className="p-1"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M16.5 8.5L7.5 15.5"/><path d="M8 8L16 16"/></svg></Button>
-                <Button variant="ghost" size="icon" className="p-1"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/></svg></Button>
-              </div>
-              <Button variant="ghost" size="icon" className="absolute right-2 bottom-2 bg-black text-white rounded p-1"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></Button>
+              <input
+                className="w-full border border-input rounded-2xl py-5 pl-6 pr-20 text-xl font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ring shadow-sm bg-white transition-all duration-200"
+                placeholder="Selaにやってほしいことを入力してください"
+                style={{ letterSpacing: '0.02em' }}
+              />
+              {/* 送信ボタンのみ右端に配置、黒丸・白アイコン・ホバーで少し浮く */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black text-white rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-md hover:scale-105 hover:shadow-xl transition-all duration-150"
+                aria-label="送信"
+              >
+                <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                  <path d="M22 2L11 13" />
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                </svg>
+              </Button>
             </div>
           </div>
 
@@ -44,9 +55,9 @@ export default function Home() {
           <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-2">
             <Tabs defaultValue="tasks" className="w-full">
               <TabsList className="mb-4 bg-gray-100">
-                <TabsTrigger value="tasks" className="data-[state=active]:bg-black data-[state=active]:text-white text-gray-700 font-normal">優先タスク</TabsTrigger>
-                <TabsTrigger value="risks" className="data-[state=active]:bg-black data-[state=active]:text-white text-gray-700 font-normal">リスク案件</TabsTrigger>
-                <TabsTrigger value="ai" className="data-[state=active]:bg-black data-[state=active]:text-white text-gray-700 font-normal">AI提案の承認</TabsTrigger>
+                <TabsTrigger value="tasks" className="text-gray-700 font-normal">優先タスク</TabsTrigger>
+                <TabsTrigger value="risks" className="text-gray-700 font-normal">リスク案件</TabsTrigger>
+                <TabsTrigger value="ai" className="text-gray-700 font-normal">AI提案の承認</TabsTrigger>
               </TabsList>
               <TabsContent value="tasks">
                 <div className="overflow-x-auto">
@@ -76,7 +87,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">進行中</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">AI自動</span></td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">承認待ち</span></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">商談Bの準備</td>
@@ -88,7 +99,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">未着手</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">手動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">C社 提案書ドラフト作成</td>
@@ -100,7 +111,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">進行中</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">AI自動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">D社 定例会議準備</td>
@@ -112,7 +123,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">進行中</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">手動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">E社 契約書レビュー</td>
@@ -124,7 +135,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">完了</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">AI自動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">F社 サポート対応</td>
@@ -136,7 +147,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">未着手</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">手動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">G社 進捗報告作成</td>
@@ -148,7 +159,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">進行中</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">AI自動</span></td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">承認待ち</span></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">H社 顧客ヒアリング</td>
@@ -160,7 +171,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">進行中</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">手動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">I社 サービス説明資料作成</td>
@@ -172,7 +183,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">未着手</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">AI自動</span></td>
                         <td className="px-3 py-2"></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">J社 受注処理</td>
@@ -184,7 +195,7 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">進行中</td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">手動</span></td>
                         <td className="px-3 py-2"><span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">承認待ち</span></td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                     </tbody>
                   </table>
@@ -200,6 +211,7 @@ export default function Home() {
                         <th className="px-3 py-2 text-left font-normal">顧客区分</th>
                         <th className="px-3 py-2 text-left font-normal">期限</th>
                         <th className="px-3 py-2 text-left font-normal">優先度</th>
+                        <th className="px-3 py-2 text-left font-normal">進捗</th>
                         <th className="px-3 py-2 text-left font-normal">リスク内容</th>
                         <th className="px-3 py-2"></th>
                       </tr>
@@ -211,8 +223,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/10</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: '80%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">80%</span>
+                        </td>
                         <td className="px-3 py-2 text-red-600 font-normal">期限超過</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">システム更改案件</td>
@@ -220,8 +238,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">既存</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/12</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">中</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-400 h-2.5 rounded-full" style={{ width: '40%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">40%</span>
+                        </td>
                         <td className="px-3 py-2 text-yellow-600 font-normal">進捗遅延</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">海外展開サポート</td>
@@ -229,8 +253,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/15</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-300 h-2.5 rounded-full" style={{ width: '20%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">20%</span>
+                        </td>
                         <td className="px-3 py-2 text-red-600 font-normal">顧客要望未対応</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">契約更新交渉</td>
@@ -238,8 +268,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">既存</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/18</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">中</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: '60%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">60%</span>
+                        </td>
                         <td className="px-3 py-2 text-yellow-600 font-normal">承認遅延</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">新規サービス提案</td>
@@ -247,8 +283,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/20</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-400 h-2.5 rounded-full" style={{ width: '50%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">50%</span>
+                        </td>
                         <td className="px-3 py-2 text-red-600 font-normal">顧客連絡途絶</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">サポート契約見直し</td>
@@ -256,8 +298,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">既存</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/22</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">低</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-200 h-2.5 rounded-full" style={{ width: '10%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">10%</span>
+                        </td>
                         <td className="px-3 py-2 text-yellow-600 font-normal">資料未提出</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">定例会議準備</td>
@@ -265,8 +313,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/25</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-300 h-2.5 rounded-full" style={{ width: '30%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">30%</span>
+                        </td>
                         <td className="px-3 py-2 text-red-600 font-normal">会議資料遅延</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">導入支援プロジェクト</td>
@@ -274,8 +328,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/28</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">中</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-200 h-2.5 rounded-full" style={{ width: '15%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">15%</span>
+                        </td>
                         <td className="px-3 py-2 text-yellow-600 font-normal">要件不明確</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">業務改善提案</td>
@@ -283,8 +343,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">既存</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/07/30</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-400 h-2.5 rounded-full" style={{ width: '55%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">55%</span>
+                        </td>
                         <td className="px-3 py-2 text-red-600 font-normal">承認保留</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">新規取引先開拓</td>
@@ -292,8 +358,14 @@ export default function Home() {
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">2024/08/02</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">中</span></td>
+                        <td className="px-3 py-2 w-32">
+                          <div className="w-full bg-gray-100 rounded-full h-2.5">
+                            <div className="bg-blue-200 h-2.5 rounded-full" style={{ width: '10%' }}></div>
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">10%</span>
+                        </td>
                         <td className="px-3 py-2 text-yellow-600 font-normal">初回連絡未完了</td>
-                        <td className="px-3 py-2"><Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button></td>
+                        <td className="px-3 py-2"><Button size="sm" variant="outline">詳細</Button></td>
                       </tr>
                     </tbody>
                   </table>
@@ -320,67 +392,47 @@ export default function Home() {
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
                         <td className="px-3 py-2 text-gray-700 font-normal">初回提案済み</td>
                         <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">承認</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">却下</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button>
-                          </div>
+                          <Button size="sm" variant="outline">詳細</Button>
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">システム更改案件</td>
-                        <td className="px-3 py-2 text-gray-700 font-normal">B社に技術資料を追加送付</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">既存</td>
+                        <td className="px-3 py-2 text-gray-700 font-normal">B社に技術資料を追加送付</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">中</span></td>
                         <td className="px-3 py-2 text-gray-700 font-normal">基本提案書送付済み</td>
                         <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">承認</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">却下</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button>
-                          </div>
+                          <Button size="sm" variant="outline">詳細</Button>
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">海外展開サポート</td>
-                        <td className="px-3 py-2 text-gray-700 font-normal">C社に現地パートナー紹介</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
+                        <td className="px-3 py-2 text-gray-700 font-normal">C社に現地パートナー紹介</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
                         <td className="px-3 py-2 text-gray-700 font-normal">初期ヒアリング完了</td>
                         <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">承認</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">却下</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button>
-                          </div>
+                          <Button size="sm" variant="outline">詳細</Button>
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">契約更新交渉</td>
-                        <td className="px-3 py-2 text-gray-700 font-normal">D社に価格見直し提案</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">既存</td>
+                        <td className="px-3 py-2 text-gray-700 font-normal">D社に価格見直し提案</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-100 rounded px-2 py-0.5 font-normal">中</span></td>
                         <td className="px-3 py-2 text-gray-700 font-normal">現行契約継続中</td>
                         <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">承認</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">却下</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button>
-                          </div>
+                          <Button size="sm" variant="outline">詳細</Button>
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-3 py-2 text-black font-normal">新規サービス提案</td>
-                        <td className="px-3 py-2 text-gray-700 font-normal">E社に追加サービス紹介</td>
                         <td className="px-3 py-2 text-gray-700 font-normal">新規</td>
+                        <td className="px-3 py-2 text-gray-700 font-normal">E社に追加サービス紹介</td>
                         <td className="px-3 py-2"><span className="text-black bg-gray-200 rounded px-2 py-0.5 font-normal">高</span></td>
                         <td className="px-3 py-2 text-gray-700 font-normal">基本サービス導入済み</td>
                         <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">承認</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">却下</Button>
-                            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 font-normal">詳細を見る</Button>
-                          </div>
+                          <Button size="sm" variant="outline">詳細</Button>
                         </td>
                       </tr>
                     </tbody>
