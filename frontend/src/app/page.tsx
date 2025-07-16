@@ -14,7 +14,7 @@ import fs from "fs";
 
 function Header() {
   return (
-    <header className="h-16 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
+    <header className="h-16 min-h-16 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
       <span className="text-xl font-bold tracking-tight">SalesOn ダッシュボード</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
@@ -50,24 +50,35 @@ export default function Home() {
     setSelectedRecipients(prev => checked ? [...prev, idx] : prev.filter(i => i !== idx));
   };
 
-  const handleSend = () => {
+  // 質問内容編集用state
+  const [lastCommand, setLastCommand] = useState("");
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
+  const [editableQuestion, setEditableQuestion] = useState("");
+
+  // handleSend修正: APIからデータ取得
+  const handleSend = async () => {
     setAiResponse("");
     setSuggestions([]);
     setFollowupCandidates(null);
     setMailPreview(null);
     setApprovalStep("none");
     if (command.includes("フォローアップメール")) {
-      const candidates = [
-        { name: "A社（田中様）", lastContact: "2024/06/20", project: "新製品提案", reason: "2週間連絡なし" },
-        { name: "B社（佐藤様）", lastContact: "2024/06/15", project: "保守契約更新", reason: "更新案内未返信" },
-        { name: "C社（鈴木様）", lastContact: "2024/06/10", project: "導入サポート", reason: "初回提案後フォロー未実施" },
-      ];
-      setFollowupCandidates(candidates);
-      setMailPreview(
-        `件名: ご無沙汰しております（${candidates[0].name}様）\n\n${candidates[0].name}様\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム`
-      );
-      setApprovalStep("search_results");
-      setCommand("");
+      // APIから取得
+      try {
+        const res = await fetch("/api/followup-candidates");
+        const data = await res.json();
+        const candidates = data.candidates || [];
+        setFollowupCandidates(candidates);
+        setMailPreview(
+          `件名: ご無沙汰しております（${candidates[0]?.name ?? "顧客名"}様）\n\n${candidates[0]?.name ?? "顧客名"}様\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム`
+        );
+        setApprovalStep("search_results");
+        setLastCommand(command); // ここでlastCommandを更新
+        setEditableQuestion(command); // 編集用にも反映
+        setCommand("");
+      } catch (e) {
+        setAiResponse("API取得に失敗しました");
+      }
       return;
     }
     setTimeout(() => {
@@ -80,6 +91,7 @@ export default function Home() {
       ]);
       setCommand("");
     }, 0);
+    if (command.trim()) setCommandHistory(prev => [...prev, command]);
   };
 
   const handleClear = () => {
@@ -112,7 +124,6 @@ export default function Home() {
     { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "auto", header: "AI/手動", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> },
     { accessorKey: "approval", header: "承認待ち", cell: info => info.getValue() ? <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> : null },
-    { id: "detail", header: "", cell: () => <Button size="sm" variant="outline">詳細</Button> },
   ];
   // Data Table用ダミーデータ
   const taskData = [
@@ -154,7 +165,6 @@ export default function Home() {
       }
       return <span className="font-normal">{value}</span>;
     } },
-    { id: "detail", header: "", cell: () => <Button size="sm" variant="outline">詳細</Button> },
   ];
   // Data Table用ダミーデータ（リスク案件）
   const riskData = [
@@ -177,7 +187,6 @@ export default function Home() {
     { accessorKey: "proposal", header: "提案内容", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-gray-200' : info.getValue()==='中' ? 'bg-gray-100' : 'bg-gray-200'}`}>{info.getValue()}</span> },
     { accessorKey: "last", header: "前回実行", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { id: "detail", header: "", cell: () => <Button size="sm" variant="outline">詳細</Button> },
   ];
   // Data Table用ダミーデータ（AI提案の承認）
   const aiData = [
@@ -229,16 +238,19 @@ export default function Home() {
     approvalStep === "sent" ||
     !!aiResponse;
 
+  // コマンド履歴用の状態追加
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+
   return (
-    <div className="flex-1 flex flex-col h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="flex-1 flex flex-col h-screen bg-white">
       <Header />
-      <div className="flex-1 flex flex-col gap-6 p-6 justify-start px-8 max-w-[1200px] w-full mx-auto" style={{ paddingBottom: showInputAtBottom ? '120px' : undefined }}>
+      <div className="flex-1 flex flex-col gap-6 p-6 justify-start px-8 max-w-[1000px] w-full mx-auto" style={{ paddingBottom: showInputAtBottom ? '120px' : undefined }}>
         {/* 初期ホーム画面：タイトルラベルとコマンド入力欄 */}
         {approvalStep === "none" && !aiResponse && (
-          <div className="w-full flex flex-col items-center pt-12 pb-8">
+          <div className="w-full flex flex-col items-center pt-12 pb-0">
             <label className="text-center font-semibold text-[64px] mb-8">SalesOn</label>
             <div className="w-full flex justify-center">
-              <div className="w-full max-w-[1200px] flex items-center bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
+              <div className="w-full max-w-[1200px] flex items-center bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
                 <Textarea
                   placeholder="Selaに質問してください"
                   value={command}
@@ -265,28 +277,54 @@ export default function Home() {
         )}
         {/* コマンド送信後のプロセスフロー */}
         {approvalStep === "search_results" && (
-          <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-6">
-            {/* 検索結果の説明テキスト */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <div className="flex items-start gap-4">
+          <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-0">
+            {/* 質問内容をカード上部の別ボックスで表示 */}
+            <div className="bg-gray-50 border border-gray-100 rounded-xl shadow px-3 py-1 mb-0 flex items-center gap-1">
+              {isEditingQuestion ? (
+                <>
+                  <input
+                    type="text"
+                    className="flex-1 bg-transparent border-none outline-none text-base text-gray-900"
+                    value={editableQuestion}
+                    onChange={e => setEditableQuestion(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { setLastCommand(editableQuestion); setIsEditingQuestion(false); } }}
+                    autoFocus
+                  />
+                  <Button size="sm" variant="outline" className="ml-2" onClick={() => { setLastCommand(editableQuestion); setIsEditingQuestion(false); }}>保存</Button>
+                  <Button size="sm" variant="ghost" className="ml-1" onClick={() => { setEditableQuestion(lastCommand); setIsEditingQuestion(false); }}>キャンセル</Button>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm text-gray-700 flex-1 truncate">あなたの質問: {lastCommand}</span>
+                  <Button size="icon" variant="ghost" className="ml-2" onClick={() => setIsEditingQuestion(true)} aria-label="編集">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                  </Button>
+                </>
+              )}
+            </div>
+            {/* 1つの白背景ボックスにまとめる */}
+            <div className="bg-white border border-gray-100 rounded-xl shadow pt-6 pr-6 pl-6 pb-2 mb-0">
+              {/* 質問内容を説明文の上に小さく表示 */}
+              <div className="mb-1 text-xs text-gray-500">あなたの質問: {commandHistory.at(-1) ?? command}</div>
+              <div className="flex items-start gap-4 mb-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">フォローアップメール候補を抽出しました</h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-2">
                     CRMデータを分析した結果、{followupCandidates ? followupCandidates.length : 0}件のフォローアップが必要な案件を特定しました。
                     各案件について、最終連絡日から2週間以上経過しており、積極的なアプローチが推奨されます。
                   </p>
-                  <div className="flex items-center gap-6 text-sm text-gray-500">
-                    <span>抽出条件: 最終連絡から14日以上経過</span>
-                    <span>対象期間: 過去30日間</span>
-                    <span>優先度: 高・中優先案件</span>
-                  </div>
-                  <div className="mt-4">
-                    <Button onClick={() => setApprovalStep("select_recipients")} className="bg-blue-600 hover:bg-blue-700 text-white">次へ進む</Button>
-                  </div>
                 </div>
+              </div>
+              {/* テーブル表示（送信先選択） 余白を減らす */}
+              <div className="overflow-x-auto mb-2">
+                {/* DataTableの検索・カラム選択UIを非表示にするpropsを追加（例: showSearch, showColumnSelector） */}
+                <DataTable columns={followupColumns} data={followupCandidates || []} showSearch={false} showColumnSelector={false} />
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={() => setApprovalStep("preview_mail")} disabled={selectedRecipients.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white">メールプレビューへ</Button>
               </div>
             </div>
           </div>
@@ -295,7 +333,7 @@ export default function Home() {
         {approvalStep === "select_recipients" && followupCandidates && (
           <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-6">
             {/* 候補テーブルと送信先選択 */}
-            <div className="bg-white rounded-xl shadow p-5">
+            <div className="bg-white border border-gray-100 rounded-xl shadow p-5">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-semibold text-gray-900">フォローアップ候補 ({selectedRecipients.length}/{followupCandidates.length}件選択)</h4>
                 <div className="flex items-center gap-2">
@@ -317,7 +355,7 @@ export default function Home() {
         {approvalStep === "preview_mail" && mailPreview && (
           <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-6">
             {/* メールプレビューと修正・承認 */}
-            <div className="bg-white rounded-xl shadow p-5">
+            <div className="bg-white border border-gray-100 rounded-xl shadow p-5">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-semibold text-gray-900">メールプレビュー</h4>
                 <Button variant="outline" size="sm" onClick={handleEdit}>
@@ -358,7 +396,7 @@ export default function Home() {
 
         {/* タブ付きテーブル（優先タスク・リスク案件・AI提案の承認） */}
         {approvalStep === "none" && !aiResponse && (
-          <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-2 mt-0 w-full">
+          <div className="bg-white border border-gray-100 rounded-xl shadow p-5 flex flex-col gap-2 mt-0 w-full">
             <Tabs defaultValue="tasks" className="w-full">
               <TabsList className="mb-4 bg-gray-100">
                 <TabsTrigger value="tasks" className="text-gray-700 font-normal">優先タスク</TabsTrigger>
@@ -392,7 +430,7 @@ export default function Home() {
         >
           <div className="w-full" style={{ maxWidth: 1200, paddingLeft: 32, paddingRight: 32, paddingBottom: 24 }}>
             <div className="flex items-end">
-              <div className="flex items-center bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm w-full">
+              <div className="flex items-center bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
                 <Textarea
                   placeholder="Selaに質問してください"
                   value={command}

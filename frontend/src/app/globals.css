@@ -39,4 +39,9 @@
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+header.h-16 {
+  height: 64px !important;
+  min-height: 64px !important;
 } 

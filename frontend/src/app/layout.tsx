@@ -23,21 +23,17 @@ function GridDotsIcon({ className = "w-6 h-6" }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja">
-      <body className="bg-white min-h-screen flex flex-col">
+    <html lang="ja" className="h-full">
+      <body className="bg-white min-h-screen h-full flex flex-col">
         {/* ヘッダー削除済み */}
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-1 min-h-0 h-full">
           {/* サイドバー */}
           <aside className="w-[72px] bg-gray-50 border-r flex flex-col h-full py-0">
-            <div className="flex flex-col flex-1 justify-between items-center h-full gap-8">
-              <div className="flex flex-col items-center" style={{ marginTop: '20px' }}>
-                <GridDotsIcon className="w-7 h-7 text-gray-700 mb-8" />
-                <Button variant="ghost" size="icon" className="w-8 h-8 p-0"><Home className="w-5 h-5" /></Button>
-              </div>
-              <div className="flex flex-col items-center mb-2 gap-8">
-                <Button variant="ghost" size="icon" className="w-8 h-8 p-0"><Briefcase className="w-5 h-5" /></Button>
-                <Button variant="ghost" size="icon" className="w-8 h-8 p-0"><Settings className="w-5 h-5" /></Button>
-              </div>
+            <div className="flex flex-col items-center pt-4 h-full">
+              <GridDotsIcon className="w-7 h-7 text-gray-700 mb-6" />
+              <Button variant="ghost" size="icon" className="w-8 h-8 p-0 mb-2"><Home className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" className="w-8 h-8 p-0 mb-2"><Briefcase className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" className="w-8 h-8 p-0"><Settings className="w-5 h-5" /></Button>
             </div>
           </aside>
           {/* メインエリア */}

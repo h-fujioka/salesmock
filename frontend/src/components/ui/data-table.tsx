@@ -21,9 +21,11 @@ import { ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  showSearch?: boolean
+  showColumnSelector?: boolean
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, showSearch = true, showColumnSelector = true }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -55,7 +57,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     <div className="w-full">
       <div className="flex items-center justify-between py-2">
         {/* フィルタ入力欄 */}
-        {filterableColumn && (
+        {showSearch && filterableColumn && (
           <Input
             placeholder="検索..."
             value={(table.getColumn(filterableColumn)?.getFilterValue() as string) ?? ""}
@@ -64,27 +66,29 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           />
         )}
         {/* カラム選択ドロップダウン */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-2">
-              表示カラム <ChevronDown className="ml-2 w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table.getAllColumns()
-              .filter(column => typeof column.accessorFn !== "undefined" && column.getCanHide())
-              .map(column => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={value => column.toggleVisibility(!!value)}
-                >
-                  {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {showColumnSelector && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-2">
+                表示カラム <ChevronDown className="ml-2 w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table.getAllColumns()
+                .filter(column => typeof column.accessorFn !== "undefined" && column.getCanHide())
+                .map(column => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={value => column.toggleVisibility(!!value)}
+                  >
+                    {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
       <div className="rounded-md border w-full">
         <Table>
