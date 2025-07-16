@@ -25,4 +25,18 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
   }
+}
+
+/* コマンドエリアのテキストエリア用: プレースホルダーを大きく */
+.command-textarea::placeholder {
+  font-size: 1.1rem; /* 17.6px相当 */
+  color: #bdbdbd;
+  font-weight: 400;
+}
+
+/* コマンドエリアのテキストエリア用: フォーカス時の枠線を完全に消す */
+.command-textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 } 
