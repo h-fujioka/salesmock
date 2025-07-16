@@ -1,35 +1,38 @@
 "use client"
-import * as React from "react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-} from "@tanstack/react-table"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
+    ColumnDef,
+    ColumnFiltersState,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    OnChangeFn,
+    RowSelectionState,
+    SortingState,
+    useReactTable,
+    VisibilityState,
+} from "@tanstack/react-table";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import * as React from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   showSearch?: boolean
   showColumnSelector?: boolean
+  searchSlot?: React.ReactNode
+  columnSelectorSlot?: React.ReactNode
+  rowSelection?: RowSelectionState
+  setRowSelection?: OnChangeFn<RowSelectionState>
 }
 
-export function DataTable<TData, TValue>({ columns, data, showSearch = true, showColumnSelector = true }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, showSearch = true, showColumnSelector = true, searchSlot, columnSelectorSlot, rowSelection, setRowSelection }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [internalRowSelection, setInternalRowSelection] = React.useState<RowSelectionState>({})
 
   const table = useReactTable({
     data,
@@ -41,12 +44,12 @@ export function DataTable<TData, TValue>({ columns, data, showSearch = true, sho
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: setRowSelection || setInternalRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
+      rowSelection: rowSelection ?? internalRowSelection,
     },
   })
 
@@ -56,39 +59,8 @@ export function DataTable<TData, TValue>({ columns, data, showSearch = true, sho
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-2">
-        {/* フィルタ入力欄 */}
-        {showSearch && filterableColumn && (
-          <Input
-            placeholder="検索..."
-            value={(table.getColumn(filterableColumn)?.getFilterValue() as string) ?? ""}
-            onChange={event => table.getColumn(filterableColumn)?.setFilterValue(event.target.value)}
-            className="w-48"
-          />
-        )}
-        {/* カラム選択ドロップダウン */}
-        {showColumnSelector && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-2">
-                表示カラム <ChevronDown className="ml-2 w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table.getAllColumns()
-                .filter(column => typeof column.accessorFn !== "undefined" && column.getCanHide())
-                .map(column => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={value => column.toggleVisibility(!!value)}
-                  >
-                    {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {searchSlot}
+        {columnSelectorSlot}
       </div>
       <div className="rounded-md border w-full">
         <Table>

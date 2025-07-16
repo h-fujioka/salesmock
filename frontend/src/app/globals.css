@@ -25,22 +25,36 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
   }
-  html, body {
-    font-size: 16px;
+
+  html,
+  body {
+    font-size: 14px;
   }
-  .text-base, .text-[15px] {
+
+  .text-base,
+  .text-\[15px\] {
     font-size: 1rem !important;
   }
 }
 
 /* テーブル内フォントサイズ */
-table, th, td, .datatable, .text-sm {
+table,
+th,
+td,
+.datatable,
+.text-sm {
   font-size: 13px !important;
+}
+
+/* コマンドエリアのテキストエリア用: フォントサイズ */
+.command-textarea {
+  font-size: 16px !important;
 }
 
 /* コマンドエリアのテキストエリア用: プレースホルダーを大きく */
 .command-textarea::placeholder {
-  font-size: 1.1rem; /* 17.6px相当 */
+  font-size: 1.1rem;
+  /* 17.6px相当 */
   color: #bdbdbd;
   font-weight: 400;
 }
@@ -55,4 +69,4 @@ table, th, td, .datatable, .text-sm {
 header.h-16 {
   height: 64px !important;
   min-height: 64px !important;
-} 
+}

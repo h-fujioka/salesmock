@@ -1,16 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, Calendar, User } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import React, { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { FileSpreadsheet, Search, Send, PenLine } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import fs from "fs";
+import { DataTable } from "@/components/ui/data-table";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { ColumnDef } from "@tanstack/react-table";
+import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Search, Send, User } from "lucide-react";
+import React, { useState } from "react";
 
 // 検索結果テンプレートコンポーネント
 interface SearchResultTemplateProps {
@@ -50,19 +50,31 @@ function SearchResultTemplate({
 }
 
 // 質問内容表示コンポーネント
-function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditableQuestion, onEditComplete }: {
+type QuestionBoxProps = {
   question: string;
   onEdit: () => void;
   isEditing: boolean;
   editableQuestion: string;
   setEditableQuestion: (v: string) => void;
   onEditComplete: () => void;
-}) {
+  variant?: "default" | "answer";
+  showEdit?: boolean;
+};
+
+function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditableQuestion, onEditComplete, variant = "default", showEdit = true }: QuestionBoxProps) {
+  const isAnswer = variant === "answer";
   return (
-    <div className="w-full max-w-[1000px] mx-auto bg-gray-100 border border-gray-100 rounded-xl shadow px-4 py-3 flex items-center justify-between text-base font-normal text-gray-800 mb-4">
+    <div
+      className={
+        isAnswer
+          ? "bg-[#22223b] rounded-3xl px-8 py-6 w-fit text-xl text-white font-medium mb-4"
+          : "w-full max-w-[1000px] mx-auto bg-gray-100 border border-gray-100 rounded-xl shadow px-4 py-3 flex items-center justify-between text-base font-normal text-gray-800 mb-4"
+      }
+      style={isAnswer ? { maxWidth: 1000, marginLeft: 'auto' } : {}}
+    >
       {isEditing ? (
         <input
-          className="flex-1 bg-transparent outline-none border-none text-base font-normal text-gray-800 mr-2 px-2 py-1 rounded"
+          className={isAnswer ? "flex-1 bg-transparent outline-none border-none text-xl text-white font-medium mr-2 px-2 py-1 rounded" : "flex-1 bg-transparent outline-none border-none text-base font-normal text-gray-800 mr-2 px-2 py-1 rounded"}
           value={editableQuestion}
           onChange={e => setEditableQuestion(e.target.value)}
           onBlur={onEditComplete}
@@ -70,17 +82,19 @@ function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditabl
           autoFocus
         />
       ) : (
-        <span className="truncate">{question}</span>
+        <span className={isAnswer ? "whitespace-pre-wrap" : "truncate"}>{question}</span>
       )}
-      <Button
-        size="icon"
-        variant="ghost"
-        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10 ml-4"
-        onClick={onEdit}
-        aria-label="編集"
-      >
-        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-      </Button>
+      {showEdit && !isAnswer && (
+        <Button
+          size="icon"
+          variant="ghost"
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10 ml-4"
+          onClick={onEdit}
+          aria-label="編集"
+        >
+          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+        </Button>
+      )}
     </div>
   );
 }
@@ -122,7 +136,25 @@ export default function Home() {
   // ApprovalStep型を拡張
   const [approvalStep, setApprovalStep] = useState<"none" | "search_results" | "select_recipients" | "preview_mail" | "sent">("none");
   // 送信先選択用の状態
-  const [selectedRecipients, setSelectedRecipients] = useState<number[]>([0,1,2]); // デフォルト全選択
+  const [selectedRecipients, setSelectedRecipients] = useState<number[]>([0,1]); // 山田太郎・鈴木一郎のみ選択
+  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({ 0: true, 1: true });
+
+  // rowSelectionとselectedRecipientsを同期
+  React.useEffect(() => {
+    // rowSelection → selectedRecipients
+    const selected = Object.entries(rowSelection)
+      .filter(([_, v]) => v)
+      .map(([k]) => Number(k));
+    setSelectedRecipients(selected);
+  }, [rowSelection]);
+
+  React.useEffect(() => {
+    // selectedRecipients → rowSelection
+    const newRowSelection: { [key: string]: boolean } = {};
+    selectedRecipients.forEach(idx => { newRowSelection[idx] = true; });
+    setRowSelection(newRowSelection);
+  }, []); // 初回のみ
+
   // 全選択・個別選択ハンドラ
   const handleSelectAll = (checked: boolean) => {
     setSelectedRecipients(checked ? followupCandidates?.map((_, i) => i) ?? [] : []);
@@ -267,6 +299,7 @@ export default function Home() {
     { accessorKey: "auto", header: "AI/手動", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> },
     { accessorKey: "approval", header: "承認待ち", cell: info => info.getValue() ? <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> : null },
   ];
+  const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true));
   // Data Table用ダミーデータ
   const taskData = [
     { task: "顧客Aへ見積送付", project: "A社案件", customerType: "新規", priority: "高", deadline: "2024/07/10", daysLeft: "3日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
@@ -308,6 +341,7 @@ export default function Home() {
       return <span className="font-normal">{value}</span>;
     } },
   ];
+  const [riskColumnVisibility, setRiskColumnVisibility] = useState(riskColumns.map(() => true));
 
   // リスク案件用のダミーデータ
   const riskData = [
@@ -326,6 +360,7 @@ export default function Home() {
     { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-gray-200' : info.getValue()==='中' ? 'bg-gray-100' : 'bg-gray-200'}`}>{info.getValue()}</span> },
     { accessorKey: "last", header: "前回実行", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
   ];
+  const [aiColumnVisibility, setAiColumnVisibility] = useState(aiColumns.map(() => true));
 
   // AI提案用のダミーデータ
   const aiData = [
@@ -405,12 +440,15 @@ export default function Home() {
   // コマンド履歴用の状態追加
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
 
+  // タブの選択状態を管理
+  const [currentTab, setCurrentTab] = useState('tasks');
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header onClear={handleClear} />
       
       {/* メインコンテンツエリア */}
-      <main className="flex-1 container mx-auto px-8 pt-8">
+      <main className="flex-1 container mx-auto px-8 pt-8 pb-48">
         <div className="space-y-4">
           {/* ホーム画面（初期表示時） */}
           {approvalStep === "none" && !aiResponse && !followupCandidates && (
@@ -424,7 +462,7 @@ export default function Home() {
                       placeholder="質問してみましょう"
                       value={command}
                       onChange={e => setCommand(e.target.value)}
-                      className="flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+                      className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
                       rows={1}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
@@ -445,25 +483,90 @@ export default function Home() {
 
               {/* タブ付きテーブル */}
               <div className="w-full bg-white border border-gray-100 rounded-xl shadow p-4">
-                <Tabs defaultValue="tasks" className="w-full">
-                  <TabsList className="mb-2 bg-gray-100 text-base">
-                    <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base">優先タスク</TabsTrigger>
-                    <TabsTrigger value="risks" className="text-gray-700 font-normal text-base">リスク案件</TabsTrigger>
-                    <TabsTrigger value="ai" className="text-gray-700 font-normal text-base">AI提案の承認</TabsTrigger>
-                  </TabsList>
+                <Tabs defaultValue="tasks" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
+                  <div className="flex items-center justify-between mb-2 gap-4">
+                    <TabsList className="bg-gray-100 text-base flex-shrink-0">
+                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base">優先タスク</TabsTrigger>
+                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base">リスク案件</TabsTrigger>
+                      <TabsTrigger value="ai" className="text-gray-700 font-normal text-base">AI提案の承認</TabsTrigger>
+                    </TabsList>
+                    <div className="flex items-center gap-2">
+                      {/* 検索ボックススロット */}
+                      <Input
+                        placeholder="検索..."
+                        className="w-48 text-base"
+                      />
+                      {/* カラム選択スロット: タブごとに切り替え */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="ml-2">
+                            表示カラム <ChevronDown className="ml-2 w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {currentTab === 'risks' ? (
+                            riskColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={riskColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setRiskColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'ai' ? (
+                            aiColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={aiColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setAiColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : (
+                            taskColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={taskColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setTaskColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
                   <TabsContent value="tasks">
                     <div className="overflow-x-auto">
-                      <DataTable columns={taskColumns} data={taskData} />
+                      <DataTable columns={taskColumns.filter((_, i) => taskColumnVisibility[i])} data={taskData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
                     </div>
                   </TabsContent>
                   <TabsContent value="risks">
                     <div className="overflow-x-auto">
-                      <DataTable columns={riskColumns} data={riskData} />
+                      <DataTable columns={riskColumns.filter((_, i) => riskColumnVisibility[i])} data={riskData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
                     </div>
                   </TabsContent>
                   <TabsContent value="ai">
                     <div className="overflow-x-auto">
-                      <DataTable columns={aiColumns} data={aiData} />
+                      <DataTable columns={aiColumns.filter((_, i) => aiColumnVisibility[i])} data={aiData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -477,20 +580,11 @@ export default function Home() {
               {messages.length > 0 && <MessageHistory />}
               {/* 質問内容の表示 */}
               {lastCommand && (
-                <QuestionBox
-                  question={lastCommand}
-                  onEdit={() => {
-                    setIsEditingQuestion(true);
-                    setEditableQuestion(lastCommand);
-                  }}
-                  isEditing={isEditingQuestion}
-                  editableQuestion={editableQuestion}
-                  setEditableQuestion={setEditableQuestion}
-                  onEditComplete={() => {
-                    setLastCommand(editableQuestion);
-                    setIsEditingQuestion(false);
-                  }}
-                />
+                <div className="w-full max-w-[1000px] mx-auto mt-4 flex justify-end">
+                  <div className="w-fit ml-auto bg-[#22223b] rounded-3xl px-8 py-6 text-xl text-white font-medium">
+                    {lastCommand}
+                  </div>
+                </div>
               )}
 
               {/* AI抽出説明文の表示 */}
@@ -502,74 +596,74 @@ export default function Home() {
 
               {/* フォローアップ候補テーブル */}
               {followupCandidates && (
-                <SearchResultTemplate
-                  title="フォローアップ候補"
-                  description={`以下の${followupCandidates.length}件の案件が抽出されました。フォローアップメールの送信対象を選択してください。`}
-                  dataComponent={
-                    <DataTable
-                      columns={followupColumns}
-                      data={followupCandidates}
-                      showSearch={false}
-                      showColumnSelector={false}
-                    />
-                  }
-                  nextActionText="選択された案件でメールプレビューを表示しますか？"
-                />
-              )}
-
-              {/* メールプレビュー */}
-              {mailPreview && approvalStep === "preview_mail" && (
                 <>
-                  <QuestionBox
-                    question={lastCommand}
-                    onEdit={() => {
-                      setIsEditingQuestion(true);
-                      setEditableQuestion(lastCommand);
-                    }}
-                    isEditing={isEditingQuestion}
-                    editableQuestion={editableQuestion}
-                    setEditableQuestion={setEditableQuestion}
-                    onEditComplete={() => {
-                      setLastCommand(editableQuestion);
-                      setIsEditingQuestion(false);
-                    }}
+                  <SearchResultTemplate
+                    title="フォローアップ候補"
+                    description={`以下の${followupCandidates.length}件の案件が抽出されました。フォローアップメールの送信対象を選択してください。`}
+                    dataComponent={
+                      <DataTable
+                        columns={followupColumns}
+                        data={followupCandidates}
+                        showSearch={false}
+                        showColumnSelector={false}
+                        rowSelection={rowSelection}
+                        setRowSelection={setRowSelection}
+                      />
+                    }
+                    nextActionText="選択された案件でメールプレビューを表示しますか？"
                   />
-                  <div className="mt-8">
-                    <SearchResultTemplate
-                      title="メールプレビュー"
-                      description={`選択された${selectedRecipients.length}件の候補案件に対してメールを作成しました。内容を確認してください。`}
-                      dataComponent={
-                        <>
-                          <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
-                            <Textarea
-                              className="w-full text-base text-gray-700 font-mono bg-transparent border-none outline-none resize-vertical min-h-[200px]"
-                              value={mailPreview}
-                              readOnly
-                            />
-                          </div>
-                        </>
-                      }
-                      nextActionText="この内容でよろしいですか？"
-                    />
+                  
+                  {/* 送信先ごとにメールプレビュー＋チェックボックス */}
+                  <div className="w-full max-w-[1000px] mx-auto mt-6 flex flex-col gap-6">
+                  <div className="mt-2 flex justify-end">
+                      {approvalStep === 'search_results' && (
+                        <Button
+                          onClick={() => setApprovalStep('preview_mail')}
+                          className="bg-[#22223b] text-white hover:bg-black rounded-xl px-4 py-2 text-base font-medium"
+                        >
+                          はい
+                        </Button>
+                      )}
+                    </div>
+                    {followupCandidates.filter((_, idx) => rowSelection[idx]).map((candidate, idx) => (
+                      <div key={candidate.id} className="relative bg-white border border-gray-100 rounded-xl shadow p-6">
+                        <div className="absolute top-4 right-4">
+                          <Checkbox
+                            checked={rowSelection[idx] ?? false}
+                            onCheckedChange={(checked) => {
+                              setRowSelection((prev) => ({ ...prev, [idx]: checked }));
+                            }}
+                            aria-label="送信対象に含める"
+                          />
+                        </div>
+                        <div className="text-base text-gray-700 mb-2 font-semibold">
+                          件名：ご無沙汰しております（{candidate.name}様）
+                        </div>
+                        <div className="text-base text-gray-700 whitespace-pre-line font-mono">
+                          {candidate.name}\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-4 text-gray-600 text-base">
+                      選択された{selectedRecipients.length}件の候補案件に対してメールを作成しました。この内容で送信しますか？
+                    </div>
+                    <div className="w-full max-w-[1000px] mx-auto mt-2 flex justify-end">
+                      <div className="w-fit ml-auto bg-[#22223b] rounded-2xl px-4 py-2 text-base text-white font-medium">
+                        はい
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
 
-              {/* 送信完了画面 */}
-              {approvalStep === "sent" && (
-                <div className="w-full max-w-[1000px] mx-auto bg-white border border-gray-100 rounded-xl shadow p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
-                      <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">メール送信が完了しました</h3>
-                      <p className="text-gray-600">フォローアップメールの送信が正常に完了しました。</p>
-                    </div>
+              {/* 送信完了情報をシンプルに表示（枠・padding・アイコンなし） */}
+              {selectedRecipients.length > 0 && (
+                <div className="w-full max-w-[1000px] mx-auto">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-gray-800">メール送信が完了しました</h3>
+                    <p className="text-gray-600">フォローアップメールの送信が正常に完了しました。</p>
                   </div>
-                  <div className="space-y-4 text-gray-600">
+                  <div className="space-y-2 text-gray-600">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">送信日時:</span>
                       <span>{new Date().toLocaleString()}</span>
@@ -583,7 +677,6 @@ export default function Home() {
                       <ul className="mt-2 space-y-1 list-inside">
                         {selectedRecipients.map((idx) => (
                           <li key={idx} className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
                             <span>{followupCandidates?.[idx].company} {followupCandidates?.[idx].name}様</span>
                           </li>
                         ))}
@@ -615,27 +708,15 @@ export default function Home() {
           )}
         </div>
       </main>
-
-      {/* コマンド入力欄 - チャット開始後のみ画面下部に固定表示 */}
       {(approvalStep !== "none" || aiResponse || followupCandidates) && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-sm">
-          <div className="container mx-auto px-8 py-4">
+        <div className="fixed bottom-0 left-0 right-0 z-50 w-full flex justify-center pointer-events-none">
+          <div className="max-w-[1000px] w-full mx-auto px-8 py-8 pointer-events-auto">
             <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
-              <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-              </button>
               <Textarea
                 placeholder="質問してみましょう"
                 value={command}
                 onChange={e => setCommand(e.target.value)}
-                className="flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+                className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
                 rows={1}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               />

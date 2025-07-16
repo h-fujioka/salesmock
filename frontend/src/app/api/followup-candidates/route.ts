@@ -32,7 +32,7 @@ export async function GET() {
       status: "提案済み",
       priority: "高",
       nextAction: "フォローアップ",
-      selected: true
+      selected: false
     }
   ];
 

@@ -1,5 +1,5 @@
-import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as React from "react";
 // cnユーティリティ関数を直接定義
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
@@ -35,7 +35,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "px-4 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-white data-[state=active]:shadow data-[state=active]:text-black text-gray-600 hover:text-black focus:outline-none",
+      "px-4 py-2 rounded-md text-lg font-medium transition-colors data-[state=active]:bg-white data-[state=active]:shadow data-[state=active]:text-black text-gray-600 hover:text-black focus:outline-none",
       className
     )}
     {...props}
@@ -55,4 +55,4 @@ const TabsContent = React.forwardRef<
 ));
 TabsContent.displayName = TabsPrimitive.Content.displayName;
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }; 
+export { Tabs, TabsContent, TabsList, TabsTrigger };
