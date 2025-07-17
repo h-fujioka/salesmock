@@ -499,44 +499,14 @@ export default function HomeV2() {
       <Header onClear={handleClear} />
       
       {/* メインコンテンツエリア */}
-      <main className="flex-1 container mx-auto px-8 pt-8 pb-48">
+      <main className="flex-1 container mx-auto px-8 pt-8 pb-32">
         <div className="space-y-4">
           {/* ホーム画面（初期表示時） */}
           {approvalStep === "none" && !aiResponse && !followupCandidates && (
             <>
-              {/* タイトルとコマンド入力欄 */}
+              {/* タイトルのみ表示 */}
               <div className="w-full flex flex-col items-center pt-8 pb-4">
                 <h1 className="text-center font-semibold text-[64px] mb-8">SalesOn v2</h1>
-                <div className="w-full max-w-[1000px] flex justify-center">
-                  <div className="w-full flex flex-col gap-2">
-                    <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
-                      <Textarea
-                        placeholder="Selaに質問してみましょう"
-                        value={command}
-                        onChange={e => {
-                          setCommand(e.target.value);
-                          validateCommand(e.target.value);
-                        }}
-                        className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
-                        rows={1}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        onClick={handleSend}
-                      >
-                        <Send className="w-5 h-5 text-gray-500" />
-                      </Button>
-                    </div>
-                    {alertMessage && (
-                      <div className="text-red-600 text-xs px-2">
-                        {alertMessage}
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
               {/* タブ付きコンテンツエリア */}
@@ -623,10 +593,42 @@ export default function HomeV2() {
                   </TabsContent>
                 </Tabs>
               </div>
+
+              {/* 初期表示時のコマンド入力欄（画面下部に固定） */}
+              <div className="fixed bottom-0 left-[72px] right-0 border-t shadow-lg"> {/* left-0 から left-[72px] に変更 */}
+                <div className="container mx-auto px-8 py-4">
+                  <div className="w-full max-w-[1000px] mx-auto flex items-center gap-4">
+                    <Textarea
+                      placeholder="Selaに質問してみましょう"
+                      value={command}
+                      onChange={e => {
+                        setCommand(e.target.value);
+                        validateCommand(e.target.value);
+                      }}
+                      className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-white border border-gray-100 rounded-xl shadow px-4 py-3 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+                      rows={1}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={handleSend}
+                    >
+                      <Send className="w-5 h-5 text-gray-500" />
+                    </Button>
+                  </div>
+                  {alertMessage && (
+                    <div className="text-red-600 text-xs px-2 mt-1">
+                      {alertMessage}
+                    </div>
+                  )}
+                </div>
+              </div>
             </>
           )}
 
-          {/* チャット開始後のコンテンツ */}
+          {/* チャット開始後のコンテンツ（既存の実装をそのまま使用） */}
           {(aiResponse || followupCandidates) && (
             <>
               <QuestionBox
@@ -666,10 +668,10 @@ export default function HomeV2() {
         </div>
       </main>
 
-      {/* コマンド入力欄（下部固定） */}
+      {/* チャット開始後のコマンド入力欄（既存の実装をそのまま使用） */}
       {showInputAtBottom && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
-          <div className="container mx-auto px-8 py-4">
+        <div className="fixed bottom-0 left-[72px] right-0 shadow-lg"> {/* left-0 から left-[72px] に変更 */}
+          <div className="container mx-auto px-8 py-8">
             <div className="w-full max-w-[1000px] mx-auto flex items-center gap-4">
               <Textarea
                 placeholder="Selaに質問してみましょう"
