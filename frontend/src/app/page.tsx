@@ -287,17 +287,15 @@ export default function Home() {
     setMailPreview(null);
   };
 
-  // Data Table用カラム定義
+  // タスク一覧用のカラム定義
   const taskColumns: ColumnDef<any, React.ReactNode>[] = [
+    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
     { accessorKey: "task", header: "タスク名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
-    { accessorKey: "project", header: "関連案件", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "customerType", header: "顧客区分", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-gray-200' : info.getValue()==='中' ? 'bg-gray-100' : 'bg-gray-200'}`}>{info.getValue()}</span> },
     { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "daysLeft", header: "残り日数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "auto", header: "AI/手動", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> },
-    { accessorKey: "approval", header: "承認待ち", cell: info => info.getValue() ? <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> : null },
+    { accessorKey: "daysLeft", header: "残日数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "status", header: "ステータス", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> },
+    { accessorKey: "project", header: "関連案件", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "auto", header: "AI/手動", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
   ];
   const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true));
   // Data Table用ダミーデータ
@@ -316,30 +314,20 @@ export default function Home() {
 
   // リスク案件用のカラム定義
   const riskColumns: ColumnDef<any, React.ReactNode>[] = [
+    { accessorKey: "risk", header: "リスク", cell: info => <span className="text-red-600 font-normal">{info.getValue()}</span> },
     { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
-    { accessorKey: "customer", header: "顧客名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "customerType", header: "顧客区分", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
     { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-gray-200' : info.getValue()==='中' ? 'bg-gray-100' : 'bg-gray-200'}`}>{info.getValue()}</span> },
+    { accessorKey: "customer", header: "顧客名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "progress", header: "進捗", cell: info => {
       const value = info.getValue() as unknown;
-      const { percent, color } = value as { percent: number, color: string };
+      const progress = value as { percent: number; color: string };
       return (
-        <div className="w-32">
-          <div className="w-full bg-gray-100 rounded-full h-2.5">
-            <div className={`h-2.5 rounded-full ${color}`} style={{ width: `${percent}%` }}></div>
-          </div>
-          <span className="text-xs text-gray-500 ml-1">{percent}%</span>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className={`${progress.color} rounded-full h-2`} style={{ width: `${progress.percent}%` }}></div>
         </div>
       );
-    } },
-    { accessorKey: "risk", header: "リスク内容", cell: info => {
-      const value = info.getValue();
-      if (typeof value === "string") {
-        return <span className={`font-normal ${value.includes('超過') ? 'text-red-600' : value.includes('遅延') ? 'text-yellow-600' : 'text-red-600'}`}>{value}</span>;
-      }
-      return <span className="font-normal">{value}</span>;
-    } },
+    }}
   ];
   const [riskColumnVisibility, setRiskColumnVisibility] = useState(riskColumns.map(() => true));
 
@@ -354,11 +342,11 @@ export default function Home() {
 
   // AI提案用のカラム定義
   const aiColumns: ColumnDef<any, React.ReactNode>[] = [
-    { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
+    { accessorKey: "proposal", header: "提案内容", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "project", header: "案件名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "customerType", header: "顧客区分", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "proposal", header: "提案内容", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-gray-200' : info.getValue()==='中' ? 'bg-gray-100' : 'bg-gray-200'}`}>{info.getValue()}</span> },
-    { accessorKey: "last", header: "前回実行", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "last", header: "前回実行", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
   ];
   const [aiColumnVisibility, setAiColumnVisibility] = useState(aiColumns.map(() => true));
 
@@ -443,6 +431,161 @@ export default function Home() {
   // タブの選択状態を管理
   const [currentTab, setCurrentTab] = useState('tasks');
 
+  // メンバー実績用のカラム定義
+  const memberColumns: ColumnDef<any, React.ReactNode>[] = [
+    { accessorKey: "name", header: "メンバー名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "role", header: "役割", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "deals", header: "成約件数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "revenue", header: "売上金額", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "progress", header: "目標達成率", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}%</span> }
+  ];
+  const [memberColumnVisibility, setMemberColumnVisibility] = useState(memberColumns.map(() => true));
+
+  // メンバー実績用のダミーデータ
+  const memberData = [
+    { name: "山田太郎", role: "営業マネージャー", deals: 15, revenue: "¥15,000,000", progress: 85 },
+    { name: "鈴木一郎", role: "営業担当", deals: 10, revenue: "¥10,000,000", progress: 75 },
+    { name: "佐藤花子", role: "営業担当", deals: 8, revenue: "¥8,000,000", progress: 60 },
+    { name: "田中次郎", role: "営業担当", deals: 12, revenue: "¥12,000,000", progress: 90 }
+  ];
+
+  // 競合利用企業用のカラム定義
+  const competitorColumns: ColumnDef<any, React.ReactNode>[] = [
+    { accessorKey: "company", header: "企業名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "competitor", header: "利用中の競合製品", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "contract", header: "契約更新時期", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "status", header: "ステータス", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> }
+  ];
+  const [competitorColumnVisibility, setCompetitorColumnVisibility] = useState(competitorColumns.map(() => true));
+
+  // 競合利用企業用のダミーデータ
+  const competitorData = [
+    { company: "株式会社ABC", competitor: "競合製品X", contract: "2024/09", status: "アプローチ中" },
+    { company: "DEF工業", competitor: "競合製品Y", contract: "2024/12", status: "情報収集中" },
+    { company: "GHI商事", competitor: "競合製品Z", contract: "2024/10", status: "商談開始" }
+  ];
+
+  // スリップ案件用のカラム定義
+  const slipColumns: ColumnDef<any, React.ReactNode>[] = [
+    { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "company", header: "企業名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "currentMonth", header: "当初予定", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "slipMonth", header: "スリップ先", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "reason", header: "理由", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
+  ];
+  const [slipColumnVisibility, setSlipColumnVisibility] = useState(slipColumns.map(() => true));
+
+  // スリップ案件用のダミーデータ
+  const slipData = [
+    { project: "システム更改案件", company: "株式会社ABC", currentMonth: "2024/07", slipMonth: "2024/08", reason: "要件定義の遅延" },
+    { project: "クラウド移行案件", company: "DEF工業", currentMonth: "2024/07", slipMonth: "2024/09", reason: "社内決裁の遅れ" },
+    { project: "データ連携案件", company: "GHI商事", currentMonth: "2024/07", slipMonth: "2024/08", reason: "技術検証の追加" }
+  ];
+
+  // 承認/却下/編集のハンドラー
+  const handleAiTaskApprove = (task: any) => {
+    // TODO: 承認処理の実装
+    console.log('承認:', task);
+  };
+
+  const handleAiTaskReject = (task: any) => {
+    // TODO: 却下処理の実装
+    console.log('却下:', task);
+  };
+
+  const handleAiTaskEdit = (task: any) => {
+    // TODO: 編集モーダルを表示
+    console.log('編集:', task);
+  };
+
+  // AI承認待ちタスク用のカラム定義
+  const aiApprovalColumns: ColumnDef<any, React.ReactNode>[] = [
+    { accessorKey: "priority", header: "優先度", cell: info => {
+      const value = info.getValue() as string;
+      return (
+        <span className="text-gray-900 font-normal">
+          {value === '高' ? '優先' : value === '中' ? '通常' : '低'}
+        </span>
+      );
+    }},
+    { accessorKey: "timestamp", header: "実行日時", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "action", header: "AI実行内容", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "target", header: "対象企業", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "detail", header: "実行詳細", cell: info => <span className="text-gray-700 font-normal whitespace-pre-wrap">{info.getValue()}</span> },
+    { 
+      id: "actions",
+      header: "操作",
+      cell: info => (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+            onClick={() => handleAiTaskApprove(info.row.original)}
+          >
+            承認
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+            onClick={() => handleAiTaskEdit(info.row.original)}
+          >
+            修正
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+            onClick={() => handleAiTaskReject(info.row.original)}
+          >
+            却下
+          </Button>
+        </div>
+      )
+    }
+  ];
+  const [aiApprovalColumnVisibility, setAiApprovalColumnVisibility] = useState(aiApprovalColumns.map(() => true));
+
+  // AI承認待ちタスク用のダミーデータ
+  const aiApprovalData = [
+    { 
+      timestamp: "2024/07/10 15:30",
+      priority: "高",
+      action: "フォローアップメール作成",
+      target: "株式会社ABC",
+      detail: "前回提案から2週間経過\n・製品導入に関する追加提案\n・デモ環境の準備完了報告"
+    },
+    {
+      timestamp: "2024/07/10 14:45",
+      priority: "中",
+      action: "商談議事録作成",
+      target: "DEF工業",
+      detail: "本日の商談内容を要約\n・予算感の確認\n・技術要件の整理\n・次回アクションの設定"
+    },
+    {
+      timestamp: "2024/07/10 13:20",
+      priority: "高",
+      action: "提案書修正",
+      target: "GHI商事",
+      detail: "提案書v2の作成完了\n・価格の見直し\n・導入スケジュールの調整\n・付帯サービスの追加"
+    },
+    {
+      timestamp: "2024/07/10 11:15",
+      priority: "高",
+      action: "失注リスク対応策",
+      target: "JKL株式会社",
+      detail: "競合製品との比較分析完了\n・当社優位性の整理\n・価格戦略の提案\n・導入事例の追加"
+    },
+    {
+      timestamp: "2024/07/10 10:30",
+      priority: "中",
+      action: "契約更新提案書作成",
+      target: "MNO産業",
+      detail: "更新プラン作成完了\n・新機能の紹介\n・利用実績の分析\n・割引プランの提案"
+    }
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header onClear={handleClear} />
@@ -486,9 +629,12 @@ export default function Home() {
                 <Tabs defaultValue="tasks" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
                   <div className="flex items-center justify-between mb-2 gap-4">
                     <TabsList className="bg-gray-100 text-base flex-shrink-0">
-                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base">優先タスク</TabsTrigger>
-                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base">リスク案件</TabsTrigger>
-                      <TabsTrigger value="ai" className="text-gray-700 font-normal text-base">AI提案の承認</TabsTrigger>
+                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base">今日のタスク</TabsTrigger>
+                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base">失注リスク</TabsTrigger>
+                      <TabsTrigger value="members" className="text-gray-700 font-normal text-base">メンバー実績</TabsTrigger>
+                      <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
+                      <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
+                      <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base">AI承認待ち</TabsTrigger>
                     </TabsList>
                     <div className="flex items-center gap-2">
                       {/* 検索ボックススロット */}
@@ -516,13 +662,49 @@ export default function Home() {
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
                               </DropdownMenuCheckboxItem>
                             ))
-                          ) : currentTab === 'ai' ? (
-                            aiColumns.map((col, idx) => (
+                          ) : currentTab === 'members' ? (
+                            memberColumns.map((col, idx) => (
                               <DropdownMenuCheckboxItem
                                 key={typeof col.header === 'string' ? col.header : `col${idx}`}
-                                checked={aiColumnVisibility[idx]}
+                                checked={memberColumnVisibility[idx]}
                                 onCheckedChange={checked => {
-                                  setAiColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                  setMemberColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'competitors' ? (
+                            competitorColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={competitorColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setCompetitorColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'slips' ? (
+                            slipColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={slipColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setSlipColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'ai-history' ? (
+                            aiApprovalColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={aiApprovalColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setAiApprovalColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
                                 }}
                               >
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
@@ -561,9 +743,35 @@ export default function Home() {
                       />
                     </div>
                   </TabsContent>
-                  <TabsContent value="ai">
+                  <TabsContent value="members">
                     <div className="overflow-x-auto">
-                      <DataTable columns={aiColumns.filter((_, i) => aiColumnVisibility[i])} data={aiData}
+                      <DataTable columns={memberColumns.filter((_, i) => memberColumnVisibility[i])} data={memberData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="competitors">
+                    <div className="overflow-x-auto">
+                      <DataTable columns={competitorColumns.filter((_, i) => competitorColumnVisibility[i])} data={competitorData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="slips">
+                    <div className="overflow-x-auto">
+                      <DataTable columns={slipColumns.filter((_, i) => slipColumnVisibility[i])} data={slipData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="ai-history">
+                    <div className="overflow-x-auto">
+                      <DataTable 
+                        columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} 
+                        data={aiApprovalData}
                         searchSlot={null}
                         columnSelectorSlot={null}
                       />
@@ -630,8 +838,8 @@ export default function Home() {
                         <div className="absolute top-4 right-4">
                           <Checkbox
                             checked={rowSelection[idx] ?? false}
-                            onCheckedChange={(checked) => {
-                              setRowSelection((prev) => ({ ...prev, [idx]: checked }));
+                            onCheckedChange={(checked: boolean | 'indeterminate') => {
+                              setRowSelection((prev) => ({ ...prev, [idx]: checked === true }));
                             }}
                             aria-label="送信対象に含める"
                           />
