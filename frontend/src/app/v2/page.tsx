@@ -127,21 +127,80 @@ export default function HomeV2() {
   const [editableQuestion, setEditableQuestion] = useState("");
   const [currentTab, setCurrentTab] = useState('tasks');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [taskColumnVisibility, setTaskColumnVisibility] = useState([true, true, true, true, true, true, true]);
 
   // タスクテーブル用のカラム定義
   const taskColumns: ColumnDef<any, React.ReactNode>[] = [
-    { accessorKey: "task", header: "タスク", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
-    { accessorKey: "project", header: "案件", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "customerType", header: "顧客区分", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
-    { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "daysLeft", header: "残日数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "status", header: "状態", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "auto", header: "自動化", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "approval", header: "承認", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
+    { 
+      accessorKey: "priority", 
+      header: () => <div className="text-sm font-medium text-gray-600">優先度</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className={`inline-flex items-center justify-center rounded px-2 py-0.5 text-sm ${
+            info.getValue() === '高' ? 'bg-red-50 text-red-700' :
+            info.getValue() === '中' ? 'bg-yellow-50 text-yellow-700' :
+            'bg-gray-50 text-gray-700'
+          }`}>
+            {info.getValue()}
+          </span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "taskName", 
+      header: () => <div className="text-sm font-medium text-gray-600">タスク名</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-black font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "deadline", 
+      header: () => <div className="text-sm font-medium text-gray-600">期限</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "daysLeft", 
+      header: () => <div className="text-sm font-medium text-gray-600">残日数</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "status", 
+      header: () => <div className="text-sm font-medium text-gray-600">ステータス</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "project", 
+      header: () => <div className="text-sm font-medium text-gray-600">関連案件</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "automation", 
+      header: () => <div className="text-sm font-medium text-gray-600">AI/手動</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    }
   ];
-  const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true));
-
   // リスクテーブル用のカラム定義
   const riskColumns: ColumnDef<any, React.ReactNode>[] = [
     { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
@@ -159,7 +218,7 @@ export default function HomeV2() {
     }},
     { accessorKey: "risk", header: "リスク", cell: info => <span className="text-red-600 font-normal">{info.getValue()}</span> }
   ];
-  const [riskColumnVisibility, setRiskColumnVisibility] = useState(riskColumns.map(() => true));
+  const [riskColumnVisibility, setRiskColumnVisibility] = useState<boolean[]>(riskColumns.map(() => true));
 
   // メンバー実績用のカラム定義
   const memberColumns: ColumnDef<any, React.ReactNode>[] = [
@@ -301,11 +360,60 @@ export default function HomeV2() {
 
   // ダミーデータ
   const taskData = [
-    { task: "顧客Aへ見積送付", project: "A社案件", customerType: "新規", priority: "高", deadline: "2024/07/10", daysLeft: "3日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
-    { task: "商談Bの準備", project: "B社案件", customerType: "既存", priority: "中", deadline: "2024/07/12", daysLeft: "1日", status: "未着手", auto: "手動", approval: "" },
-    { task: "C社 提案書ドラフト作成", project: "C社新規案件", customerType: "新規", priority: "高", deadline: "2024/07/15", daysLeft: "2日", status: "進行中", auto: "AI自動", approval: "" },
-    { task: "D社 定例会議準備", project: "D社サポート案件", customerType: "既存", priority: "中", deadline: "2024/07/13", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
-    { task: "E社 契約書レビュー", project: "E社更新案件", customerType: "既存", priority: "高", deadline: "2024/07/09", daysLeft: "1日", status: "完了", auto: "AI自動", approval: "" }
+    {
+      priority: "高",
+      taskName: "顧客Aへ見積送付",
+      deadline: "2024/07/10",
+      daysLeft: "3日",
+      status: "進行中",
+      project: "A社案件",
+      automation: "AI自動"
+    },
+    {
+      priority: "中",
+      taskName: "商談Bの準備",
+      deadline: "2024/07/12",
+      daysLeft: "1日",
+      status: "未着手",
+      project: "B社案件",
+      automation: "手動"
+    },
+    {
+      priority: "高",
+      taskName: "C社 提案書ドラフト作成",
+      deadline: "2024/07/15",
+      daysLeft: "2日",
+      status: "進行中",
+      project: "C社新規案件",
+      automation: "AI自動"
+    },
+    {
+      priority: "中",
+      taskName: "D社 定例会議準備",
+      deadline: "2024/07/13",
+      daysLeft: "0日",
+      status: "進行中",
+      project: "D社サポート案件",
+      automation: "手動"
+    },
+    {
+      priority: "高",
+      taskName: "E社 契約書レビュー",
+      deadline: "2024/07/09",
+      daysLeft: "1日",
+      status: "完了",
+      project: "E社更新案件",
+      automation: "AI自動"
+    },
+    {
+      priority: "低",
+      taskName: "F社 サポート対応",
+      deadline: "2024/07/20",
+      daysLeft: "0日",
+      status: "未着手",
+      project: "F社サポート案件",
+      automation: "手動"
+    }
   ];
 
   const riskData = [
@@ -367,14 +475,8 @@ export default function HomeV2() {
 
   // コマンドの検証関数
   const validateCommand = (input: string): boolean => {
-    const requiredPhrase = "フォローアップメールが必要な案件を抽出して";
-    if (input === requiredPhrase) {
-      setAlertMessage(null);
-      return true;
-    } else {
-      setAlertMessage(`"${requiredPhrase}" と入力してください`);
-      return false;
-    }
+    setAlertMessage("v2では何を入力しても送信できません");
+    return false;
   };
 
   // rowSelectionとselectedRecipientsを同期
@@ -487,12 +589,7 @@ export default function HomeV2() {
   };
 
   // コマンド入力欄の表示位置を制御
-  const showInputAtBottom =
-    approvalStep === "search_results" ||
-    approvalStep === "select_recipients" ||
-    approvalStep === "preview_mail" ||
-    approvalStep === "sent" ||
-    !!aiResponse;
+  const showInputAtBottom = !!followupCandidates;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -500,13 +597,128 @@ export default function HomeV2() {
       
       {/* メインコンテンツエリア */}
       <main className="flex-1 container mx-auto px-8 pt-8 pb-32">
-        <div className="space-y-4">
+        <div className="space-y-8">
           {/* ホーム画面（初期表示時） */}
           {approvalStep === "none" && !aiResponse && !followupCandidates && (
             <>
               {/* タイトルのみ表示 */}
               <div className="w-full flex flex-col items-center pt-8 pb-4">
-                <h1 className="text-center font-semibold text-[64px] mb-8">SalesOn v2</h1>
+                <h1 className="text-center font-semibold text-[64px] ">SalesOn v2</h1>
+              </div>
+
+              {/* ダッシュボードエリア */}
+              <div className="w-full grid grid-cols-4 gap-4 mb-8">
+                {/* 進捗状況のダッシュボード */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
+                  <h2 className="text-lg font-medium mb-4">進捗状況</h2>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>全体の進捗</span>
+                        <span>75%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="bg-gray-200 rounded-full h-2" style={{ width: '75%' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>リスク案件</span>
+                        <span>{riskData.length}件</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs">
+                          高: {riskData.filter(r => r.priority === '高').length}件
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs">
+                          中: {riskData.filter(r => r.priority === '中').length}件
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* チーム/メンバーの状況 */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
+                  <h2 className="text-lg font-medium mb-4">チーム状況</h2>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>目標達成率</span>
+                        <span>{Math.round(memberData.reduce((acc, m) => acc + m.progress, 0) / memberData.length)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div 
+                          className="bg-gray-200 rounded-full h-2" 
+                          style={{ width: `${Math.round(memberData.reduce((acc, m) => acc + m.progress, 0) / memberData.length)}%` }} 
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {memberData.slice(0, 2).map((member, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <span className="text-sm truncate">{member.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs">{member.deals}件</span>
+                            <div className="w-16 bg-gray-100 rounded-full h-1.5">
+                              <div
+                                className="bg-gray-200 rounded-full h-1.5"
+                                style={{ width: `${member.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 優先タスク・リスク案件のサマリー */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
+                  <h2 className="text-lg font-medium mb-4">優先タスク</h2>
+                  <div className="space-y-2">
+                    {taskData
+                      .filter(task => task.priority === '高')
+                      .slice(0, 3)
+                      .map((task, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                          <div className="truncate text-sm">{task.taskName}</div>
+                          <span className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded">残り{task.daysLeft}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* チーム/メンバーのアクション状況 */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
+                  <h2 className="text-lg font-medium mb-4">アクション</h2>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gray-200 rounded-lg p-2">
+                      <div className="text-xs text-gray-700">未完了</div>
+                      <div className="text-xl font-medium text-gray-700">
+                        {taskData.filter(t => t.status !== '完了').length}
+                      </div>
+                    </div>
+                    <div className="bg-gray-100 rounded-lg p-2">
+                      <div className="text-xs text-gray-500">本日期限</div>
+                      <div className="text-xl font-medium text-gray-700">
+                        {taskData.filter(t => t.daysLeft === '0日').length}
+                      </div>
+                    </div>
+                    <div className="bg-gray-100 rounded-lg p-2">
+                      <div className="text-xs text-gray-500">完了</div>
+                      <div className="text-xl font-medium text-gray-700">
+                        {taskData.filter(t => t.status === '完了').length}
+                      </div>
+                    </div>
+                    <div className="bg-gray-200 rounded-lg p-2">
+                      <div className="text-xs text-gray-700">AI自動化</div>
+                      <div className="text-xl font-medium text-gray-700">
+                        {Math.round(taskData.filter(t => t.automation === 'AI自動').length / taskData.length * 100)}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* タブ付きコンテンツエリア */}
@@ -528,101 +740,154 @@ export default function HomeV2() {
                         <Plus className="h-4 w-4" />
                       </Button>
                     </TabsList>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        placeholder="検索..."
+                        className="max-w-[200px]"
+                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="ml-auto">
+                            表示カラム <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {[
+                            { key: "priority", label: "優先度" },
+                            { key: "taskName", label: "タスク名" },
+                            { key: "deadline", label: "期限" },
+                            { key: "daysLeft", label: "残日数" },
+                            { key: "status", label: "ステータス" },
+                            { key: "project", label: "関連案件" },
+                            { key: "automation", label: "AI/手動" }
+                          ].map((column, index) => (
+                            <DropdownMenuCheckboxItem
+                              key={index}
+                              checked={taskColumnVisibility[index]}
+                              onCheckedChange={(value) => {
+                                const newVisibility = [...taskColumnVisibility];
+                                newVisibility[index] = value;
+                                setTaskColumnVisibility(newVisibility);
+                              }}
+                            >
+                              {column.label}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
 
                   {/* タブコンテンツ */}
                   <TabsContent value="tasks">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={taskColumns.filter((_, i) => taskColumnVisibility[i])} 
-                        data={taskData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                      <div className="border-separate border-spacing-0 min-w-full">
+                        <DataTable 
+                          columns={taskColumns.map((col, i) => taskColumnVisibility[i] ? col : null).filter(Boolean) as ColumnDef<any, React.ReactNode>[]} 
+                          data={taskData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="risks">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={riskColumns.filter((_, i) => riskColumnVisibility[i])} 
-                        data={riskData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                      <div className="border-separate border-spacing-0 min-w-full">
+                        <DataTable 
+                          columns={riskColumns.filter((_, i) => riskColumnVisibility[i])} 
+                          data={riskData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="members">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={memberColumns.filter((_, i) => memberColumnVisibility[i])} 
-                        data={memberData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                      <div className="border-separate border-spacing-0 min-w-full">
+                        <DataTable 
+                          columns={memberColumns.filter((_, i) => memberColumnVisibility[i])} 
+                          data={memberData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="competitors">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={competitorColumns.filter((_, i) => competitorColumnVisibility[i])} 
-                        data={competitorData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                      <div className="border-separate border-spacing-0 min-w-full">
+                        <DataTable 
+                          columns={competitorColumns.filter((_, i) => competitorColumnVisibility[i])} 
+                          data={competitorData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="slips">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={slipColumns.filter((_, i) => slipColumnVisibility[i])} 
-                        data={slipData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                      <div className="border-separate border-spacing-0 min-w-full">
+                        <DataTable 
+                          columns={slipColumns.filter((_, i) => slipColumnVisibility[i])} 
+                          data={slipData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="ai-history">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} 
-                        data={aiApprovalData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                      <div className="border-separate border-spacing-0 min-w-full">
+                        <DataTable 
+                          columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} 
+                          data={aiApprovalData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                 </Tabs>
               </div>
 
               {/* 初期表示時のコマンド入力欄（画面下部に固定） */}
-              <div className="fixed bottom-0 left-[72px] right-0 border-t shadow-lg"> {/* left-0 から left-[72px] に変更 */}
-                <div className="container mx-auto px-8 py-4">
-                  <div className="w-full max-w-[1000px] mx-auto flex items-center gap-4">
-                    <Textarea
-                      placeholder="Selaに質問してみましょう"
-                      value={command}
-                      onChange={e => {
-                        setCommand(e.target.value);
-                        validateCommand(e.target.value);
-                      }}
-                      className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-white border border-gray-100 rounded-xl shadow px-4 py-3 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
-                      rows={1}
-                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="shrink-0"
-                      onClick={handleSend}
-                    >
-                      <Send className="w-5 h-5 text-gray-500" />
-                    </Button>
-                  </div>
-                  {alertMessage && (
-                    <div className="text-red-600 text-xs px-2 mt-1">
-                      {alertMessage}
+              <div className="fixed bottom-0 left-[72px] right-0 z-50 w-full flex justify-center pointer-events-none">
+                <div className="w-full max-w-[1000px] mx-auto px-8 py-4 pointer-events-auto">
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3 w-full">
+                      <Textarea
+                        placeholder="Selaに質問してみましょう"
+                        value={command}
+                        onChange={e => {
+                          setCommand(e.target.value);
+                          validateCommand(e.target.value);
+                        }}
+                        className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base w-full"
+                        rows={1}
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                      />
+                      <Button
+                        onClick={handleSend}
+                        disabled={!command.trim() || alertMessage !== null}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${command.trim() && !alertMessage ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
+                        aria-label="送信"
+                      >
+                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path d="M22 2L11 13" />
+                          <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                        </svg>
+                      </Button>
                     </div>
-                  )}
+                    {alertMessage && (
+                      <div className="text-red-600 text-xs px-2">
+                        {alertMessage}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </>
@@ -668,37 +933,15 @@ export default function HomeV2() {
         </div>
       </main>
 
-      {/* チャット開始後のコマンド入力欄（既存の実装をそのまま使用） */}
-      {showInputAtBottom && (
-        <div className="fixed bottom-0 left-[72px] right-0 shadow-lg"> {/* left-0 から left-[72px] に変更 */}
-          <div className="container mx-auto px-8 py-8">
-            <div className="w-full max-w-[1000px] mx-auto flex items-center gap-4">
-              <Textarea
-                placeholder="Selaに質問してみましょう"
-                value={command}
-                onChange={e => {
-                  setCommand(e.target.value);
-                  validateCommand(e.target.value);
-                }}
-                className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-white border border-gray-100 rounded-xl shadow px-4 py-3 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
-                rows={1}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0"
-                onClick={handleSend}
-              >
-                <Send className="w-5 h-5 text-gray-500" />
-              </Button>
-            </div>
-            {alertMessage && (
-              <div className="text-red-600 text-xs px-2 mt-1">
-                {alertMessage}
-              </div>
-            )}
-          </div>
+      {/* メール送信確認ボタン */}
+      {approvalStep === "preview_mail" && (
+        <div className="fixed right-8 top-1/2 transform -translate-y-1/2">
+          <Button
+            onClick={handleApprove}
+            className="w-[65px] h-[350px] bg-[#22223b] text-white hover:bg-black rounded-xl"
+          >
+            はい
+          </Button>
         </div>
       )}
     </div>

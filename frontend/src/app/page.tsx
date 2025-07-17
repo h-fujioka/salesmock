@@ -718,30 +718,30 @@ export default function Home() {
                 <h1 className="text-center font-semibold text-[64px] mb-8">SalesOn</h1>
                 <div className="w-full max-w-[1000px] flex justify-center">
                   <div className="w-full flex flex-col gap-2">
-                    <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
-                      <Textarea
+                  <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
+                    <Textarea
                         placeholder="Selaに質問してみましょう"
-                        value={command}
+                      value={command}
                         onChange={e => {
                           setCommand(e.target.value);
                           validateCommand(e.target.value);
                         }}
-                        className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
-                        rows={1}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                      />
-                      <Button
-                        onClick={handleSend}
+                      className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
+                      rows={1}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    />
+                    <Button
+                      onClick={handleSend}
                         disabled={!command.trim() || alertMessage !== null}
                         className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${command.trim() && !alertMessage ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
-                        aria-label="送信"
-                      >
-                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                          <path d="M22 2L11 13" />
-                          <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                        </svg>
-                      </Button>
-                    </div>
+                      aria-label="送信"
+                    >
+                      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                        <path d="M22 2L11 13" />
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                      </svg>
+                    </Button>
+                  </div>
                     {/* アラートメッセージ表示 */}
                     {alertMessage && (
                       <div className="text-red-600 text-xs px-2">
@@ -955,6 +955,40 @@ export default function Home() {
                     }
                     nextActionText="選択された案件でメールプレビューを表示しますか？"
                   />
+
+                  {/* コマンド入力欄 */}
+                  <div className="fixed bottom-0 left-[32px] right-0 z-50 w-full flex justify-center pointer-events-none">
+                    <div className="w-full max-w-[1000px] mx-auto py-8 pointer-events-auto">
+                      <div className="flex flex-col gap-2 w-full">
+                        <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3 w-full">
+                          <Textarea
+                            placeholder="Selaに質問してみましょう"
+                            value={command}
+                            onChange={e => {
+                              setCommand(e.target.value);
+                              validateCommand(e.target.value);
+                            }}
+                            className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base w-full"
+                            rows={1}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0"
+                            onClick={handleSend}
+                          >
+                            <Send className="w-5 h-5 text-gray-500" />
+                          </Button>
+                        </div>
+                        {alertMessage && (
+                          <div className="text-red-600 text-xs px-2">
+                            {alertMessage}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   
                   {/* 送信先ごとにメールプレビュー＋チェックボックス */}
                   <div className="w-full max-w-[1000px] mx-auto mt-6 flex flex-col gap-6">
@@ -1051,44 +1085,7 @@ export default function Home() {
           )}
         </div>
       </main>
-      {(approvalStep !== "none" || aiResponse || followupCandidates) && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 w-full flex justify-center pointer-events-none">
-          <div className="max-w-[1000px] w-full mx-auto px-8 py-8 pointer-events-auto">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
-                <Textarea
-                  placeholder="Selaに質問してみましょう"
-                  value={command}
-                  onChange={e => {
-                    setCommand(e.target.value);
-                    validateCommand(e.target.value);
-                  }}
-                  className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
-                  rows={1}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                />
-                <Button
-                  onClick={handleSend}
-                  disabled={!command.trim() || alertMessage !== null}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${command.trim() && !alertMessage ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
-                  aria-label="送信"
-                >
-                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                    <path d="M22 2L11 13" />
-                    <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                  </svg>
-                </Button>
-              </div>
-              {/* アラートメッセージ表示 */}
-              {alertMessage && (
-                <div className="text-red-600 text-xs px-2">
-                  {alertMessage}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 } 
