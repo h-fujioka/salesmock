@@ -102,10 +102,9 @@ function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditabl
 function Header({ onClear }: { onClear: () => void }) {
   return (
     <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
-      <span className="text-xl font-bold tracking-tight">SalesOn プロト画面</span>
+      <span className="text-xl font-bold tracking-tight">SalesOn デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
-        <Button variant="ghost" size="icon" onClick={onClear}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></Button>
         <Button variant="ghost" size="icon"><Calendar className="w-6 h-6" /></Button>
         <Button variant="ghost" size="icon"><Bell className="w-6 h-6" /></Button>
         <Avatar className="w-8 h-8">
@@ -138,6 +137,20 @@ export default function Home() {
   // 送信先選択用の状態
   const [selectedRecipients, setSelectedRecipients] = useState<number[]>([0,1]); // 山田太郎・鈴木一郎のみ選択
   const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({ 0: true, 1: true });
+  // アラートメッセージ用のstate追加
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
+  // コマンドの検証関数
+  const validateCommand = (input: string): boolean => {
+    const requiredPhrase = "フォローアップメールが必要な案件を抽出して";
+    if (input === requiredPhrase) {
+      setAlertMessage(null);
+      return true;
+    } else {
+      setAlertMessage(`"${requiredPhrase}" と入力してください`);
+      return false;
+    }
+  };
 
   // rowSelectionとselectedRecipientsを同期
   React.useEffect(() => {
@@ -185,6 +198,10 @@ export default function Home() {
 
   // handleSend修正: ユーザーの回答を解析して次のステップを決定
   const handleSend = async () => {
+    if (!validateCommand(command)) {
+      return;
+    }
+
     // 現在のステップでユーザーの回答を解析
     if (approvalStep === "search_results") {
       const userResponse = command.toLowerCase().trim();
@@ -600,26 +617,37 @@ export default function Home() {
               <div className="w-full flex flex-col items-center pt-8 pb-4">
                 <h1 className="text-center font-semibold text-[64px] mb-8">SalesOn</h1>
                 <div className="w-full max-w-[1000px] flex justify-center">
-                  <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
-                    <Textarea
-                      placeholder="質問してみましょう"
-                      value={command}
-                      onChange={e => setCommand(e.target.value)}
-                      className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
-                      rows={1}
-                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                    />
-                    <Button
-                      onClick={handleSend}
-                      disabled={!command.trim()}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${command.trim() ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
-                      aria-label="送信"
-                    >
-                      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                        <path d="M22 2L11 13" />
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                      </svg>
-                    </Button>
+                  <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
+                      <Textarea
+                        placeholder="Selaに質問してみましょう"
+                        value={command}
+                        onChange={e => {
+                          setCommand(e.target.value);
+                          validateCommand(e.target.value);
+                        }}
+                        className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
+                        rows={1}
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                      />
+                      <Button
+                        onClick={handleSend}
+                        disabled={!command.trim() || alertMessage !== null}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${command.trim() && !alertMessage ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
+                        aria-label="送信"
+                      >
+                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path d="M22 2L11 13" />
+                          <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                        </svg>
+                      </Button>
+                    </div>
+                    {/* アラートメッセージ表示 */}
+                    {alertMessage && (
+                      <div className="text-red-600 text-xs px-2">
+                        {alertMessage}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -919,26 +947,37 @@ export default function Home() {
       {(approvalStep !== "none" || aiResponse || followupCandidates) && (
         <div className="fixed bottom-0 left-0 right-0 z-50 w-full flex justify-center pointer-events-none">
           <div className="max-w-[1000px] w-full mx-auto px-8 py-8 pointer-events-auto">
-            <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
-              <Textarea
-                placeholder="質問してみましょう"
-                value={command}
-                onChange={e => setCommand(e.target.value)}
-                className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
-                rows={1}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              />
-              <Button
-                onClick={handleSend}
-                disabled={!command.trim()}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${command.trim() ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
-                aria-label="送信"
-              >
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                  <path d="M22 2L11 13" />
-                  <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                </svg>
-              </Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
+                <Textarea
+                  placeholder="Selaに質問してみましょう"
+                  value={command}
+                  onChange={e => {
+                    setCommand(e.target.value);
+                    validateCommand(e.target.value);
+                  }}
+                  className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+                  rows={1}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={!command.trim() || alertMessage !== null}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${command.trim() && !alertMessage ? 'bg-[#22223b] text-white hover:bg-black' : 'bg-gray-200 text-gray-400'}`}
+                  aria-label="送信"
+                >
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                    <path d="M22 2L11 13" />
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                  </svg>
+                </Button>
+              </div>
+              {/* アラートメッセージ表示 */}
+              {alertMessage && (
+                <div className="text-red-600 text-xs px-2">
+                  {alertMessage}
+                </div>
+              )}
             </div>
           </div>
         </div>
