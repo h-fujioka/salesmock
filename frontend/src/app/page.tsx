@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Search, Send, User } from "lucide-react";
+import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Search, Send, User, Plus } from "lucide-react";
 import React, { useState } from "react";
 
 // 検索結果テンプレートコンポーネント
@@ -517,27 +517,86 @@ export default function Home() {
 
   // AI承認待ちタスク用のカラム定義
   const aiApprovalColumns: ColumnDef<any, React.ReactNode>[] = [
-    { accessorKey: "priority", header: "優先度", cell: info => {
-      const value = info.getValue() as string;
-      return (
-        <span className="text-gray-900 font-normal">
-          {value === '高' ? '優先' : value === '中' ? '通常' : '低'}
-        </span>
-      );
-    }},
-    { accessorKey: "timestamp", header: "実行日時", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "action", header: "AI実行内容", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
-    { accessorKey: "target", header: "対象企業", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "detail", header: "実行詳細", cell: info => <span className="text-gray-700 font-normal whitespace-pre-wrap">{info.getValue()}</span> },
+    { 
+      accessorKey: "priority", 
+      header: "優先度",
+      cell: info => {
+        const value = info.getValue() as string;
+        return (
+          <span className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium ${
+            value === '優先' ? 'bg-red-50 text-red-700' : 
+            'bg-yellow-50 text-yellow-700'
+          }`}>
+            {value}
+          </span>
+        );
+      }
+    },
+    { 
+      accessorKey: "status",
+      header: "ステータス",
+      cell: info => {
+        const status = info.getValue() as '承認待ち' | '修正中' | '却下済み';
+        const statusStyles = {
+          '承認待ち': 'bg-blue-50 text-blue-700',
+          '修正中': 'bg-yellow-50 text-yellow-700',
+          '却下済み': 'bg-red-50 text-red-700'
+        } as const;
+        return (
+          <span className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium ${statusStyles[status]}`}>
+            {status}
+          </span>
+        );
+      }
+    },
+    { 
+      accessorKey: "timestamp", 
+      header: "実行日時",
+      cell: info => <span className="text-gray-700">{info.getValue()}</span>
+    },
+    { 
+      accessorKey: "deadline", 
+      header: "対応期限",
+      cell: info => <span className="text-gray-700">{info.getValue()}</span>
+    },
+    { 
+      accessorKey: "taskName", 
+      header: "タスク名",
+      cell: info => <span className="font-medium text-gray-900">{info.getValue()}</span>
+    },
+    { 
+      accessorKey: "details", 
+      header: "実行詳細",
+      cell: info => {
+        const details = info.getValue() as string[];
+        return (
+          <ul className="list-disc list-inside space-y-1.5 text-gray-600">
+            {details.map((detail, idx) => (
+              <li key={idx} className="text-sm">{detail}</li>
+            ))}
+          </ul>
+        );
+      }
+    },
+    {
+      accessorKey: "assignee",
+      header: "担当者",
+      cell: info => <span className="text-gray-700">{info.getValue()}</span>
+    },
+    {
+      accessorKey: "target",
+      header: "対象企業",
+      cell: info => <span className="text-gray-700">{info.getValue()}</span>
+    },
     { 
       id: "actions",
-      header: "操作",
+      header: () => <div className="text-right">操作</div>,
       cell: info => (
-        <div className="flex items-center gap-2">
+        <div className="flex justify-end gap-1.5">
           <Button
             size="sm"
             variant="outline"
-            className="bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+            className="h-8 px-3 bg-white hover:bg-green-50 text-green-700 border-green-200 hover:border-green-300"
             onClick={() => handleAiTaskApprove(info.row.original)}
           >
             承認
@@ -545,7 +604,7 @@ export default function Home() {
           <Button
             size="sm"
             variant="outline"
-            className="bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+            className="h-8 px-3 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
             onClick={() => handleAiTaskEdit(info.row.original)}
           >
             修正
@@ -553,7 +612,7 @@ export default function Home() {
           <Button
             size="sm"
             variant="outline"
-            className="bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+            className="h-8 px-3 bg-white hover:bg-red-50 text-red-700 border-red-200 hover:border-red-300"
             onClick={() => handleAiTaskReject(info.row.original)}
           >
             却下
@@ -562,46 +621,87 @@ export default function Home() {
       )
     }
   ];
-  const [aiApprovalColumnVisibility, setAiApprovalColumnVisibility] = useState(aiApprovalColumns.map(() => true));
 
   // AI承認待ちタスク用のダミーデータ
   const aiApprovalData = [
     { 
       timestamp: "2024/07/10 15:30",
-      priority: "高",
-      action: "フォローアップメール作成",
+      priority: "優先",
+      status: "承認待ち",
+      deadline: "2024/07/11 15:30",
+      taskName: "フォローアップメール作成と送信",
       target: "株式会社ABC",
-      detail: "前回提案から2週間経過\n・製品導入に関する追加提案\n・デモ環境の準備完了報告"
+      details: [
+        "前回提案から2週間経過",
+        "製品導入に関する追加提案",
+        "デモ環境の準備完了報告"
+      ],
+      assignee: "山田太郎"
     },
     {
       timestamp: "2024/07/10 14:45",
-      priority: "中",
-      action: "商談議事録作成",
+      priority: "通常",
+      status: "修正中",
+      deadline: "2024/07/11 14:45",
+      taskName: "商談議事録作成と共有",
       target: "DEF工業",
-      detail: "本日の商談内容を要約\n・予算感の確認\n・技術要件の整理\n・次回アクションの設定"
+      details: [
+        "本日の商談内容を要約",
+        "予算感の確認",
+        "技術要件の整理",
+        "次回アクションの設定"
+      ],
+      assignee: "鈴木一郎"
     },
     {
       timestamp: "2024/07/10 13:20",
-      priority: "高",
-      action: "提案書修正",
+      priority: "優先",
+      status: "承認待ち",
+      deadline: "2024/07/11 13:20",
+      taskName: "提案書v2の作成と価格見直し",
       target: "GHI商事",
-      detail: "提案書v2の作成完了\n・価格の見直し\n・導入スケジュールの調整\n・付帯サービスの追加"
+      details: [
+        "提案書v2の作成完了",
+        "価格の見直し",
+        "導入スケジュールの調整",
+        "付帯サービスの追加"
+      ],
+      assignee: "佐藤花子"
     },
     {
       timestamp: "2024/07/10 11:15",
-      priority: "高",
-      action: "失注リスク対応策",
+      priority: "優先",
+      status: "却下済み",
+      deadline: "2024/07/11 11:15",
+      taskName: "失注リスク対応策の立案",
       target: "JKL株式会社",
-      detail: "競合製品との比較分析完了\n・当社優位性の整理\n・価格戦略の提案\n・導入事例の追加"
+      details: [
+        "競合製品との比較分析完了",
+        "当社優位性の整理",
+        "価格戦略の提案",
+        "導入事例の追加"
+      ],
+      assignee: "田中次郎"
     },
     {
       timestamp: "2024/07/10 10:30",
-      priority: "中",
-      action: "契約更新提案書作成",
+      priority: "通常",
+      status: "承認待ち",
+      deadline: "2024/07/11 10:30",
+      taskName: "契約更新提案書の作成",
       target: "MNO産業",
-      detail: "更新プラン作成完了\n・新機能の紹介\n・利用実績の分析\n・割引プランの提案"
+      details: [
+        "更新プラン作成完了",
+        "新機能の紹介",
+        "利用実績の分析",
+        "割引プランの提案"
+      ],
+      assignee: "高橋美咲"
     }
   ];
+
+  // 状態管理の定義を更新
+  const [aiApprovalColumnVisibility, setAiApprovalColumnVisibility] = useState<boolean[]>(aiApprovalColumns.map(() => true));
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -663,6 +763,13 @@ export default function Home() {
                       <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
                       <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
                       <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base">AI承認待ち</TabsTrigger>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 shrink-0 pl-4 pr-6"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
                     </TabsList>
                     <div className="flex items-center gap-2">
                       {/* 検索ボックススロット */}
