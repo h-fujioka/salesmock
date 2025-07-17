@@ -251,7 +251,8 @@ export default function Home() {
     if (command.includes("フォローアップメール")) {
       // APIから取得
       try {
-        const res = await fetch("/api/followup-candidates");
+        const basePath = process.env.NODE_ENV === 'production' ? '/salesmock' : '';
+        const res = await fetch(`${basePath}/api/followup-candidates`);
         const data = await res.json();
         const candidates = data.candidates || [];
         setFollowupCandidates(candidates);
