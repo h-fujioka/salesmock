@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',  // 静的ファイル生成用
-  basePath: '/salesmock', // リポジトリ名に合わせたベースパス
+  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
+  basePath: process.env.NODE_ENV === 'production' ? '/salesmock' : '',
   images: {
-    unoptimized: true, // GitHub Pages用の画像設定
+    unoptimized: true,
   },
   compiler: {
     styledComponents: true,
