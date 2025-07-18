@@ -23,8 +23,8 @@ function GridDotsIcon({ className = "w-6 h-6" }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className="h-full">
-      <body className="bg-white min-h-screen h-full flex flex-col">
+    <html lang="ja" className="h-full" suppressHydrationWarning>
+      <body className="bg-white min-h-screen h-full flex flex-col" suppressHydrationWarning>
         {/* ヘッダー削除済み */}
         <div className="flex flex-1 min-h-0 h-full">
           {/* サイドバー */}

@@ -21,6 +21,14 @@ module.exports = {
       base: ['14px', { lineHeight: '20px' }],
       lg: ['16px', { lineHeight: '24px' }],
       xl: ['18px', { lineHeight: '28px' }],
+      '2xl': ['24px', { lineHeight: '32px' }],
+      '3xl': ['30px', { lineHeight: '36px' }],
+      '4xl': ['36px', { lineHeight: '40px' }],
+      '5xl': ['48px', { lineHeight: '48px' }],
+      '6xl': ['60px', { lineHeight: '60px' }],
+      '7xl': ['72px', { lineHeight: '72px' }],
+      '8xl': ['96px', { lineHeight: '96px' }],
+      '9xl': ['128px', { lineHeight: '128px' }],
     },
     extend: {
       colors: {
