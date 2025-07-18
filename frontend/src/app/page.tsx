@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Search, Send, User, Plus } from "lucide-react";
+import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User } from "lucide-react";
 import React, { useState } from "react";
 
 // 検索結果テンプレートコンポーネント
@@ -139,6 +139,9 @@ export default function Home() {
   const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({ 0: true, 1: true });
   // アラートメッセージ用のstate追加
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  // メール編集機能用の状態追加
+  const [editingMailId, setEditingMailId] = useState<string | null>(null);
+  const [editedMails, setEditedMails] = useState<{[key: string]: {subject: string, body: string}}>({});
 
   // コマンドの検証関数
   const validateCommand = (input: string): boolean => {
@@ -256,9 +259,40 @@ export default function Home() {
         const data = await res.json();
         const candidates = data.candidates || [];
         setFollowupCandidates(candidates);
-        setMailPreview(
-          `件名: ご無沙汰しております（${candidates[0]?.name ?? "顧客名"}様）\n\n${candidates[0]?.name ?? "顧客名"}様\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム`
-        );
+        
+        // 各候補の次のアクションに基づいてメールプレビューを生成
+        const generateMailContent = (candidate: any) => {
+          const { name, project, nextAction, lastAction } = candidate;
+          
+          let subject = "";
+          let body = "";
+          
+          switch (nextAction) {
+            case "価格見積もり送付":
+              subject = `${project} 価格見積もりについて`;
+              body = `${name}様\n\nお世話になっております。\n先日は${lastAction}にご参加いただき、ありがとうございました。\n\n${project}について、詳細な価格見積もりを準備いたしました。\n添付資料をご確認いただけますでしょうか。\n\nご不明な点やご質問がございましたら、お気軽にお声がけください。\n\nご検討をお待ちしております。\n\nSalesOnチーム`;
+              break;
+            case "追加資料提供":
+              subject = `${project} 追加資料のご提供`;
+              body = `${name}様\n\nお世話になっております。\n先日は${lastAction}をご検討いただき、ありがとうございました。\n\n${project}について、ご要望いただいた追加資料を準備いたしました。\n技術仕様書と導入スケジュールの詳細を添付いたします。\n\nご不明な点がございましたら、お気軽にお声がけください。\n\nSalesOnチーム`;
+              break;
+            case "決裁者へのアプローチ":
+              subject = `${project} 決裁者様へのご紹介`;
+              body = `${name}様\n\nお世話になっております。\n先日は${lastAction}にご協力いただき、ありがとうございました。\n\n${project}について、決裁者様へのご紹介をお願いできませんでしょうか。\n弊社の提案内容について、直接ご説明させていただきたいと思います。\n\nご都合の良い日時をご教示いただけますでしょうか。\n\nSalesOnチーム`;
+              break;
+            default:
+              subject = `ご無沙汰しております（${name}様）`;
+              body = `${name}様\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム`;
+          }
+          
+          return `件名: ${subject}\n\n${body}`;
+        };
+        
+        // 選択された候補のメールプレビューを生成
+        const selectedCandidates = candidates.filter((c: any) => c.selected);
+        const mailPreviews = selectedCandidates.map(generateMailContent);
+        setMailPreview(mailPreviews.join('\n\n---\n\n'));
+        
         setApprovalStep("search_results");
         // 質問を履歴に追加
         setMessages([{ content: command, type: 'question' }]);
@@ -292,6 +326,8 @@ export default function Home() {
     setEditableQuestion("");
     setMessages([]);
     setCommand("");
+    setEditingMailId(null);
+    setEditedMails({});
   };
 
   // フォローアップメール承認処理
@@ -309,31 +345,32 @@ export default function Home() {
   const taskColumns: ColumnDef<any, React.ReactNode>[] = [
     { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
     { accessorKey: "task", header: "タスク名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "daysLeft", header: "残日数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "status", header: "ステータス", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> },
-    { accessorKey: "project", header: "関連案件", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "auto", header: "AI/手動", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
   ];
   const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true));
   // Data Table用ダミーデータ
   const taskData = [
-    { task: "顧客Aへ見積送付", project: "A社案件", customerType: "新規", priority: "高", deadline: "2024/07/10", daysLeft: "3日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
-    { task: "商談Bの準備", project: "B社案件", customerType: "既存", priority: "中", deadline: "2024/07/12", daysLeft: "1日", status: "未着手", auto: "手動", approval: "" },
-    { task: "C社 提案書ドラフト作成", project: "C社新規案件", customerType: "新規", priority: "高", deadline: "2024/07/15", daysLeft: "2日", status: "進行中", auto: "AI自動", approval: "" },
-    { task: "D社 定例会議準備", project: "D社サポート案件", customerType: "既存", priority: "中", deadline: "2024/07/13", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
-    { task: "E社 契約書レビュー", project: "E社更新案件", customerType: "既存", priority: "高", deadline: "2024/07/09", daysLeft: "1日", status: "完了", auto: "AI自動", approval: "" },
-    { task: "F社 サポート対応", project: "F社サポート案件", customerType: "既存", priority: "低", deadline: "2024/07/20", daysLeft: "0日", status: "未着手", auto: "手動", approval: "" },
-    { task: "G社 進捗報告作成", project: "G社大型案件", customerType: "新規", priority: "高", deadline: "2024/07/11", daysLeft: "0日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
-    { task: "H社 顧客ヒアリング", project: "H社新規案件", customerType: "新規", priority: "中", deadline: "2024/07/18", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
-    { task: "I社 サービス説明資料作成", project: "I社新規案件", customerType: "新規", priority: "低", deadline: "2024/07/22", daysLeft: "0日", status: "未着手", auto: "AI自動", approval: "" },
-    { task: "J社 受注処理", project: "J社大型案件", customerType: "新規", priority: "高", deadline: "2024/07/14", daysLeft: "0日", status: "進行中", auto: "手動", approval: "承認待ち" },
+    { task: "顧客Aへ見積送付", project: "A社案件", customerType: "新規", priority: "高", assignee: "山田太郎", deadline: "2024/07/10", daysLeft: "3日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
+    { task: "商談Bの準備", project: "B社案件", customerType: "既存", priority: "中", assignee: "鈴木一郎", deadline: "2024/07/12", daysLeft: "1日", status: "未着手", auto: "手動", approval: "" },
+    { task: "C社 提案書ドラフト作成", project: "C社新規案件", customerType: "新規", priority: "高", assignee: "佐藤花子", deadline: "2024/07/15", daysLeft: "2日", status: "進行中", auto: "AI自動", approval: "" },
+    { task: "D社 定例会議準備", project: "D社サポート案件", customerType: "既存", priority: "中", assignee: "田中次郎", deadline: "2024/07/13", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
+    { task: "E社 契約書レビュー", project: "E社更新案件", customerType: "既存", priority: "高", assignee: "山田太郎", deadline: "2024/07/09", daysLeft: "1日", status: "完了", auto: "AI自動", approval: "" },
+    { task: "F社 サポート対応", project: "F社サポート案件", customerType: "既存", priority: "低", assignee: "鈴木一郎", deadline: "2024/07/20", daysLeft: "0日", status: "未着手", auto: "手動", approval: "" },
+    { task: "G社 進捗報告作成", project: "G社大型案件", customerType: "新規", priority: "高", assignee: "佐藤花子", deadline: "2024/07/11", daysLeft: "0日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
+    { task: "H社 顧客ヒアリング", project: "H社新規案件", customerType: "新規", priority: "中", assignee: "田中次郎", deadline: "2024/07/18", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
+    { task: "I社 サービス説明資料作成", project: "I社新規案件", customerType: "新規", priority: "低", assignee: "山田太郎", deadline: "2024/07/22", daysLeft: "0日", status: "未着手", auto: "AI自動", approval: "" },
+    { task: "J社 受注処理", project: "J社大型案件", customerType: "新規", priority: "高", assignee: "鈴木一郎", deadline: "2024/07/14", daysLeft: "0日", status: "進行中", auto: "手動", approval: "承認待ち" },
   ];
 
   // リスク案件用のカラム定義
   const riskColumns: ColumnDef<any, React.ReactNode>[] = [
     { accessorKey: "risk", header: "リスク", cell: info => <span className="text-red-600 font-normal">{info.getValue()}</span> },
     { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
     { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "customer", header: "顧客名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
@@ -351,11 +388,11 @@ export default function Home() {
 
   // リスク案件用のダミーデータ
   const riskData = [
-    { project: "新製品導入プロジェクト", customer: "株式会社みらいテック", customerType: "新規", deadline: "2024/07/10", priority: "高", progress: { percent: 80, color: "bg-blue-500" }, risk: "期限超過" },
-    { project: "システム更改案件", customer: "東都情報サービス株式会社", customerType: "既存", deadline: "2024/07/12", priority: "中", progress: { percent: 40, color: "bg-blue-400" }, risk: "進捗遅延" },
-    { project: "海外展開サポート", customer: "グローバル商事株式会社", customerType: "新規", deadline: "2024/07/15", priority: "高", progress: { percent: 20, color: "bg-blue-300" }, risk: "顧客要望未対応" },
-    { project: "契約更新交渉", customer: "日本エネルギー株式会社", customerType: "既存", deadline: "2024/07/18", priority: "中", progress: { percent: 60, color: "bg-blue-500" }, risk: "承認遅延" },
-    { project: "新規サービス提案", customer: "株式会社さくらネット", customerType: "新規", deadline: "2024/07/20", priority: "高", progress: { percent: 50, color: "bg-blue-400" }, risk: "顧客連絡途絶" },
+    { project: "新製品導入プロジェクト", customer: "株式会社みらいテック", customerType: "新規", deadline: "2024/07/10", priority: "高", progress: { percent: 80, color: "bg-blue-500" }, risk: "期限超過", assignee: "山田太郎" },
+    { project: "システム更改案件", customer: "東都情報サービス株式会社", customerType: "既存", deadline: "2024/07/12", priority: "中", progress: { percent: 40, color: "bg-blue-400" }, risk: "進捗遅延", assignee: "鈴木一郎" },
+    { project: "海外展開サポート", customer: "グローバル商事株式会社", customerType: "新規", deadline: "2024/07/15", priority: "高", progress: { percent: 20, color: "bg-blue-300" }, risk: "顧客要望未対応", assignee: "佐藤花子" },
+    { project: "契約更新交渉", customer: "日本エネルギー株式会社", customerType: "既存", deadline: "2024/07/18", priority: "中", progress: { percent: 60, color: "bg-blue-500" }, risk: "承認遅延", assignee: "田中次郎" },
+    { project: "新規サービス提案", customer: "株式会社さくらネット", customerType: "新規", deadline: "2024/07/20", priority: "高", progress: { percent: 50, color: "bg-blue-400" }, risk: "顧客連絡途絶", assignee: "山田太郎" },
   ];
 
   // AI提案用のカラム定義
@@ -405,7 +442,12 @@ export default function Home() {
     },
     { 
       accessorKey: "company",
-      header: "会社名",
+      header: "顧客名",
+      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
+    },
+    { 
+      accessorKey: "project",
+      header: "案件名",
       cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
     },
     { 
@@ -415,8 +457,13 @@ export default function Home() {
     },
     { 
       accessorKey: "status",
-      header: "ステータス",
-      cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span>
+      header: "案件ステータス",
+      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
+    },
+    { 
+      accessorKey: "lastAction",
+      header: "前回接触内容",
+      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
     },
     { 
       accessorKey: "priority",
@@ -472,15 +519,15 @@ export default function Home() {
     { accessorKey: "company", header: "企業名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
     { accessorKey: "competitor", header: "利用中の競合製品", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "contract", header: "契約更新時期", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "status", header: "ステータス", cell: info => <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded font-normal">{info.getValue()}</span> }
+    { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
   ];
   const [competitorColumnVisibility, setCompetitorColumnVisibility] = useState(competitorColumns.map(() => true));
 
   // 競合利用企業用のダミーデータ
   const competitorData = [
-    { company: "株式会社ABC", competitor: "競合製品X", contract: "2024/09", status: "アプローチ中" },
-    { company: "DEF工業", competitor: "競合製品Y", contract: "2024/12", status: "情報収集中" },
-    { company: "GHI商事", competitor: "競合製品Z", contract: "2024/10", status: "商談開始" }
+    { company: "株式会社ABC", competitor: "競合製品X", contract: "2024/12", status: "情報収集中" },
+    { company: "DEF工業", competitor: "競合製品Y", contract: "2024/10", status: "商談開始" },
+    { company: "GHI商事", competitor: "競合製品Z", contract: "2024/11", status: "検討中" }
   ];
 
   // スリップ案件用のカラム定義
@@ -529,23 +576,6 @@ export default function Home() {
             'bg-yellow-50 text-yellow-700'
           }`}>
             {value}
-          </span>
-        );
-      }
-    },
-    { 
-      accessorKey: "status",
-      header: "ステータス",
-      cell: info => {
-        const status = info.getValue() as '承認待ち' | '修正中' | '却下済み';
-        const statusStyles = {
-          '承認待ち': 'bg-blue-50 text-blue-700',
-          '修正中': 'bg-yellow-50 text-yellow-700',
-          '却下済み': 'bg-red-50 text-red-700'
-        } as const;
-        return (
-          <span className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium ${statusStyles[status]}`}>
-            {status}
           </span>
         );
       }
@@ -629,7 +659,7 @@ export default function Home() {
       timestamp: "2024/07/10 15:30",
       priority: "優先",
       status: "承認待ち",
-      deadline: "2024/07/11 15:30",
+      deadline: "2024/07/11",
       taskName: "フォローアップメール作成と送信",
       target: "株式会社ABC",
       details: [
@@ -643,7 +673,7 @@ export default function Home() {
       timestamp: "2024/07/10 14:45",
       priority: "通常",
       status: "修正中",
-      deadline: "2024/07/11 14:45",
+      deadline: "2024/07/11",
       taskName: "商談議事録作成と共有",
       target: "DEF工業",
       details: [
@@ -658,7 +688,7 @@ export default function Home() {
       timestamp: "2024/07/10 13:20",
       priority: "優先",
       status: "承認待ち",
-      deadline: "2024/07/11 13:20",
+      deadline: "2024/07/11",
       taskName: "提案書v2の作成と価格見直し",
       target: "GHI商事",
       details: [
@@ -673,7 +703,7 @@ export default function Home() {
       timestamp: "2024/07/10 11:15",
       priority: "優先",
       status: "却下済み",
-      deadline: "2024/07/11 11:15",
+      deadline: "2024/07/11",
       taskName: "失注リスク対応策の立案",
       target: "JKL株式会社",
       details: [
@@ -688,7 +718,7 @@ export default function Home() {
       timestamp: "2024/07/10 10:30",
       priority: "通常",
       status: "承認待ち",
-      deadline: "2024/07/11 10:30",
+      deadline: "2024/07/11",
       taskName: "契約更新提案書の作成",
       target: "MNO産業",
       details: [
@@ -721,13 +751,13 @@ export default function Home() {
                   <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
                     <Textarea
-                        placeholder="Selaに質問してみましょう"
+                        placeholder="Selaへの依頼を入力してください"
                       value={command}
                         onChange={e => {
                           setCommand(e.target.value);
                           validateCommand(e.target.value);
                         }}
-                      className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
+                      className="command-textarea flex-1 resize-none h-[60px] min-h-[60px] bg-gray-50 border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
                       rows={1}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     />
@@ -758,12 +788,21 @@ export default function Home() {
                 <Tabs defaultValue="tasks" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
                   <div className="flex items-center justify-between mb-2 gap-4">
                     <TabsList className="bg-gray-100 text-base flex-shrink-0">
-                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base">今日のタスク</TabsTrigger>
-                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base">失注リスク</TabsTrigger>
+                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                        優先タスク
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{taskData.filter(task => task.priority === '高').length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                        リスク案件
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{riskData.filter(risk => risk.priority === '高').length}</span>
+                      </TabsTrigger>
                       <TabsTrigger value="members" className="text-gray-700 font-normal text-base">メンバー実績</TabsTrigger>
                       <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
                       <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
-                      <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base">AI承認待ち</TabsTrigger>
+                      <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                        AI承認待ち
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiApprovalData.filter(item => item.status === '承認待ち' && item.priority === '優先').length}</span>
+                      </TabsTrigger>
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -834,18 +873,9 @@ export default function Home() {
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
                               </DropdownMenuCheckboxItem>
                             ))
-                          ) : currentTab === 'ai-history' ? (
-                            aiApprovalColumns.map((col, idx) => (
-                              <DropdownMenuCheckboxItem
-                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
-                                checked={aiApprovalColumnVisibility[idx]}
-                                onCheckedChange={checked => {
-                                  setAiApprovalColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
-                                }}
-                              >
-                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
-                              </DropdownMenuCheckboxItem>
-                            ))
+                          ) : currentTab === 'ai' ? (
+                            // aiApprovalColumnsのカラム選択ロジックも削除
+                            null
                           ) : (
                             taskColumns.map((col, idx) => (
                               <DropdownMenuCheckboxItem
@@ -879,6 +909,16 @@ export default function Home() {
                       />
                     </div>
                   </TabsContent>
+                  {/* <TabsContent value="ai">
+                    <div className="overflow-x-auto">
+                      <DataTable 
+                        columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} 
+                        data={aiData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
+                    </div>
+                  </TabsContent> */}
                   <TabsContent value="members">
                     <div className="overflow-x-auto">
                       <DataTable columns={memberColumns.filter((_, i) => memberColumnVisibility[i])} data={memberData}
@@ -905,9 +945,7 @@ export default function Home() {
                   </TabsContent>
                   <TabsContent value="ai-history">
                     <div className="overflow-x-auto">
-                      <DataTable 
-                        columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} 
-                        data={aiApprovalData}
+                      <DataTable columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} data={aiApprovalData.filter(item => item.status === '承認待ち')}
                         searchSlot={null}
                         columnSelectorSlot={null}
                       />
@@ -942,7 +980,7 @@ export default function Home() {
               {followupCandidates && (
                 <>
                   <SearchResultTemplate
-                    title="フォローアップ候補"
+                    title="フォローアップ候補を抽出しました"
                     description={`以下の${followupCandidates.length}件の案件が抽出されました。フォローアップメールの送信対象を選択してください。`}
                     dataComponent={
                       <DataTable
@@ -954,7 +992,7 @@ export default function Home() {
                         setRowSelection={setRowSelection}
                       />
                     }
-                    nextActionText="選択された案件でメールプレビューを表示しますか？"
+                    nextActionText="選択した案件について、メール内容を確認しますか？"
                   />
 
                   {/* コマンド入力欄 */}
@@ -963,13 +1001,13 @@ export default function Home() {
                       <div className="flex flex-col gap-2 w-full">
                         <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3 w-full">
                           <Textarea
-                            placeholder="Selaに質問してみましょう"
+                            placeholder="Selaへの依頼を入力してください"
                             value={command}
                             onChange={e => {
                               setCommand(e.target.value);
                               validateCommand(e.target.value);
                             }}
-                            className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base w-full"
+                            className="command-textarea flex-1 resize-none h-[60px] min-h-[60px] bg-gray-50 border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base w-full"
                             rows={1}
                             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                           />
@@ -1003,25 +1041,99 @@ export default function Home() {
                         </Button>
                       )}
                     </div>
-                    {followupCandidates.filter((_, idx) => rowSelection[idx]).map((candidate, idx) => (
-                      <div key={candidate.id} className="relative bg-white border border-gray-100 rounded-xl shadow p-6">
-                        <div className="absolute top-4 right-4">
-                          <Checkbox
-                            checked={rowSelection[idx] ?? false}
-                            onCheckedChange={(checked: boolean | 'indeterminate') => {
-                              setRowSelection((prev) => ({ ...prev, [idx]: checked === true }));
-                            }}
-                            aria-label="送信対象に含める"
-                          />
+                    {followupCandidates.filter((_, idx) => rowSelection[idx]).map((candidate, idx) => {
+                      // 各候補の次のアクションに基づいてメールプレビューを生成
+                      const generateMailContent = (candidate: any) => {
+                        const { name, project, nextAction, lastAction } = candidate;
+                        
+                        let subject = "";
+                        let body = "";
+                        
+                        switch (nextAction) {
+                          case "価格見積もり送付":
+                            subject = `${project} 価格見積もりについて`;
+                            body = `${name}様\n\nお世話になっております。\n先日は${lastAction}にご参加いただき、ありがとうございました。\n\n${project}について、詳細な価格見積もりを準備いたしました。\n添付資料をご確認いただけますでしょうか。\n\nご不明な点やご質問がございましたら、お気軽にお声がけください。\n\nご検討をお待ちしております。\n\nSalesOnチーム`;
+                            break;
+                          case "追加資料提供":
+                            subject = `${project} 追加資料のご提供`;
+                            body = `${name}様\n\nお世話になっております。\n先日は${lastAction}をご検討いただき、ありがとうございました。\n\n${project}について、ご要望いただいた追加資料を準備いたしました。\n技術仕様書と導入スケジュールの詳細を添付いたします。\n\nご不明な点がございましたら、お気軽にお声がけください。\n\nSalesOnチーム`;
+                            break;
+                          case "決裁者へのアプローチ":
+                            subject = `${project} 決裁者様へのご紹介`;
+                            body = `${name}様\n\nお世話になっております。\n先日は${lastAction}にご協力いただき、ありがとうございました。\n\n${project}について、決裁者様へのご紹介をお願いできませんでしょうか。\n弊社の提案内容について、直接ご説明させていただきたいと思います。\n\nご都合の良い日時をご教示いただけますでしょうか。\n\nSalesOnチーム`;
+                            break;
+                          default:
+                            subject = `ご無沙汰しております（${name}様）`;
+                            body = `${name}様\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム`;
+                        }
+                        
+                        return { subject, body };
+                      };
+                      
+                      const mailContent = generateMailContent(candidate);
+                      
+                      return (
+                        <div key={candidate.id} className="relative bg-white border border-gray-100 rounded-xl shadow p-6">
+                          <div className="absolute top-4 left-4">
+                            <Checkbox
+                              checked={rowSelection[idx] ?? false}
+                              onCheckedChange={(checked: boolean | 'indeterminate') => {
+                                setRowSelection((prev) => ({ ...prev, [idx]: checked === true }));
+                              }}
+                              aria-label="送信対象に含める"
+                              className="w-5 h-5"
+                            />
+                          </div>
+                          <div className="absolute top-4 right-4">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingMailId(editingMailId === candidate.id ? null : candidate.id)}
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              {editingMailId === candidate.id ? '完了' : '編集'}
+                            </Button>
+                          </div>
+                          <div className="text-base text-gray-700 mb-2 font-semibold pl-8 pr-16">
+                            {editingMailId === candidate.id ? (
+                              <input
+                                type="text"
+                                value={editedMails[candidate.id]?.subject ?? mailContent.subject}
+                                onChange={(e) => setEditedMails(prev => ({
+                                  ...prev,
+                                  [candidate.id]: {
+                                    ...prev[candidate.id],
+                                    subject: e.target.value
+                                  }
+                                }))}
+                                className="w-full border border-gray-300 rounded px-2 py-1 text-base"
+                                placeholder="件名を入力"
+                              />
+                            ) : (
+                              `件名：${editedMails[candidate.id]?.subject ?? mailContent.subject}`
+                            )}
+                          </div>
+                          <div className="text-base text-gray-700 whitespace-pre-line font-mono pl-8 pr-16">
+                            {editingMailId === candidate.id ? (
+                              <textarea
+                                value={editedMails[candidate.id]?.body ?? mailContent.body}
+                                onChange={(e) => setEditedMails(prev => ({
+                                  ...prev,
+                                  [candidate.id]: {
+                                    ...prev[candidate.id],
+                                    body: e.target.value
+                                  }
+                                }))}
+                                className="w-full border border-gray-300 rounded px-2 py-1 text-base font-mono min-h-[200px] resize-y"
+                                placeholder="本文を入力"
+                              />
+                            ) : (
+                              editedMails[candidate.id]?.body ?? mailContent.body
+                            )}
+                          </div>
                         </div>
-                        <div className="text-base text-gray-700 mb-2 font-semibold">
-                          件名：ご無沙汰しております（{candidate.name}様）
-                        </div>
-                        <div className="text-base text-gray-700 whitespace-pre-line font-mono">
-                          {candidate.name}\n\nお世話になっております。\n前回ご提案後、ご不明点や追加のご要望などございませんでしょうか？\nご返信をお待ちしております。\n\nSalesOnチーム
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div className="mt-4 text-gray-600 text-base">
                       選択された{selectedRecipients.length}件の候補案件に対してメールを作成しました。この内容で送信しますか？
                     </div>
