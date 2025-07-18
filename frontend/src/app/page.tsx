@@ -608,6 +608,16 @@ export default function Home() {
       header: "タスク名",
       cell: info => <span className="font-medium text-gray-900">{info.getValue()}</span>
     },
+    {
+      accessorKey: "assignee",
+      header: "担当者",
+      cell: info => <span className="text-gray-700">{info.getValue()}</span>
+    },
+    {
+      accessorKey: "target",
+      header: "案件名",
+      cell: info => <span className="text-gray-700">{info.getValue()}</span>
+    },
     { 
       accessorKey: "details", 
       header: "実行詳細",
@@ -621,48 +631,6 @@ export default function Home() {
           </ul>
         );
       }
-    },
-    {
-      accessorKey: "assignee",
-      header: "担当者",
-      cell: info => <span className="text-gray-700">{info.getValue()}</span>
-    },
-    {
-      accessorKey: "target",
-      header: "対象企業",
-      cell: info => <span className="text-gray-700">{info.getValue()}</span>
-    },
-    { 
-      id: "actions",
-      header: () => <div className="text-right">操作</div>,
-      cell: info => (
-        <div className="flex justify-end gap-1.5">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 px-3 bg-white hover:bg-green-50 text-green-700 border-green-200 hover:border-green-300"
-            onClick={() => handleAiTaskApprove(info.row.original)}
-          >
-            承認
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 px-3 bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300"
-            onClick={() => handleAiTaskEdit(info.row.original)}
-          >
-            修正
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 px-3 bg-white hover:bg-red-50 text-red-700 border-red-200 hover:border-red-300"
-            onClick={() => handleAiTaskReject(info.row.original)}
-          >
-            却下
-          </Button>
-        </div>
-      )
     }
   ];
 

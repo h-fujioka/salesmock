@@ -861,11 +861,6 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     </ul>
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>担当者: {selectedAIItem.assignee}</span>
-                    <span>対象企業: {selectedAIItem.targetCompany}</span>
-                  </div>
-                  
                   <div className="flex space-x-2 pt-4 border-t border-gray-200">
                     <Button 
                       size="sm" 
