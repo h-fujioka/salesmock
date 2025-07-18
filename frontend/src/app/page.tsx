@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
 import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User } from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 
 // 検索結果テンプレートコンポーネント
@@ -344,7 +345,19 @@ export default function Home() {
   // タスク一覧用のカラム定義
   const taskColumns: ColumnDef<any, React.ReactNode>[] = [
     { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
-    { accessorKey: "task", header: "タスク名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { 
+      accessorKey: "task", 
+      header: "タスク名", 
+      cell: info => (
+        <Link 
+          href={`/tasks/${info.row.original.taskId}`}
+          className="text-gray-600 hover:text-gray-900 hover:underline cursor-pointer transition-colors"
+          style={{ textDecoration: "none" }}
+        >
+          {info.getValue()}
+        </Link>
+      )
+    },
     { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "daysLeft", header: "残日数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
@@ -354,16 +367,16 @@ export default function Home() {
   const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true));
   // Data Table用ダミーデータ
   const taskData = [
-    { task: "顧客Aへ見積送付", project: "A社案件", customerType: "新規", priority: "高", assignee: "山田太郎", deadline: "2024/07/10", daysLeft: "3日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
-    { task: "商談Bの準備", project: "B社案件", customerType: "既存", priority: "中", assignee: "鈴木一郎", deadline: "2024/07/12", daysLeft: "1日", status: "未着手", auto: "手動", approval: "" },
-    { task: "C社 提案書ドラフト作成", project: "C社新規案件", customerType: "新規", priority: "高", assignee: "佐藤花子", deadline: "2024/07/15", daysLeft: "2日", status: "進行中", auto: "AI自動", approval: "" },
-    { task: "D社 定例会議準備", project: "D社サポート案件", customerType: "既存", priority: "中", assignee: "田中次郎", deadline: "2024/07/13", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
-    { task: "E社 契約書レビュー", project: "E社更新案件", customerType: "既存", priority: "高", assignee: "山田太郎", deadline: "2024/07/09", daysLeft: "1日", status: "完了", auto: "AI自動", approval: "" },
-    { task: "F社 サポート対応", project: "F社サポート案件", customerType: "既存", priority: "低", assignee: "鈴木一郎", deadline: "2024/07/20", daysLeft: "0日", status: "未着手", auto: "手動", approval: "" },
-    { task: "G社 進捗報告作成", project: "G社大型案件", customerType: "新規", priority: "高", assignee: "佐藤花子", deadline: "2024/07/11", daysLeft: "0日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
-    { task: "H社 顧客ヒアリング", project: "H社新規案件", customerType: "新規", priority: "中", assignee: "田中次郎", deadline: "2024/07/18", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
-    { task: "I社 サービス説明資料作成", project: "I社新規案件", customerType: "新規", priority: "低", assignee: "山田太郎", deadline: "2024/07/22", daysLeft: "0日", status: "未着手", auto: "AI自動", approval: "" },
-    { task: "J社 受注処理", project: "J社大型案件", customerType: "新規", priority: "高", assignee: "鈴木一郎", deadline: "2024/07/14", daysLeft: "0日", status: "進行中", auto: "手動", approval: "承認待ち" },
+    { taskId: "task-001", task: "顧客Aへ見積送付", project: "A社案件", customerType: "新規", priority: "高", assignee: "山田太郎", deadline: "2024/07/10", daysLeft: "3日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
+    { taskId: "task-002", task: "商談Bの準備", project: "B社案件", customerType: "既存", priority: "中", assignee: "鈴木一郎", deadline: "2024/07/12", daysLeft: "1日", status: "未着手", auto: "手動", approval: "" },
+    { taskId: "task-003", task: "C社 提案書ドラフト作成", project: "C社新規案件", customerType: "新規", priority: "高", assignee: "佐藤花子", deadline: "2024/07/15", daysLeft: "2日", status: "進行中", auto: "AI自動", approval: "" },
+    { taskId: "task-004", task: "D社 定例会議準備", project: "D社サポート案件", customerType: "既存", priority: "中", assignee: "田中次郎", deadline: "2024/07/13", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
+    { taskId: "task-005", task: "E社 契約書レビュー", project: "E社更新案件", customerType: "既存", priority: "高", assignee: "山田太郎", deadline: "2024/07/09", daysLeft: "1日", status: "完了", auto: "AI自動", approval: "" },
+    { taskId: "task-006", task: "F社 サポート対応", project: "F社サポート案件", customerType: "既存", priority: "低", assignee: "鈴木一郎", deadline: "2024/07/20", daysLeft: "0日", status: "未着手", auto: "手動", approval: "" },
+    { taskId: "task-007", task: "G社 進捗報告作成", project: "G社大型案件", customerType: "新規", priority: "高", assignee: "佐藤花子", deadline: "2024/07/11", daysLeft: "0日", status: "進行中", auto: "AI自動", approval: "承認待ち" },
+    { taskId: "task-008", task: "H社 顧客ヒアリング", project: "H社新規案件", customerType: "新規", priority: "中", assignee: "田中次郎", deadline: "2024/07/18", daysLeft: "0日", status: "進行中", auto: "手動", approval: "" },
+    { taskId: "task-009", task: "I社 サービス説明資料作成", project: "I社新規案件", customerType: "新規", priority: "低", assignee: "山田太郎", deadline: "2024/07/22", daysLeft: "0日", status: "未着手", auto: "AI自動", approval: "" },
+    { taskId: "task-010", task: "J社 受注処理", project: "J社大型案件", customerType: "新規", priority: "高", assignee: "鈴木一郎", deadline: "2024/07/14", daysLeft: "0日", status: "進行中", auto: "手動", approval: "承認待ち" },
   ];
 
   // リスク案件用のカラム定義
@@ -635,7 +648,7 @@ export default function Home() {
           <Button
             size="sm"
             variant="outline"
-            className="h-8 px-3 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
+            className="h-8 px-3 bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300"
             onClick={() => handleAiTaskEdit(info.row.original)}
           >
             修正
@@ -1180,7 +1193,7 @@ export default function Home() {
               {suggestions.length > 0 && (
                 <div className="w-full max-w-[1000px] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {suggestions.map((suggestion, i) => (
-                    <a
+                    <Link
                       key={i}
                       href={suggestion.url}
                       className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow hover:shadow-md transition-shadow"
@@ -1190,7 +1203,7 @@ export default function Home() {
                       {suggestion.icon === "send" && <Send className="w-5 h-5 text-gray-500" />}
                       {suggestion.icon === "pen" && <PenLine className="w-5 h-5 text-gray-500" />}
                       <span className="text-sm text-gray-700">{suggestion.title}</span>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}
