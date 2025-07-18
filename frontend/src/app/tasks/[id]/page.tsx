@@ -17,6 +17,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
     {
       taskId: "task-001",
       task: "顧客Aへ見積送付",
+      caseName: "見積書について",
       project: "リーガル社新規銃中案件",
       customerType: "新規",
       priority: "高",
@@ -37,6 +38,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
     {
       taskId: "task-002",
       task: "商談Bの準備",
+      caseName: "次回商談の件",
       project: "B社案件",
       customerType: "既存",
       priority: "中",
