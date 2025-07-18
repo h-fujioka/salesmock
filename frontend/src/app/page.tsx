@@ -139,6 +139,9 @@ export default function Home() {
   const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({ 0: true, 1: true });
   // アラートメッセージ用のstate追加
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  // メール編集機能用の状態追加
+  const [editingMailId, setEditingMailId] = useState<string | null>(null);
+  const [editedMails, setEditedMails] = useState<{[key: string]: {subject: string, body: string}}>({});
 
   // コマンドの検証関数
   const validateCommand = (input: string): boolean => {
@@ -323,6 +326,8 @@ export default function Home() {
     setEditableQuestion("");
     setMessages([]);
     setCommand("");
+    setEditingMailId(null);
+    setEditedMails({});
   };
 
   // フォローアップメール承認処理
@@ -1079,11 +1084,52 @@ export default function Home() {
                               className="w-5 h-5"
                             />
                           </div>
-                          <div className="text-base text-gray-700 mb-2 font-semibold pl-8">
-                            件名：{mailContent.subject}
+                          <div className="absolute top-4 right-4">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingMailId(editingMailId === candidate.id ? null : candidate.id)}
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              {editingMailId === candidate.id ? '完了' : '編集'}
+                            </Button>
                           </div>
-                          <div className="text-base text-gray-700 whitespace-pre-line font-mono pl-8">
-                            {mailContent.body}
+                          <div className="text-base text-gray-700 mb-2 font-semibold pl-8 pr-16">
+                            {editingMailId === candidate.id ? (
+                              <input
+                                type="text"
+                                value={editedMails[candidate.id]?.subject ?? mailContent.subject}
+                                onChange={(e) => setEditedMails(prev => ({
+                                  ...prev,
+                                  [candidate.id]: {
+                                    ...prev[candidate.id],
+                                    subject: e.target.value
+                                  }
+                                }))}
+                                className="w-full border border-gray-300 rounded px-2 py-1 text-base"
+                                placeholder="件名を入力"
+                              />
+                            ) : (
+                              `件名：${editedMails[candidate.id]?.subject ?? mailContent.subject}`
+                            )}
+                          </div>
+                          <div className="text-base text-gray-700 whitespace-pre-line font-mono pl-8 pr-16">
+                            {editingMailId === candidate.id ? (
+                              <textarea
+                                value={editedMails[candidate.id]?.body ?? mailContent.body}
+                                onChange={(e) => setEditedMails(prev => ({
+                                  ...prev,
+                                  [candidate.id]: {
+                                    ...prev[candidate.id],
+                                    body: e.target.value
+                                  }
+                                }))}
+                                className="w-full border border-gray-300 rounded px-2 py-1 text-base font-mono min-h-[200px] resize-y"
+                                placeholder="本文を入力"
+                              />
+                            ) : (
+                              editedMails[candidate.id]?.body ?? mailContent.body
+                            )}
                           </div>
                         </div>
                       );
