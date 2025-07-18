@@ -155,6 +155,15 @@ export default function HomeV2() {
       )
     },
     { 
+      accessorKey: "assignee", 
+      header: () => <div className="text-sm font-medium text-gray-600">担当者</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
       accessorKey: "deadline", 
       header: () => <div className="text-sm font-medium text-gray-600">期限</div>,
       cell: info => (
@@ -203,6 +212,7 @@ export default function HomeV2() {
   // リスクテーブル用のカラム定義
   const riskColumns: ColumnDef<any, React.ReactNode>[] = [
     { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "customer", header: "顧客名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "customerType", header: "顧客区分", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
@@ -345,6 +355,7 @@ export default function HomeV2() {
     {
       priority: "高",
       taskName: "顧客Aへ見積送付",
+      assignee: "山田太郎",
       deadline: "2024/07/10",
       daysLeft: "3日",
       status: "進行中",
@@ -354,6 +365,7 @@ export default function HomeV2() {
     {
       priority: "中",
       taskName: "商談Bの準備",
+      assignee: "鈴木一郎",
       deadline: "2024/07/12",
       daysLeft: "1日",
       status: "未着手",
@@ -363,6 +375,7 @@ export default function HomeV2() {
     {
       priority: "高",
       taskName: "C社 提案書ドラフト作成",
+      assignee: "佐藤花子",
       deadline: "2024/07/15",
       daysLeft: "2日",
       status: "進行中",
@@ -372,6 +385,7 @@ export default function HomeV2() {
     {
       priority: "中",
       taskName: "D社 定例会議準備",
+      assignee: "田中次郎",
       deadline: "2024/07/13",
       daysLeft: "0日",
       status: "進行中",
@@ -381,6 +395,7 @@ export default function HomeV2() {
     {
       priority: "高",
       taskName: "E社 契約書レビュー",
+      assignee: "山田太郎",
       deadline: "2024/07/09",
       daysLeft: "1日",
       status: "完了",
@@ -390,6 +405,7 @@ export default function HomeV2() {
     {
       priority: "低",
       taskName: "F社 サポート対応",
+      assignee: "鈴木一郎",
       deadline: "2024/07/20",
       daysLeft: "0日",
       status: "未着手",
@@ -399,9 +415,9 @@ export default function HomeV2() {
   ];
 
   const riskData = [
-    { project: "新製品導入プロジェクト", customer: "株式会社みらいテック", customerType: "新規", deadline: "2024/07/10", priority: "高", progress: { percent: 80, color: "bg-blue-500" }, risk: "期限超過" },
-    { project: "システム更改案件", customer: "東都情報サービス株式会社", customerType: "既存", deadline: "2024/07/12", priority: "中", progress: { percent: 40, color: "bg-blue-400" }, risk: "進捗遅延" },
-    { project: "海外展開サポート", customer: "グローバル商事株式会社", customerType: "新規", deadline: "2024/07/15", priority: "高", progress: { percent: 20, color: "bg-blue-300" }, risk: "顧客要望未対応" }
+    { project: "新製品導入プロジェクト", customer: "株式会社みらいテック", customerType: "新規", deadline: "2024/07/10", priority: "高", progress: { percent: 80, color: "bg-blue-500" }, risk: "期限超過", assignee: "山田太郎" },
+    { project: "システム更改案件", customer: "東都情報サービス株式会社", customerType: "既存", deadline: "2024/07/12", priority: "中", progress: { percent: 40, color: "bg-blue-400" }, risk: "進捗遅延", assignee: "鈴木一郎" },
+    { project: "海外展開サポート", customer: "グローバル商事株式会社", customerType: "新規", deadline: "2024/07/15", priority: "高", progress: { percent: 20, color: "bg-blue-300" }, risk: "顧客要望未対応", assignee: "佐藤花子" }
   ];
 
   const memberData = [
