@@ -2,14 +2,13 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/ui/data-table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Search, Send, User, Plus } from "lucide-react";
+import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User } from "lucide-react";
 import React, { useState } from "react";
 
 // 型定義
@@ -127,7 +126,7 @@ export default function HomeV2() {
   const [editableQuestion, setEditableQuestion] = useState("");
   const [currentTab, setCurrentTab] = useState('tasks');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [taskColumnVisibility, setTaskColumnVisibility] = useState([true, true, true, true, true, true, true]);
+  const [taskColumnVisibility, setTaskColumnVisibility] = useState([true, true, true, true, true, true, true, true]);
 
   // タスクテーブル用のカラム定義
   const taskColumns: ColumnDef<any, React.ReactNode>[] = [
@@ -174,15 +173,6 @@ export default function HomeV2() {
       )
     },
     { 
-      accessorKey: "status", 
-      header: () => <div className="text-sm font-medium text-gray-600">ステータス</div>,
-      cell: info => (
-        <div className="px-4 py-3 text-sm border-t border-gray-100">
-          <span className="text-gray-700 font-normal">{info.getValue()}</span>
-        </div>
-      )
-    },
-    { 
       accessorKey: "project", 
       header: () => <div className="text-sm font-medium text-gray-600">関連案件</div>,
       cell: info => (
@@ -194,6 +184,15 @@ export default function HomeV2() {
     { 
       accessorKey: "automation", 
       header: () => <div className="text-sm font-medium text-gray-600">AI/手動</div>,
+      cell: info => (
+        <div className="px-4 py-3 text-sm border-t border-gray-100">
+          <span className="text-gray-700 font-normal">{info.getValue()}</span>
+        </div>
+      )
+    },
+    { 
+      accessorKey: "status", 
+      header: () => <div className="text-sm font-medium text-gray-600">ステータス</div>,
       cell: info => (
         <div className="px-4 py-3 text-sm border-t border-gray-100">
           <span className="text-gray-700 font-normal">{info.getValue()}</span>
@@ -236,7 +235,7 @@ export default function HomeV2() {
     { accessorKey: "competitor", header: "競合製品", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "industry", header: "業種", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "scale", header: "規模", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-    { accessorKey: "status", header: "状態", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
+    { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
   ];
   const [competitorColumnVisibility, setCompetitorColumnVisibility] = useState(competitorColumns.map(() => true));
 
@@ -263,23 +262,6 @@ export default function HomeV2() {
             'bg-yellow-50 text-yellow-700'
           }`}>
             {value}
-          </span>
-        );
-      }
-    },
-    { 
-      accessorKey: "status",
-      header: "ステータス",
-      cell: info => {
-        const status = info.getValue() as '承認待ち' | '修正中' | '却下済み';
-        const statusStyles = {
-          '承認待ち': 'bg-blue-50 text-blue-700',
-          '修正中': 'bg-yellow-50 text-yellow-700',
-          '却下済み': 'bg-red-50 text-red-700'
-        } as const;
-        return (
-          <span className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium ${statusStyles[status]}`}>
-            {status}
           </span>
         );
       }
@@ -446,7 +428,7 @@ export default function HomeV2() {
       timestamp: "2024/07/10 15:30",
       priority: "優先",
       status: "承認待ち",
-      deadline: "2024/07/11 15:30",
+      deadline: "2024/07/11",
       taskName: "フォローアップメール作成と送信",
       target: "株式会社ABC",
       details: [
@@ -460,7 +442,7 @@ export default function HomeV2() {
       timestamp: "2024/07/10 14:45",
       priority: "通常",
       status: "修正中",
-      deadline: "2024/07/11 14:45",
+      deadline: "2024/07/11",
       taskName: "商談議事録作成と共有",
       target: "DEF工業",
       details: [
@@ -726,12 +708,21 @@ export default function HomeV2() {
                 <Tabs defaultValue="tasks" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
                   <div className="flex items-center justify-between mb-2 gap-4">
                     <TabsList className="bg-gray-100 text-base flex-shrink-0">
-                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base">今日のタスク</TabsTrigger>
-                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base">失注リスク</TabsTrigger>
+                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                        優先タスク
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{taskData.filter(task => task.priority === '高').length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                        リスク案件
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{riskData.filter(risk => risk.priority === '高').length}</span>
+                      </TabsTrigger>
                       <TabsTrigger value="members" className="text-gray-700 font-normal text-base">メンバー実績</TabsTrigger>
                       <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
                       <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
-                      <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base">AI承認待ち</TabsTrigger>
+                      <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                        AI承認待ち
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiApprovalData.filter(item => item.status === '承認待ち' && item.priority === '優先').length}</span>
+                      </TabsTrigger>
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -844,7 +835,7 @@ export default function HomeV2() {
                       <div className="border-separate border-spacing-0 min-w-full">
                         <DataTable 
                           columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} 
-                          data={aiApprovalData}
+                          data={aiApprovalData.filter(item => item.status === '承認待ち')}
                           searchSlot={null}
                           columnSelectorSlot={null}
                         />
@@ -860,13 +851,13 @@ export default function HomeV2() {
                   <div className="flex flex-col gap-2 w-full">
                     <div className="flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3 w-full">
                       <Textarea
-                        placeholder="Selaに質問してみましょう"
+                        placeholder="Selaへの依頼を入力してください"
                         value={command}
                         onChange={e => {
                           setCommand(e.target.value);
                           validateCommand(e.target.value);
                         }}
-                        className="command-textarea flex-1 resize-none h-12 min-h-[48px] bg-transparent border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base w-full"
+                        className="command-textarea flex-1 resize-none h-[60px] min-h-[60px] bg-gray-50 border-none outline-none p-0 focus:ring-0 focus:outline-none focus:border-transparent focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base w-full"
                         rows={1}
                         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                       />
