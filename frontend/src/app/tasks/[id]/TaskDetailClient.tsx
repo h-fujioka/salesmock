@@ -65,9 +65,6 @@ function Header() {
 export default function TaskDetailClient({ task }: { task: Task }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [command, setCommand] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState(task);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
 
   // タイムラインエントリを自動追加する関数
@@ -113,24 +110,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
 これらの提案を実行しますか？`;
 
-    setAiResponse(aiResponse);
     setMessages(prev => [...prev, { content: aiResponse, type: 'answer' }]);
     setCommand("");
-  };
-
-  // タスク編集
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  // タスク保存
-  const handleSave = () => {
-    setIsEditing(false);
-    addTimelineEntry(
-      "タスク情報更新",
-      { task: editedTask?.task || task.task },
-      'human'
-    );
   };
 
   // Sela提案の実行
@@ -309,8 +290,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
               {/* Sela提案 */}
               <div className="mb-6">
                 <div className="space-y-3">
-                  {task.aiSuggestions.map((suggestion, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  {task.aiSuggestions.map((suggestion) => (
+                    <div key={suggestion} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-700">{suggestion}</span>
                       <Button 
                         size="sm" 
