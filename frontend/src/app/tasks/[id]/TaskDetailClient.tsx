@@ -26,6 +26,13 @@ type Message = {
   type: 'question' | 'answer' | 'system';
 };
 
+type Comment = {
+  id: string;
+  content: string;
+  timestamp: Date;
+  author: string;
+};
+
 // タスクの型定義
 type Task = {
   taskId: string;
@@ -43,6 +50,17 @@ type Task = {
   description: string;
   progress: number;
   aiSuggestions: string[];
+};
+
+// AI対応項目の型定義
+type AIActionItem = {
+  id: string;
+  title: string;
+  timestamp: Date;
+  details: string[];
+  assignee: string;
+  targetCompany: string;
+  status: 'pending' | 'approved' | 'rejected' | 'modified';
 };
 
 // ヘッダーコンポーネント
@@ -68,7 +86,27 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [command, setCommand] = useState("");
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
-  const [activeTab, setActiveTab] = useState<'timeline' | 'communication'>('timeline');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'communication' | 'ai-status'>('timeline');
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [aiActionItems, setAiActionItems] = useState<AIActionItem[]>([]);
+  const [selectedAIItem, setSelectedAIItem] = useState<AIActionItem | null>(null);
+  const [showAIModal, setShowAIModal] = useState(false);
+
+  // コメント追加ハンドラー
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    
+    const newComment: Comment = {
+      id: `comment-${Date.now()}`,
+      content: commentText,
+      timestamp: new Date(),
+      author: "山田太郎"
+    };
+    
+    setComments(prev => [newComment, ...prev]);
+    setCommentText("");
+  };
 
   // タイムラインエントリを自動追加する関数
   const addTimelineEntry = (action: string, details: Record<string, unknown>, type: 'ai' | 'human' | 'system', status?: 'pending' | 'approved' | 'rejected', reason?: string) => {
@@ -186,6 +224,73 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     setTimeline(initialTimeline);
   }, []);
 
+  // AI対応項目の初期データ
+  useEffect(() => {
+    const initialAIActions: AIActionItem[] = [
+      {
+        id: "ai-1",
+        title: "フォローアップメール作成と送信",
+        timestamp: new Date('2024-07-10T15:30:00'),
+        details: [
+          "前回提案から2週間経過",
+          "製品導入に関する追加提案",
+          "デモ環境の準備完了報告"
+        ],
+        assignee: "山田太郎",
+        targetCompany: "株式会社ABC",
+        status: 'pending'
+      },
+      {
+        id: "ai-2",
+        title: "提案書v2の作成と価格見直し",
+        timestamp: new Date('2024-07-10T13:20:00'),
+        details: [
+          "提案書v2の作成完了",
+          "価格の見直し",
+          "導入スケジュールの調整",
+          "付帯サービスの追加"
+        ],
+        assignee: "佐藤花子",
+        targetCompany: "GHI商事",
+        status: 'pending'
+      }
+    ];
+    setAiActionItems(initialAIActions);
+  }, []);
+
+  // AI対応項目の承認
+  const handleApproveAI = (itemId: string) => {
+    setAiActionItems(prev => prev.map(item => 
+      item.id === itemId ? { ...item, status: 'approved' as const } : item
+    ));
+    setShowAIModal(false);
+    setSelectedAIItem(null);
+  };
+
+  // AI対応項目の修正
+  const handleModifyAI = (itemId: string) => {
+    setAiActionItems(prev => prev.map(item => 
+      item.id === itemId ? { ...item, status: 'modified' as const } : item
+    ));
+    setShowAIModal(false);
+    setSelectedAIItem(null);
+  };
+
+  // AI対応項目の却下
+  const handleRejectAI = (itemId: string) => {
+    setAiActionItems(prev => prev.map(item => 
+      item.id === itemId ? { ...item, status: 'rejected' as const } : item
+    ));
+    setShowAIModal(false);
+    setSelectedAIItem(null);
+  };
+
+  // AI対応項目の詳細表示
+  const handleShowAIDetails = (item: AIActionItem) => {
+    setSelectedAIItem(item);
+    setShowAIModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
@@ -213,17 +318,17 @@ export default function TaskDetailClient({ task }: { task: Task }) {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{task.task}</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* メインコンテンツ */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
 
             {/* タイムライン・対応履歴 */}
             <div className="bg-white rounded-lg border shadow-sm p-6">
               {/* タブ */}
-              <div className="flex space-x-1 mb-4 border-b border-gray-200">
+              <div className="flex space-x-1 mb-4">
                 <button
                   onClick={() => setActiveTab('timeline')}
-                  className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
                     activeTab === 'timeline'
                       ? 'bg-gray-900 text-white'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -233,13 +338,23 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                 </button>
                 <button
                   onClick={() => setActiveTab('communication')}
-                  className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
                     activeTab === 'communication'
                       ? 'bg-gray-900 text-white'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
                   顧客対応履歴
+                </button>
+                <button
+                  onClick={() => setActiveTab('ai-status')}
+                  className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
+                    activeTab === 'ai-status'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  AI対応状況
                 </button>
               </div>
 
@@ -300,15 +415,48 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     </div>
                   </div>
                   
-                  {/* タイムライン全体用のコメント入力欄 */}
+                  {/* コメント表示 */}
+                  {comments.length > 0 && (
+                    <div className="mt-6 space-y-4">
+                      {comments.map((comment) => (
+                        <div key={comment.id} className="relative flex items-start space-x-4">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-gray-100">
+                            <User className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-gray-900">{comment.author}</span>
+                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">コメント</span>
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {comment.timestamp.toLocaleString('ja-JP', {
+                                  month: 'numeric',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700">{comment.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* 統一されたコメント入力欄 */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <div className="space-y-2">
                       <Textarea
-                        placeholder="作業タイムラインへのコメントを入力..."
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="コメントを入力..."
                         className="min-h-[60px] text-sm"
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAddComment()}
                       />
                       <div className="flex justify-end">
-                        <Button size="sm" className="text-xs">
+                        <Button size="sm" className="text-xs" onClick={handleAddComment} disabled={!commentText.trim()}>
                           コメント追加
                         </Button>
                       </div>
@@ -378,20 +526,96 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     </div>
                   </div>
                   
-                  {/* 顧客対応履歴用のコメント入力欄 */}
+                  {/* コメント表示 */}
+                  {comments.length > 0 && (
+                    <div className="mt-6 space-y-4">
+                      {comments.map((comment) => (
+                        <div key={comment.id} className="relative flex items-start space-x-4">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-gray-100">
+                            <User className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-gray-900">{comment.author}</span>
+                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">コメント</span>
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {comment.timestamp.toLocaleString('ja-JP', {
+                                  month: 'numeric',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700">{comment.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* 統一されたコメント入力欄 */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <div className="space-y-2">
                       <Textarea
-                        placeholder="顧客対応履歴へのコメントを入力..."
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="コメントを入力..."
                         className="min-h-[60px] text-sm"
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAddComment()}
                       />
                       <div className="flex justify-end">
-                        <Button size="sm" className="text-xs">
+                        <Button size="sm" className="text-xs" onClick={handleAddComment} disabled={!commentText.trim()}>
                           コメント追加
                         </Button>
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* AI対応状況タブ内容 */}
+              {activeTab === 'ai-status' && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {aiActionItems.map((item) => (
+                        <tr 
+                          key={item.id} 
+                          className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                          onClick={() => handleShowAIDetails(item)}
+                        >
+                          <td className="py-3 px-4">
+                            <span className="font-medium text-gray-900">{item.title}</span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-600">
+                            {item.timestamp.toLocaleString('ja-JP', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              item.status === 'approved' ? 'bg-green-100 text-green-800' :
+                              item.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                              item.status === 'modified' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {item.status === 'approved' ? '承認済み' :
+                               item.status === 'rejected' ? '却下' :
+                               item.status === 'modified' ? '修正済み' :
+                               '承認待ち'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -593,6 +817,84 @@ export default function TaskDetailClient({ task }: { task: Task }) {
           </div>
         </div>
       </div>
+
+          {/* AI対応詳細モーダル */}
+          {showAIModal && selectedAIItem && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">AI対応詳細</h3>
+                  <button 
+                    onClick={() => {
+                      setShowAIModal(false);
+                      setSelectedAIItem(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">{selectedAIItem.title}</h4>
+                    <p className="text-xs text-gray-500 mb-3">
+                      {selectedAIItem.timestamp.toLocaleString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">詳細内容</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {selectedAIItem.details.map((detail, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="mr-2">•</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <span>担当者: {selectedAIItem.assignee}</span>
+                    <span>対象企業: {selectedAIItem.targetCompany}</span>
+                  </div>
+                  
+                  <div className="flex space-x-2 pt-4 border-t border-gray-200">
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleApproveAI(selectedAIItem.id)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      承認
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleModifyAI(selectedAIItem.id)}
+                      className="flex-1"
+                    >
+                      修正
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleRejectAI(selectedAIItem.id)}
+                      className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
+                    >
+                      却下
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
     </div>
   );
 } 
