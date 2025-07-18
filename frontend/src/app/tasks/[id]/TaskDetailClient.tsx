@@ -67,7 +67,7 @@ type AIActionItem = {
 function Header() {
   return (
     <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
-      <span className="text-xl font-bold tracking-tight">SalesOn デモ画面</span>
+      <span className="text-xl font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
         <Button variant="ghost" size="icon"><Calendar className="w-6 h-6" /></Button>
@@ -362,57 +362,57 @@ export default function TaskDetailClient({ task }: { task: Task }) {
               {activeTab === 'timeline' && (
                 <div>
                   {/* タイムラインエントリー部分 */}
-                  <div className="relative">
+                <div className="relative">
                     {/* 垂直線 - タイムラインエントリー部分のみ */}
-                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                    <div className="space-y-6">
-                      {timeline.map((entry, index) => (
-                        <div key={entry.id} className="relative flex items-start space-x-4">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 ${
-                            entry.type === 'ai' ? 'bg-blue-100' :
-                            entry.type === 'human' ? 'bg-green-100' :
-                            'bg-gray-100'
-                          }`}>
-                            {entry.type === 'ai' ? (
-                              <Zap className="w-4 h-4 text-blue-600" />
-                            ) : entry.type === 'human' ? (
-                              <User className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <CheckCircle className="w-4 h-4 text-gray-600" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm font-medium text-gray-900">
-                                  {entry.type === 'ai' ? 'Sela' :
-                                   entry.type === 'human' ? '山田太郎' :
-                                   'システム'}
-                                </span>
-                                {/* 発生源の表示 */}
-                                {entry.source && (
-                                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                    {entry.source}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {entry.timestamp.toLocaleString('ja-JP', {
-                                  month: 'numeric',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-700">{entry.action}</p>
-                            {entry.reason && (
-                              <p className="text-xs text-gray-500 mt-1">理由: {entry.reason}</p>
-                            )}
-                          </div>
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                  <div className="space-y-6">
+                    {timeline.map((entry, index) => (
+                      <div key={entry.id} className="relative flex items-start space-x-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 ${
+                          entry.type === 'ai' ? 'bg-blue-100' :
+                          entry.type === 'human' ? 'bg-green-100' :
+                          'bg-gray-100'
+                        }`}>
+                          {entry.type === 'ai' ? (
+                            <Zap className="w-4 h-4 text-blue-600" />
+                          ) : entry.type === 'human' ? (
+                            <User className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4 text-gray-600" />
+                          )}
                         </div>
-                      ))}
-                    </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium text-gray-900">
+                                {entry.type === 'ai' ? 'Sela' :
+                                 entry.type === 'human' ? '山田太郎' :
+                                 'システム'}
+                              </span>
+                              {/* 発生源の表示 */}
+                              {entry.source && (
+                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                  {entry.source}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {entry.timestamp.toLocaleString('ja-JP', {
+                                month: 'numeric',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700">{entry.action}</p>
+                          {entry.reason && (
+                            <p className="text-xs text-gray-500 mt-1">理由: {entry.reason}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   </div>
                   
                   {/* コメント表示 */}
@@ -487,25 +487,25 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                           </div>
                           <p className="text-sm text-gray-700">初期提案書を送付、顧客から好意的な反応</p>
                           <p className="text-xs text-gray-500 mt-1">顧客A担当者宛</p>
-                        </div>
-                      </div>
+                    </div>
+                  </div>
 
-                      {/* 商談履歴 */}
+                  {/* 商談履歴 */}
                       <div className="relative flex items-start space-x-4">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-green-100">
-                          <Users className="w-4 h-4 text-green-600" />
+                      <Users className="w-4 h-4 text-green-600" />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-medium text-gray-900">商談</span>
                             </div>
-                            <span className="text-xs text-gray-500">7/6 14:00</span>
-                          </div>
-                          <p className="text-sm text-gray-700">初回商談：予算・要件の確認完了</p>
-                          <p className="text-xs text-gray-500 mt-1">参加者: 山田太郎、顧客A担当者</p>
+                      <span className="text-xs text-gray-500">7/6 14:00</span>
+                    </div>
+                    <p className="text-sm text-gray-700">初回商談：予算・要件の確認完了</p>
+                    <p className="text-xs text-gray-500 mt-1">参加者: 山田太郎、顧客A担当者</p>
                         </div>
-                      </div>
+                  </div>
 
                       {/* メール対応（最新） */}
                       <div className="relative flex items-start space-x-4">
@@ -525,7 +525,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* コメント表示 */}
                   {comments.length > 0 && (
                     <div className="mt-6 space-y-4">

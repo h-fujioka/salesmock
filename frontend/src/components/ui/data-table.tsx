@@ -1,18 +1,18 @@
 "use client"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-    ColumnDef,
-    ColumnFiltersState,
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    OnChangeFn,
-    RowSelectionState,
-    SortingState,
-    useReactTable,
-    VisibilityState,
+  ColumnDef,
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  OnChangeFn,
+  RowSelectionState,
+  SortingState,
+  useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import * as React from "react";
@@ -26,9 +26,22 @@ interface DataTableProps<TData, TValue> {
   columnSelectorSlot?: React.ReactNode
   rowSelection?: RowSelectionState
   setRowSelection?: OnChangeFn<RowSelectionState>
+  pageSize?: number
+  showPagination?: boolean
 }
 
-export function DataTable<TData, TValue>({ columns, data, showSearch = true, showColumnSelector = true, searchSlot, columnSelectorSlot, rowSelection, setRowSelection }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ 
+  columns, 
+  data, 
+  showSearch = true, 
+  showColumnSelector = true, 
+  searchSlot, 
+  columnSelectorSlot, 
+  rowSelection, 
+  setRowSelection,
+  pageSize = 10,
+  showPagination = false
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -45,6 +58,11 @@ export function DataTable<TData, TValue>({ columns, data, showSearch = true, sho
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection || setInternalRowSelection,
+    initialState: {
+      pagination: {
+        pageSize: pageSize,
+      },
+    },
     state: {
       sorting,
       columnFilters,
@@ -109,6 +127,36 @@ export function DataTable<TData, TValue>({ columns, data, showSearch = true, sho
           </TableBody>
         </Table>
       </div>
+      
+      {/* ページネーション */}
+      {showPagination && table.getPageCount() > 1 && (
+        <div className="flex items-center justify-between space-x-2 py-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <button
+              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+            <button
+              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

@@ -1,6 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import SidebarHomeButton from "@/components/ui/SidebarHomeButton";
 import { Briefcase, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 import "./globals.css";
 
@@ -21,6 +24,22 @@ function GridDotsIcon({ className = "w-6 h-6" }) {
   );
 }
 
+function SidebarCasesButton() {
+  const router = useRouter();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="w-10 h-10 p-1 mb-2"
+      onClick={() => router.push("/cases")}
+      aria-label="案件一覧"
+    >
+      <Briefcase className="w-8 h-8" />
+    </Button>
+  );
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja" className="h-full" suppressHydrationWarning>
@@ -32,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex flex-col items-center pt-4 h-full">
               <GridDotsIcon className="w-7 h-7 text-gray-700 mb-6" />
               <SidebarHomeButton />
-              <Button variant="ghost" size="icon" className="w-10 h-10 p-1 mb-2"><Briefcase className="w-8 h-8" /></Button>
+              <SidebarCasesButton />
               <Button variant="ghost" size="icon" className="w-10 h-10 p-1"><Settings className="w-8 h-8" /></Button>
             </div>
           </aside>

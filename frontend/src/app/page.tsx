@@ -68,7 +68,7 @@ function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditabl
     <div
       className={
         isAnswer
-          ? "bg-[#22223b] rounded-3xl px-8 py-6 w-fit text-xl text-white font-medium mb-4"
+          ? "bg-gray-800 rounded-3xl px-8 py-6 w-fit text-xl text-white font-medium mb-4"
           : "w-full max-w-[1000px] mx-auto bg-gray-100 border border-gray-100 rounded-xl shadow px-4 py-3 flex items-center justify-between text-base font-normal text-gray-800 mb-4"
       }
       style={isAnswer ? { maxWidth: 1000, marginLeft: 'auto' } : {}}
@@ -103,7 +103,7 @@ function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditabl
 function Header({ onClear }: { onClear: () => void }) {
   return (
     <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
-      <span className="text-xl font-bold tracking-tight">SalesOn デモ画面</span>
+      <span className="text-xl font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
         <Button variant="ghost" size="icon"><Calendar className="w-6 h-6" /></Button>
@@ -191,7 +191,7 @@ export default function Home() {
       <div className="w-full max-w-[1000px] mx-auto space-y-4">
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.type === 'question' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.type === 'question' ? 'bg-[#22223b] text-white' : 'bg-gray-50'}`}>
+            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.type === 'question' ? 'bg-gray-800 text-white' : 'bg-gray-50'}`}>
               <p className="text-base whitespace-pre-wrap break-words">{msg.content}</p>
             </div>
           </div>
@@ -344,7 +344,7 @@ export default function Home() {
 
   // タスク一覧用のカラム定義
   const taskColumns: ColumnDef<any, React.ReactNode>[] = [
-    { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : info.getValue()==='中' ? 'bg-yellow-100' : 'bg-gray-100'}`}>{info.getValue()}</span> },
+    { accessorKey: "priority", header: "優先度", cell: info => <span className="text-black rounded px-2 py-0.5 font-normal bg-gray-100">{info.getValue()}</span> },
     { 
       accessorKey: "task", 
       header: "タスク名", 
@@ -529,7 +529,7 @@ export default function Home() {
 
   // 競合利用企業用のカラム定義
   const competitorColumns: ColumnDef<any, React.ReactNode>[] = [
-    { accessorKey: "company", header: "企業名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
+    { accessorKey: "company", header: "顧客名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
     { accessorKey: "competitor", header: "利用中の競合製品", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "contract", header: "契約更新時期", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
@@ -546,7 +546,7 @@ export default function Home() {
   // スリップ案件用のカラム定義
   const slipColumns: ColumnDef<any, React.ReactNode>[] = [
     { accessorKey: "project", header: "案件名", cell: info => <span className="text-black font-normal">{info.getValue()}</span> },
-    { accessorKey: "company", header: "企業名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+    { accessorKey: "company", header: "顧客名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "currentMonth", header: "当初予定", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "slipMonth", header: "スリップ先", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
     { accessorKey: "reason", header: "理由", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
@@ -725,9 +725,9 @@ export default function Home() {
           {/* ホーム画面（初期表示時） */}
           {approvalStep === "none" && !aiResponse && !followupCandidates && (
             <>
-              {/* タイトルとコマンド入力欄 */}
+              {/* タイトルとコマンド入力欄 */}  
               <div className="w-full flex flex-col items-center pt-8 pb-4">
-                <h1 className="text-center font-semibold text-[64px] mb-8">SalesOn</h1>
+                <h1 className="text-center font-semibold text-[32px] mb-8">千里の道も一歩から</h1>
                 <div className="w-full max-w-[1000px] flex justify-center">
                   <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
