@@ -1,6 +1,10 @@
 // フォローアップ候補のダミーデータAPI (GET)
 import { NextResponse } from 'next/server';
 
+// 静的エクスポート用の設定
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 export async function GET() {
   // ダミーデータを返す
   const candidates = [
