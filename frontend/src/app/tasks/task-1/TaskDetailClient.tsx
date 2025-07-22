@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Send, Settings, User, Users, Zap, X, XCircle, CheckCircle2, Copy } from "lucide-react";
+import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Phone, Play, Send, Settings, User, Users, Zap, X, XCircle, CheckCircle2, Copy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -42,6 +42,28 @@ type Comment = {
   author: string;
 };
 
+// 顧客対応履歴の型定義
+type CustomerCommunication = {
+  id: string;
+  type: 'email' | 'meeting' | 'call' | 'document' | 'proposal';
+  title: string;
+  description: string;
+  timestamp: Date;
+  participants?: string[];
+  subject?: string;
+  recipient?: string;
+  relatedAIId?: string;
+  status?: 'completed' | 'scheduled' | 'draft';
+  comments?: Array<{
+    id: string;
+    content: string;
+    timestamp: Date;
+    author: string;
+  }>;
+  _newComment?: string; // コメント入力欄の状態を保持
+  showCommentInput?: boolean; // コメント入力欄の表示状態を保持
+};
+
 // タスクの型定義
 type Task = {
   taskId: string;
@@ -71,6 +93,7 @@ type AIActionItem = {
   targetCompany: string;
   status: 'generating' | 'completed' | 'error';
   isPreparedForSending?: boolean; // 送信準備済みフラグ
+  relatedCommunicationId?: string; // 関連する顧客対応履歴のID
   generatedContent?: {
     type: 'email' | 'document' | 'analysis' | 'report';
     content: string;
@@ -122,7 +145,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       ],
       assignee: 'Sela',
       targetCompany: '自動検知',
-      status: 'generating'
+      status: 'generating',
+      relatedCommunicationId: 'comm-1'
     },
     {
       id: 'ai-completed-1',
@@ -136,6 +160,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       assignee: 'Sela',
       targetCompany: '自動検知',
       status: 'completed',
+      relatedCommunicationId: 'comm-2',
       generatedContent: {
         type: 'email',
         content: 'フォローアップメールの作成と最適化が完了しました。\n\n最適化内容:\n• 件名: プロジェクト進捗について\n• 送信先: 顧客担当者\n• 内容: 進捗報告と次回ミーティングの提案\n\nAIによる最適化が完了しました。内容を確認してから送信ボタンでワンクリック送信できます。',
@@ -157,6 +182,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       assignee: 'Sela',
       targetCompany: '自動検知',
       status: 'completed',
+      relatedCommunicationId: 'comm-3',
       generatedContent: {
         type: 'report',
         content: '競合他社分析レポートが完成しました。\n\n分析結果:\n• 主要競合3社の動向を調査\n• 価格戦略の比較分析\n• 差別化ポイントの特定\n\n次回商談での活用提案も含まれています。',
@@ -178,6 +204,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       assignee: 'Sela',
       targetCompany: '自動検知',
       status: 'completed',
+      relatedCommunicationId: 'comm-4',
       generatedContent: {
         type: 'document',
         content: '顧客ヒアリングの議事録を作成しました。\n\n議事録内容:\n• 会議日時: 2024年7月7日 14:00-15:30\n• 参加者: 顧客担当者、営業担当\n• 主要議題: プロジェクト要件の詳細確認\n• 決定事項: 次回ミーティングの日程調整\n\nアクションアイテムも自動抽出されています。',
@@ -201,6 +228,50 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   
   // Selaタブ管理用の状態
   const [activeSelaTab, setActiveSelaTab] = useState<'proposals' | 'history'>('proposals');
+
+  // 顧客対応履歴の状態
+  const [customerCommunications, setCustomerCommunications] = useState<CustomerCommunication[]>([
+    {
+      id: 'comm-1',
+      type: 'proposal',
+      title: '提案書送付',
+      description: '初期提案書を送付、顧客から好意的な反応',
+      timestamp: new Date('2024-07-05T10:00:00'),
+      recipient: '顧客A担当者宛',
+      relatedAIId: 'ai-generating-1',
+      status: 'completed'
+    },
+    {
+      id: 'comm-2',
+      type: 'meeting',
+      title: '商談',
+      description: '初回商談：予算・要件の確認完了',
+      timestamp: new Date('2024-07-06T14:00:00'),
+      participants: ['山田太郎', '顧客A担当者'],
+      relatedAIId: 'ai-completed-1',
+      status: 'completed'
+    },
+    {
+      id: 'comm-3',
+      type: 'email',
+      title: 'メール対応',
+      description: '顧客Aから見積書の詳細について問い合わせ',
+      timestamp: new Date('2024-07-07T15:30:00'),
+      subject: '見積書について',
+      relatedAIId: 'ai-completed-2',
+      status: 'completed'
+    },
+    {
+      id: 'comm-4',
+      type: 'meeting',
+      title: 'ヒアリング実施',
+      description: '顧客Aとの詳細ヒアリング実施、要件の詳細確認',
+      timestamp: new Date('2024-07-07T14:00:00'),
+      participants: ['山田太郎', '顧客A担当者'],
+      relatedAIId: 'ai-completed-3',
+      status: 'completed'
+    }
+  ]);
 
   // コメント追加ハンドラー
   const handleAddComment = () => {
@@ -231,6 +302,26 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     
     setTimeline(prev => [entry, ...prev]);
     return entry;
+  };
+
+  // 顧客対応履歴を追加する関数
+  const addCustomerCommunication = (communication: Omit<CustomerCommunication, 'id'>) => {
+    const newCommunication: CustomerCommunication = {
+      id: `comm-${Date.now()}`,
+      ...communication
+    };
+    setCustomerCommunications(prev => [newCommunication, ...prev]);
+    return newCommunication;
+  };
+
+  // AIアクションと顧客対応履歴を関連付ける関数
+  const linkAIWithCommunication = (aiId: string, communicationId: string) => {
+    setAiActionItems(prev => prev.map(item => 
+      item.id === aiId ? { ...item, relatedCommunicationId: communicationId } : item
+    ));
+    setCustomerCommunications(prev => prev.map(comm => 
+      comm.id === communicationId ? { ...comm, relatedAIId: aiId } : comm
+    ));
   };
 
   // Selaへの指示送信
@@ -291,6 +382,21 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       { action: suggestion, status: 'generating' },
       'ai'
     );
+
+    // 関連する顧客対応履歴を自動生成（例：メール送信の場合）
+    if (suggestion.includes('メール') || suggestion.includes('フォローアップ')) {
+      const newCommunication = addCustomerCommunication({
+        type: 'email',
+        title: 'AI生成メール送信',
+        description: `${suggestion}による自動メール送信`,
+        timestamp: new Date(),
+        subject: suggestion,
+        status: 'draft'
+      });
+      
+      // AIアクションと顧客対応履歴を関連付け
+      linkAIWithCommunication(newAIAction.id, newCommunication.id);
+    }
 
     try {
       // AI処理をシミュレート（実際のAPI呼び出し）
@@ -443,6 +549,16 @@ export default function TaskDetailClient({ task }: { task: Task }) {
         { action: 'ai_execution', result: 'completed' },
         'ai'
       );
+
+      // 関連する顧客対応履歴のステータスを更新
+      const aiItem = aiActionItems.find(item => item.id === itemId);
+      if (aiItem?.relatedCommunicationId) {
+        setCustomerCommunications(prev => prev.map(comm => 
+          comm.id === aiItem.relatedCommunicationId 
+            ? { ...comm, status: 'completed' as const }
+            : comm
+        ));
+      }
 
     } catch (error) {
       // エラー状態に変更
@@ -635,9 +751,9 @@ export default function TaskDetailClient({ task }: { task: Task }) {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{task.task}</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* メインコンテンツ */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
 
             {/* タイムライン・対応履歴 */}
             <div className="bg-white rounded-lg border shadow-sm p-6">
@@ -762,24 +878,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     </div>
                   )}
                   
-                  {/* 統一されたコメント入力欄 */}
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <div className="space-y-2">
-                      <Textarea
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        placeholder="コメントを入力..."
-                        className="min-h-[60px] text-sm"
-                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAddComment()}
-                      />
-                      <div className="flex justify-end">
-                        <Button size="sm" className="text-xs" onClick={handleAddComment} disabled={!commentText.trim()}>
-                          コメント追加
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                                  </div>
               )}
 
               {/* 顧客対応履歴 */}
@@ -790,56 +889,173 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     {/* 垂直線 - 顧客対応履歴エントリー部分のみ */}
                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                     <div className="space-y-6">
-                      {/* 提案書送付（最古） */}
-                      <div className="relative flex items-start space-x-4">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-purple-100">
-                          <FileText className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-900">提案書送付</span>
-                            </div>
-                            <span className="text-xs text-gray-500">7/5 10:00</span>
-                          </div>
-                          <p className="text-sm text-gray-700">初期提案書を送付、顧客から好意的な反応</p>
-                          <p className="text-xs text-gray-500 mt-1">顧客A担当者宛</p>
-                    </div>
-                  </div>
+                      {customerCommunications.map((comm) => {
+                        // 関連するAIアクションを取得
+                        const relatedAI = comm.relatedAIId 
+                          ? aiActionItems.find(item => item.id === comm.relatedAIId)
+                          : null;
 
-                  {/* 商談履歴 */}
-                      <div className="relative flex items-start space-x-4">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-green-100">
-                      <Users className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-900">商談</span>
-                            </div>
-                      <span className="text-xs text-gray-500">7/6 14:00</span>
-                    </div>
-                    <p className="text-sm text-gray-700">初回商談：予算・要件の確認完了</p>
-                    <p className="text-xs text-gray-500 mt-1">参加者: 山田太郎、顧客A担当者</p>
-                        </div>
-                  </div>
+                        // アイコンと色を決定
+                        const getIconAndColor = (type: string) => {
+                          switch (type) {
+                            case 'email':
+                              return { icon: Mail, color: 'blue' };
+                            case 'meeting':
+                              return { icon: Users, color: 'green' };
+                            case 'call':
+                              return { icon: Phone, color: 'purple' };
+                            case 'document':
+                            case 'proposal':
+                              return { icon: FileText, color: 'purple' };
+                            default:
+                              return { icon: FileText, color: 'gray' };
+                          }
+                        };
 
-                      {/* メール対応（最新） */}
-                      <div className="relative flex items-start space-x-4">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-blue-100">
-                          <Mail className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-900">メール対応</span>
+                        const { icon: Icon, color } = getIconAndColor(comm.type);
+                        const bgColor = `bg-${color}-100`;
+                        const textColor = `text-${color}-600`;
+
+                        return (
+                          <div key={comm.id} className="relative flex items-start space-x-4">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 ${bgColor}`}>
+                              <Icon className={`w-4 h-4 ${textColor}`} />
                             </div>
-                            <span className="text-xs text-gray-500">7/7 15:30</span>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-sm font-medium text-gray-900">{comm.title}</span>
+                                  {comm.status === 'draft' && (
+                                    <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded">下書き</span>
+                                  )}
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {comm.timestamp.toLocaleString('ja-JP', {
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-700">{comm.description}</p>
+                              
+                              {/* 詳細情報の表示 */}
+                              {comm.subject && (
+                                <p className="text-xs text-gray-500 mt-1">件名: {comm.subject}</p>
+                              )}
+                              {comm.recipient && (
+                                <p className="text-xs text-gray-500 mt-1">{comm.recipient}</p>
+                              )}
+                              {comm.participants && (
+                                <p className="text-xs text-gray-500 mt-1">参加者: {comm.participants.join('、')}</p>
+                              )}
+
+                              {/* 関連AIアクションの表示 */}
+                              {relatedAI && (
+                                <div className="mt-2 flex items-center space-x-2">
+                                  <span className="text-xs text-gray-500">AI対応:</span>
+                                  <button
+                                    onClick={() => setActiveTab('ai-status')}
+                                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                                  >
+                                    {relatedAI.title}
+                                  </button>
+                                  {relatedAI.status === 'generating' && (
+                                    <span className="text-xs text-gray-400">(生成中...)</span>
+                                  )}
+                                  {relatedAI.status === 'completed' && (
+                                    <span className="text-xs text-green-600">✓ 完了</span>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* コメント追加ボタン */}
+                              <div className="mt-3">
+                                <button
+                                  className="text-sm text-blue-600 hover:text-blue-800 underline font-medium"
+                                  onClick={() => {
+                                    setCustomerCommunications(prev => prev.map(c =>
+                                      c.id === comm.id ? { ...c, showCommentInput: !c.showCommentInput } : c
+                                    ));
+                                  }}
+                                >
+                                  {comm.showCommentInput ? 'キャンセル' : 'コメント追加'}
+                                </button>
+                              </div>
+                              
+                              {/* コメント入力欄（条件付き表示） */}
+                              {comm.showCommentInput && (
+                                <div className="mt-3 p-4 bg-gray-50 rounded-lg border">
+                                  <textarea
+                                    placeholder="コメントを追加..."
+                                    className="w-full border px-3 py-2 rounded text-sm resize-none min-h-[100px]"
+                                    value={comm._newComment || ''}
+                                    onChange={e => {
+                                      setCustomerCommunications(prev => prev.map(c =>
+                                        c.id === comm.id ? { ...c, _newComment: e.target.value } : c
+                                      ));
+                                    }}
+                                  />
+                                  <div className="mt-3 flex justify-end space-x-2">
+                                    <button
+                                      className="text-sm px-3 py-1 text-gray-600 hover:text-gray-800"
+                                      onClick={() => {
+                                        setCustomerCommunications(prev => prev.map(c =>
+                                          c.id === comm.id ? { ...c, showCommentInput: false, _newComment: '' } : c
+                                        ));
+                                      }}
+                                    >
+                                      キャンセル
+                                    </button>
+                                    <button
+                                      className="text-sm px-4 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+                                      disabled={!comm._newComment || !comm._newComment.trim()}
+                                      onClick={() => {
+                                        if (comm._newComment && comm._newComment.trim()) {
+                                          const newComment = {
+                                            id: `comm-comment-${Date.now()}`,
+                                            content: comm._newComment,
+                                            timestamp: new Date(),
+                                            author: '山田太郎',
+                                          };
+                                          setCustomerCommunications(prev => prev.map(c =>
+                                            c.id === comm.id
+                                              ? { ...c, comments: [...(c.comments || []), newComment], _newComment: '', showCommentInput: false }
+                                              : c
+                                          ));
+                                        }
+                                      }}
+                                    >追加</button>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* コメント表示 */}
+                              {comm.comments && comm.comments.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                  {comm.comments.map(comment => (
+                                    <div key={comment.id} className="text-sm text-gray-700 bg-white p-3 rounded-lg border">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className="font-medium text-gray-900">{comment.author}</span>
+                                        <span className="text-xs text-gray-500">
+                                          {comment.timestamp.toLocaleString('ja-JP', {
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                          })}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm">{comment.content}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-700">顧客Aから見積書の詳細について問い合わせ</p>
-                          <p className="text-xs text-gray-500 mt-1">件名: 見積書について</p>
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
 
