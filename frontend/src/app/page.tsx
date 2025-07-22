@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User } from "lucide-react";
+import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // 検索結果テンプレートコンポーネント
 interface SearchResultTemplateProps {
@@ -258,6 +259,9 @@ export default function Home() {
   const [slipColumnVisibility, setSlipColumnVisibility] = useState(slipColumns.map(() => true))
   const [aiApprovalColumnVisibility, setAiApprovalColumnVisibility] = useState(aiApprovalColumns.map(() => true))
 
+  // Selaの実行結果メッセージ用の状態
+  const [selaMessage, setSelaMessage] = useState<string | null>(null);
+
   // コマンドの検証関数
   const validateCommand = (input: string): boolean => {
     const requiredPhrase = "フォローアップメールが必要な案件を抽出して";
@@ -443,6 +447,7 @@ export default function Home() {
     setCommand("");
     setEditingMailId(null);
     setEditedMails({});
+    setSelaMessage(null); // クリア時にメッセージも消去
   };
 
   // フォローアップメール承認処理
@@ -706,6 +711,29 @@ export default function Home() {
     }
   ];
 
+  // Selaの提案実行ハンドラー
+  const [executingSuggestions, setExecutingSuggestions] = useState<Set<string>>(new Set());
+
+  const handleExecuteSuggestion = (suggestion: string) => {
+    // 実行中状態を設定
+    setExecutingSuggestions(new Set([...executingSuggestions, suggestion]));
+
+    // 3秒後に実行完了とメッセージを表示
+    setTimeout(() => {
+      setExecutingSuggestions(prev => {
+        const next = new Set(prev);
+        next.delete(suggestion);
+        return next;
+      });
+      setSelaMessage(`Selaが「${suggestion}」を実行しました。結果はAI対応状況タブで確認できます。`);
+
+      // 5秒後にメッセージを消去
+      setTimeout(() => {
+        setSelaMessage(null);
+      }, 5000);
+    }, 3000);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header onClear={handleClear} />
@@ -713,6 +741,17 @@ export default function Home() {
       {/* メインコンテンツエリア */}
       <main className="flex-1 container mx-auto px-8 pt-8 pb-48">
         <div className="space-y-4">
+          {/* Selaの実行結果メッセージ */}
+          {selaMessage && (
+            <Alert className="bg-green-50 border-green-200">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <AlertTitle className="text-green-800 ml-2">実行完了</AlertTitle>
+              <AlertDescription className="text-green-700 ml-2">
+                {selaMessage}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* ホーム画面（初期表示時） */}
           {approvalStep === "none" && !aiResponse && !followupCandidates && (
             <>
