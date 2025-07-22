@@ -175,6 +175,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
   const [selectedAIItem, setSelectedAIItem] = useState<AIActionItem | null>(null);
   const [showAIModal, setShowAIModal] = useState(false);
+  // 実行中の提案を管理
+  const [executingSuggestions, setExecutingSuggestions] = useState<Set<string>>(new Set());
 
   // コメント追加ハンドラー
   const handleAddComment = () => {
@@ -240,6 +242,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
   // Sela提案の実行
   const handleExecuteSuggestion = async (suggestion: string) => {
+    setExecutingSuggestions(prev => new Set(prev).add(suggestion));
     // 新しいAI対応項目を作成
     const newAIAction: AIActionItem = {
       id: `ai-${Date.now()}`,
@@ -305,6 +308,12 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       // エラーメッセージ
       const errorResponse = `「${suggestion}」の実行中にエラーが発生しました。再実行をお試しください。`;
       setMessages(prev => [...prev, { content: errorResponse, type: 'answer' }]);
+    } finally {
+      setExecutingSuggestions(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(suggestion);
+        return newSet;
+      });
     }
   };
 
@@ -771,24 +780,30 @@ export default function TaskDetailClient({ task }: { task: Task }) {
               {/* Sela提案 */}
               <div className="mb-6">
                 <div className="space-y-3">
-                  {task.aiSuggestions.map((suggestion) => (
-                    <div key={suggestion} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm text-gray-700">{suggestion}</span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <div onClick={() => handleExecuteSuggestion(suggestion)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                            <Play className="mr-2 h-4 w-4" />
-                            実行
+                  {task.aiSuggestions.map((suggestion) => {
+                    const isExecuting = executingSuggestions.has(suggestion);
+                    return (
+                      <div key={suggestion} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-700">{suggestion}</span>
+                        {isExecuting ? (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>生成中...</span>
                           </div>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  ))}
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleExecuteSuggestion(suggestion)}
+                            className="flex items-center space-x-2"
+                          >
+                            <Play className="h-4 w-4" />
+                            <span>実行</span>
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
