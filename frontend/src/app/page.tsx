@@ -560,6 +560,61 @@ export default function Home() {
     { project: "データ連携案件", company: "GHI商事", currentMonth: "2024/07", slipMonth: "2024/08", reason: "技術検証の追加" }
   ];
 
+  // タイムライン用のダミーデータ
+  const timelineData = [
+    {
+      id: 1,
+      icon: "⚡",
+      actor: "Sela",
+      actorType: "AI検知",
+      description: "見積書の競合他社比較表を自動生成しました。",
+      timestamp: "7/7 15:30"
+    },
+    {
+      id: 2,
+      icon: "⚡",
+      actor: "Sela",
+      actorType: "",
+      description: "見積書の内容を確認しました。価格設定は適切ですが、競合他社との差別化ポイントをより明確に記載することをお勧めします。",
+      timestamp: "7/7 15:00"
+    },
+    {
+      id: 3,
+      icon: "👤",
+      actor: "山田太郎",
+      actorType: "",
+      description: "見積書のドラフトを作成しました。レビューをお願いします。",
+      timestamp: "7/7 14:30"
+    },
+    {
+      id: 4,
+      icon: "✓",
+      actor: "システム",
+      actorType: "",
+      description: "ステータスを「未着手」から「進行中」に変更しました。",
+      timestamp: "7/7 10:00"
+    },
+    {
+      id: 5,
+      icon: "⚡",
+      actor: "Sela",
+      actorType: "",
+      description: "顧客の過去の取引履歴を分析し、最適な価格設定を提案しました。",
+      timestamp: "7/7 09:30"
+    },
+    {
+      id: 6,
+      icon: "⚡",
+      actor: "Sela",
+      actorType: "",
+      description: "メール内容を解析し、タスク「顧客Aへ見積送付」を自動生成しました。",
+      timestamp: "7/6 09:00"
+    }
+  ];
+
+  // コメント用の状態
+  const [comment, setComment] = useState("");
+
   // 承認/却下/編集のハンドラー
   const handleAiTaskApprove = (task: any) => {
     // TODO: 承認処理の実装
@@ -780,6 +835,7 @@ export default function Home() {
                       <TabsTrigger value="members" className="text-gray-700 font-normal text-base">メンバー実績</TabsTrigger>
                       <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
                       <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
+                      <TabsTrigger value="timeline" className="text-gray-700 font-normal text-base">作業タイムライン</TabsTrigger>
                       <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base flex items-center gap-1">
                         AI承認待ち
                         <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiApprovalData.filter(item => item.status === '承認待ち' && item.priority === '優先').length}</span>
@@ -875,11 +931,37 @@ export default function Home() {
                     </div>
                   </div>
                   <TabsContent value="tasks">
-                    <div className="overflow-x-auto">
-                      <DataTable columns={taskColumns.filter((_, i) => taskColumnVisibility[i])} data={taskData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <DataTable columns={taskColumns.filter((_, i) => taskColumnVisibility[i])} data={taskData}
+                          searchSlot={null}
+                          columnSelectorSlot={null}
+                        />
+                      </div>
+                      
+                      {/* コメント欄 - タブの直下に配置 */}
+                      <div className="mt-6 pt-4 border-t border-gray-200">
+                        <div className="flex items-end gap-3">
+                          <Textarea
+                            placeholder="コメントを入力..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="flex-1 resize-none min-h-[80px] bg-gray-50 border-gray-200 focus:border-gray-300"
+                          />
+                          <Button
+                            onClick={() => {
+                              if (comment.trim()) {
+                                console.log('コメント追加:', comment);
+                                setComment("");
+                              }
+                            }}
+                            disabled={!comment.trim()}
+                            className="bg-gray-600 text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:text-gray-500"
+                          >
+                            コメント追加
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="risks">
@@ -922,6 +1004,67 @@ export default function Home() {
                         searchSlot={null}
                         columnSelectorSlot={null}
                       />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="timeline">
+                    <div className="space-y-4">
+                      {/* タイムライン表示 */}
+                      <div className="space-y-4">
+                        {timelineData.map((item, index) => (
+                          <div key={item.id} className="flex items-start gap-4 relative">
+                            {/* タイムラインの縦線 */}
+                            {index < timelineData.length - 1 && (
+                              <div className="absolute left-6 top-8 w-0.5 h-12 bg-gray-200"></div>
+                            )}
+                            {/* アイコン */}
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-medium z-10 relative ${
+                              item.actor === "Sela" ? "bg-blue-100 text-blue-600" :
+                              item.actor === "山田太郎" ? "bg-green-100 text-green-600" :
+                              "bg-gray-100 text-gray-600"
+                            }`}>
+                              {item.icon}
+                            </div>
+                            {/* コンテンツ */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-gray-900">{item.actor}</span>
+                                {item.actorType && (
+                                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                    {item.actorType}
+                                  </span>
+                                )}
+                                <span className="text-sm text-gray-500 ml-auto">{item.timestamp}</span>
+                              </div>
+                              <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* コメント欄 - タブの直下に配置 */}
+                      <div className="mt-6 pt-4 border-t border-gray-200">
+                        <div className="flex items-end gap-3">
+                          <Textarea
+                            placeholder="コメントを入力..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="flex-1 resize-none min-h-[80px] bg-gray-50 border-gray-200 focus:border-gray-300"
+                          />
+                          <Button
+                            onClick={() => {
+                              if (comment.trim()) {
+                                // コメント追加処理（ここではコンソールに出力）
+                                console.log('コメント追加:', comment);
+                                setComment("");
+                              }
+                            }}
+                            disabled={!comment.trim()}
+                            className="bg-gray-600 text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:text-gray-500"
+                          >
+                            コメント追加
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="ai-history">

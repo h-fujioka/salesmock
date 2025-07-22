@@ -2,9 +2,10 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Mail, Play, Send, Settings, User, Users, Zap } from "lucide-react";
+import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Send, Settings, User, Users, Zap } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -60,7 +61,17 @@ type AIActionItem = {
   details: string[];
   assignee: string;
   targetCompany: string;
-  status: 'pending' | 'approved' | 'rejected' | 'modified';
+  status: 'generating' | 'completed' | 'error';
+  generatedContent?: {
+    type: 'email' | 'document' | 'analysis' | 'report';
+    content: string;
+    files?: Array<{
+      name: string;
+      type: string;
+      size: string;
+      url?: string;
+    }>;
+  };
 };
 
 // ヘッダーコンポーネント
@@ -89,7 +100,79 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const [activeTab, setActiveTab] = useState<'timeline' | 'communication' | 'ai-status'>('timeline');
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
-  const [aiActionItems, setAiActionItems] = useState<AIActionItem[]>([]);
+  // ここで4つのダミーデータを直接初期値として設定
+  const [aiActionItems, setAiActionItems] = useState<AIActionItem[]>([
+    {
+      id: 'ai-generating-1',
+      title: '見積書の自動生成',
+      timestamp: new Date(Date.now() - 5 * 60 * 1000),
+      details: [
+        'Sela提案: 見積書の自動生成機能を活用',
+        '自動生成による対応',
+        'AI処理による最適化'
+      ],
+      assignee: 'Sela',
+      targetCompany: '自動検知',
+      status: 'generating'
+    },
+    {
+      id: 'ai-completed-1',
+      title: 'フォローアップメール作成と送信',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000),
+      details: [
+        'Sela提案: フォローアップメール作成と送信',
+        '自動生成による対応',
+        'AI処理による最適化'
+      ],
+      assignee: 'Sela',
+      targetCompany: '自動検知',
+      status: 'completed',
+      generatedContent: {
+        type: 'email',
+        content: 'フォローアップメールの作成と送信が完了しました。\n\n送信内容:\n• 件名: プロジェクト進捗について\n• 送信先: 顧客担当者\n• 内容: 進捗報告と次回ミーティングの提案\n\n自動生成による最適化が完了し、次回アクションの提案も生成されました。',
+        files: [
+          { name: 'followup_email.txt', type: 'text', size: '1.8KB' },
+          { name: 'progress_report.pdf', type: 'pdf', size: '2.1MB' }
+        ]
+      }
+    },
+    {
+      id: 'ai-completed-2',
+      title: '提案書v2の作成と価格見直し',
+      timestamp: new Date(Date.now() - 60 * 60 * 1000),
+      details: [
+        'Sela提案: 提案書v2の作成と価格見直し',
+        '自動生成による対応',
+        'AI処理による最適化'
+      ],
+      assignee: 'Sela',
+      targetCompany: '自動検知',
+      status: 'completed',
+      generatedContent: {
+        type: 'document',
+        content: '提案書v2の作成と価格見直しが完了しました。\n\n更新内容:\n• 技術仕様の詳細化\n• 価格体系の見直し\n• 導入スケジュールの調整\n\n自動生成による最適化が完了し、次回アクションの提案も生成されました。',
+        files: [
+          { name: 'proposal_v2.pdf', type: 'pdf', size: '3.5MB' },
+          { name: 'price_revision.xlsx', type: 'excel', size: '856KB' }
+        ]
+      }
+    },
+    {
+      id: 'ai-error-1',
+      title: '関連資料の自動収集・整理',
+      timestamp: new Date(Date.now() - 90 * 60 * 1000),
+      details: [
+        'Sela提案: 関連資料の自動収集・整理',
+        '自動生成による対応',
+        'AI処理による最適化'
+      ],
+      assignee: 'Sela',
+      targetCompany: '自動検知',
+      status: 'error'
+    }
+  ]);
+  
+
   const [selectedAIItem, setSelectedAIItem] = useState<AIActionItem | null>(null);
   const [showAIModal, setShowAIModal] = useState(false);
 
@@ -156,18 +239,73 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   };
 
   // Sela提案の実行
-  const handleExecuteSuggestion = (suggestion: string) => {
-    // Sela実行をタイムラインに追加
+  const handleExecuteSuggestion = async (suggestion: string) => {
+    // 新しいAI対応項目を作成
+    const newAIAction: AIActionItem = {
+      id: `ai-${Date.now()}`,
+      title: suggestion,
+      timestamp: new Date(),
+      details: [
+        `Sela提案: ${suggestion}`,
+        "自動生成による対応",
+        "AI処理による最適化"
+      ],
+      assignee: "Sela",
+      targetCompany: "自動検知",
+      status: 'generating'
+    };
+
+    // AI対応項目リストに追加
+    setAiActionItems(prev => [newAIAction, ...prev]);
+
+    // タイムラインに追加
     addTimelineEntry(
-      `Sela実行: ${suggestion}`,
-      { action: suggestion, result: "実行完了" },
-      'ai',
-      'approved'
+      `Sela実行開始: ${suggestion}`,
+      { action: suggestion, status: 'generating' },
+      'ai'
     );
-    
-    // Selaレスポンスをシミュレート
-    const response = `Selaが「${suggestion}」を実行しました。`;
-    setMessages(prev => [...prev, { content: response, type: 'answer' }]);
+
+    try {
+      // AI処理をシミュレート（実際のAPI呼び出し）
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // 生成済み状態に更新
+      setAiActionItems(prev => prev.map(item => 
+        item.id === newAIAction.id ? { 
+          ...item, 
+          status: 'completed',
+          generatedContent: {
+            type: 'email',
+            content: `${suggestion}の実行が完了しました。\n\n実行内容:\n• 自動処理による最適化\n• 結果の生成と保存\n• 次回アクションの提案`,
+            files: [
+              { name: `${suggestion}_result.txt`, type: 'text', size: '1.2KB' },
+              { name: `${suggestion}_report.pdf`, type: 'pdf', size: '856KB' }
+            ]
+          }
+        } : item
+      ));
+
+      // タイムラインに完了を追加
+      addTimelineEntry(
+        `Sela実行完了: ${suggestion}`,
+        { action: suggestion, result: 'completed' },
+        'ai'
+      );
+
+      // Selaレスポンスをシミュレート
+      const response = `Selaが「${suggestion}」を実行しました。結果はAI対応状況タブで確認できます。`;
+      setMessages(prev => [...prev, { content: response, type: 'answer' }]);
+
+    } catch (error) {
+      // エラー状態に更新
+      setAiActionItems(prev => prev.map(item => 
+        item.id === newAIAction.id ? { ...item, status: 'error' } : item
+      ));
+
+      // エラーメッセージ
+      const errorResponse = `「${suggestion}」の実行中にエラーが発生しました。再実行をお試しください。`;
+      setMessages(prev => [...prev, { content: errorResponse, type: 'answer' }]);
+    }
   };
 
   // 初期タイムラインを設定
@@ -224,65 +362,52 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     setTimeline(initialTimeline);
   }, []);
 
-  // AI対応項目の初期データ
-  useEffect(() => {
-    const initialAIActions: AIActionItem[] = [
-      {
-        id: "ai-1",
-        title: "フォローアップメール作成と送信",
-        timestamp: new Date('2024-07-10T15:30:00'),
-        details: [
-          "前回提案から2週間経過",
-          "製品導入に関する追加提案",
-          "デモ環境の準備完了報告"
-        ],
-        assignee: "山田太郎",
-        targetCompany: "株式会社ABC",
-        status: 'pending'
-      },
-      {
-        id: "ai-2",
-        title: "提案書v2の作成と価格見直し",
-        timestamp: new Date('2024-07-10T13:20:00'),
-        details: [
-          "提案書v2の作成完了",
-          "価格の見直し",
-          "導入スケジュールの調整",
-          "付帯サービスの追加"
-        ],
-        assignee: "佐藤花子",
-        targetCompany: "GHI商事",
-        status: 'pending'
-      }
-    ];
-    setAiActionItems(initialAIActions);
-  }, []);
 
-  // AI対応項目の承認
-  const handleApproveAI = (itemId: string) => {
+
+  // AI対応項目の実行
+  const handleExecuteAI = async (itemId: string) => {
+    // 生成中状態に変更
     setAiActionItems(prev => prev.map(item => 
-      item.id === itemId ? { ...item, status: 'approved' as const } : item
+      item.id === itemId ? { ...item, status: 'generating' as const } : item
     ));
-    setShowAIModal(false);
-    setSelectedAIItem(null);
+
+    try {
+      // AI処理をシミュレート（実際のAPI呼び出し）
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 生成済み状態に変更
+      setAiActionItems(prev => prev.map(item => 
+        item.id === itemId ? { 
+          ...item, 
+          status: 'completed' as const,
+          generatedContent: {
+            type: 'email',
+            content: `${item.title}の実行結果が生成されました。`,
+            files: [
+              { name: `${item.title}.txt`, type: 'text', size: '1.5KB' }
+            ]
+          }
+        } : item
+      ));
+
+      // タイムラインに追加
+      addTimelineEntry(
+        `AI実行完了: ${aiActionItems.find(item => item.id === itemId)?.title}`,
+        { action: 'ai_execution', result: 'completed' },
+        'ai'
+      );
+
+    } catch (error) {
+      // エラー状態に変更
+      setAiActionItems(prev => prev.map(item => 
+        item.id === itemId ? { ...item, status: 'error' as const } : item
+      ));
+    }
   };
 
-  // AI対応項目の修正
-  const handleModifyAI = (itemId: string) => {
-    setAiActionItems(prev => prev.map(item => 
-      item.id === itemId ? { ...item, status: 'modified' as const } : item
-    ));
-    setShowAIModal(false);
-    setSelectedAIItem(null);
-  };
-
-  // AI対応項目の却下
-  const handleRejectAI = (itemId: string) => {
-    setAiActionItems(prev => prev.map(item => 
-      item.id === itemId ? { ...item, status: 'rejected' as const } : item
-    ));
-    setShowAIModal(false);
-    setSelectedAIItem(null);
+  // AI対応項目の再実行
+  const handleReExecuteAI = (itemId: string) => {
+    handleExecuteAI(itemId);
   };
 
   // AI対応項目の詳細表示
@@ -580,15 +705,42 @@ export default function TaskDetailClient({ task }: { task: Task }) {
               {activeTab === 'ai-status' && (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">ステータス</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">対応内容</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">日時</th>
+                      </tr>
+                    </thead>
                     <tbody>
                       {aiActionItems.map((item) => (
                         <tr 
                           key={item.id} 
-                          className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                          onClick={() => handleShowAIDetails(item)}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
                           <td className="py-3 px-4">
-                            <span className="font-medium text-gray-900">{item.title}</span>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              item.status === 'generating' ? 'bg-blue-100 text-blue-800' :
+                              item.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              item.status === 'error' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {item.status === 'generating' && (
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                              )}
+                              {item.status === 'generating' ? '生成中...' :
+                               item.status === 'completed' ? '生成済み' :
+                               item.status === 'error' ? 'エラー' :
+                               '生成中...'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span 
+                              className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                              onClick={() => handleShowAIDetails(item)}
+                            >
+                              {item.title}
+                            </span>
                           </td>
                           <td className="py-3 px-4 text-gray-600">
                             {item.timestamp.toLocaleString('ja-JP', {
@@ -599,19 +751,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                               minute: '2-digit'
                             })}
                           </td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              item.status === 'approved' ? 'bg-green-100 text-green-800' :
-                              item.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                              item.status === 'modified' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {item.status === 'approved' ? '承認済み' :
-                               item.status === 'rejected' ? '却下' :
-                               item.status === 'modified' ? '修正済み' :
-                               '承認待ち'}
-                            </span>
-                          </td>
+
                         </tr>
                       ))}
                     </tbody>
@@ -625,7 +765,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
               {/* Selaヘッダー */}
               <div className="flex items-center space-x-2 mb-4">
                 <Zap className="w-5 h-5 text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Selaからの提案</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Selaからの対応提案</h3>
               </div>
               
               {/* Sela提案 */}
@@ -634,14 +774,19 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                   {task.aiSuggestions.map((suggestion) => (
                     <div key={suggestion} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-700">{suggestion}</span>
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleExecuteSuggestion(suggestion)}
-                        variant="outline"
-                      >
-                        <Play className="w-4 h-4 mr-2" />
-                        リプレイ
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <div onClick={() => handleExecuteSuggestion(suggestion)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <Play className="mr-2 h-4 w-4" />
+                            実行
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   ))}
                 </div>
@@ -821,7 +966,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
           {/* AI対応詳細モーダル */}
           {showAIModal && selectedAIItem && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">AI対応詳細</h3>
                   <button 
@@ -847,6 +992,24 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                         minute: '2-digit'
                       })}
                     </p>
+                    
+                    {/* ステータス表示 */}
+                    <div className="mb-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        selectedAIItem.status === 'generating' ? 'bg-blue-100 text-blue-800' :
+                        selectedAIItem.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        selectedAIItem.status === 'error' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {selectedAIItem.status === 'generating' && (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        )}
+                        {selectedAIItem.status === 'generating' ? '生成中...' :
+                         selectedAIItem.status === 'completed' ? '生成済み' :
+                         selectedAIItem.status === 'error' ? 'エラー' :
+                         '生成中...'}
+                      </span>
+                    </div>
                   </div>
                   
                   <div>
@@ -861,30 +1024,97 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     </ul>
                   </div>
                   
-                  <div className="flex space-x-2 pt-4 border-t border-gray-200">
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleApproveAI(selectedAIItem.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      承認
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleModifyAI(selectedAIItem.id)}
-                      className="flex-1"
-                    >
-                      修正
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleRejectAI(selectedAIItem.id)}
-                      className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
-                    >
-                      却下
-                    </Button>
+                  {/* 生成済みの場合の結果表示 */}
+                  {selectedAIItem.status === 'completed' && selectedAIItem.generatedContent && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">生成結果</h5>
+                      <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {selectedAIItem.generatedContent.content}
+                        </p>
+                      </div>
+                      
+                      {/* ファイル一覧 */}
+                      {selectedAIItem.generatedContent.files && selectedAIItem.generatedContent.files.length > 0 && (
+                        <div>
+                          <h6 className="text-xs font-medium text-gray-600 mb-2">生成されたファイル</h6>
+                          <div className="space-y-2">
+                            {selectedAIItem.generatedContent.files.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-2">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-700">{file.name}</span>
+                                  <span className="text-xs text-gray-500">({file.size})</span>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  ダウンロード
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* エラーの場合のエラー詳細 */}
+                  {selectedAIItem.status === 'error' && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <h5 className="text-sm font-medium text-red-700 mb-2">エラー詳細</h5>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p className="text-sm text-red-700">
+                          処理中にエラーが発生しました。再実行をお試しください。
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* アクションボタン */}
+                  <div className="flex justify-end pt-4 border-t border-gray-200">
+                    {selectedAIItem.status === 'generating' && (
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        生成中です...
+                      </div>
+                    )}
+                    
+                    {selectedAIItem.status === 'completed' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          {selectedAIItem.generatedContent?.type === 'email' && (
+                            <div onClick={() => console.log('メール送信:', selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                              <Mail className="mr-2 h-4 w-4" />
+                              メール送信
+                            </div>
+                          )}
+                          <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <Play className="mr-2 h-4 w-4" />
+                            再実行
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                    
+                    {selectedAIItem.status === 'error' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <Play className="mr-2 h-4 w-4" />
+                            再実行
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </div>
               </div>
