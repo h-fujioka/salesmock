@@ -260,7 +260,7 @@ export default function Home() {
   const [aiApprovalColumnVisibility, setAiApprovalColumnVisibility] = useState(aiApprovalColumns.map(() => true))
 
   // Selaの実行結果メッセージ用の状態
-  const [selaMessage, setSelaMessage] = useState<string | null>(null);
+  const [selaMessage, setSelaMessage] = useState<React.ReactNode | null>(null);
 
   // コマンドの検証関数
   const validateCommand = (input: string): boolean => {
@@ -725,7 +725,40 @@ export default function Home() {
         next.delete(suggestion);
         return next;
       });
-      setSelaMessage(`Selaが「${suggestion}」を実行しました。結果はAI対応状況タブで確認できます。`);
+      
+      // メッセージを設定
+      const message = (
+        <Alert className="bg-white border border-gray-100 shadow-sm">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+            <div className="ml-3 flex-1">
+              <AlertTitle className="text-gray-900 text-sm font-semibold">
+                実行完了
+              </AlertTitle>
+              <AlertDescription className="mt-1 text-gray-600 text-sm">
+                Selaが「{suggestion}」を実行しました。結果はAI対応状況タブで確認できます。
+              </AlertDescription>
+            </div>
+            <div className="ml-4 flex-shrink-0 flex">
+              <button
+                type="button"
+                onClick={() => setSelaMessage(null)}
+                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500"
+              >
+                <span className="sr-only">閉じる</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </Alert>
+      );
+      setSelaMessage(message);
 
       // 5秒後にメッセージを消去
       setTimeout(() => {
@@ -742,15 +775,7 @@ export default function Home() {
       <main className="flex-1 container mx-auto px-8 pt-8 pb-48">
         <div className="space-y-4">
           {/* Selaの実行結果メッセージ */}
-          {selaMessage && (
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <AlertTitle className="text-green-800 ml-2">実行完了</AlertTitle>
-              <AlertDescription className="text-green-700 ml-2">
-                {selaMessage}
-              </AlertDescription>
-            </Alert>
-          )}
+          {selaMessage}
 
           {/* ホーム画面（初期表示時） */}
           {approvalStep === "none" && !aiResponse && !followupCandidates && (

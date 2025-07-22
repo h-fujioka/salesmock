@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Send, Settings, User, Users, Zap } from "lucide-react";
+import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Send, Settings, User, Users, Zap, X, XCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -138,45 +138,53 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     },
     {
       id: 'ai-completed-2',
-      title: '提案書v2の作成と価格見直し',
+      title: '競合他社分析レポート作成',
       timestamp: new Date(Date.now() - 60 * 60 * 1000),
       details: [
-        'Sela提案: 提案書v2の作成と価格見直し',
-        '自動生成による対応',
-        'AI処理による最適化'
+        'Sela提案: 競合他社の動向分析',
+        '市場調査データの収集',
+        '分析レポートの自動生成'
+      ],
+      assignee: 'Sela',
+      targetCompany: '自動検知',
+      status: 'completed',
+      generatedContent: {
+        type: 'report',
+        content: '競合他社分析レポートが完成しました。\n\n分析結果:\n• 主要競合3社の動向を調査\n• 価格戦略の比較分析\n• 差別化ポイントの特定\n\n次回商談での活用提案も含まれています。',
+        files: [
+          { name: 'competitor_analysis.pdf', type: 'pdf', size: '3.2MB' },
+          { name: 'market_data.xlsx', type: 'excel', size: '1.5MB' }
+        ]
+      }
+    },
+    {
+      id: 'ai-completed-3',
+      title: '顧客ヒアリング議事録作成',
+      timestamp: new Date(Date.now() - 90 * 60 * 1000),
+      details: [
+        'Sela提案: 議事録の自動作成',
+        '音声データの文字起こし',
+        '重要ポイントの抽出'
       ],
       assignee: 'Sela',
       targetCompany: '自動検知',
       status: 'completed',
       generatedContent: {
         type: 'document',
-        content: '提案書v2の作成と価格見直しが完了しました。\n\n更新内容:\n• 技術仕様の詳細化\n• 価格体系の見直し\n• 導入スケジュールの調整\n\n自動生成による最適化が完了し、次回アクションの提案も生成されました。',
+        content: '顧客ヒアリングの議事録を作成しました。\n\n議事録内容:\n• 会議日時: 2024年7月7日 14:00-15:30\n• 参加者: 顧客担当者、営業担当\n• 主要議題: プロジェクト要件の詳細確認\n• 決定事項: 次回ミーティングの日程調整\n\nアクションアイテムも自動抽出されています。',
         files: [
-          { name: 'proposal_v2.pdf', type: 'pdf', size: '3.5MB' },
-          { name: 'price_revision.xlsx', type: 'excel', size: '856KB' }
+          { name: 'meeting_minutes.docx', type: 'word', size: '2.8MB' },
+          { name: 'action_items.txt', type: 'text', size: '0.5KB' }
         ]
       }
-    },
-    {
-      id: 'ai-error-1',
-      title: '関連資料の自動収集・整理',
-      timestamp: new Date(Date.now() - 90 * 60 * 1000),
-      details: [
-        'Sela提案: 関連資料の自動収集・整理',
-        '自動生成による対応',
-        'AI処理による最適化'
-      ],
-      assignee: 'Sela',
-      targetCompany: '自動検知',
-      status: 'error'
     }
   ]);
-  
-
   const [selectedAIItem, setSelectedAIItem] = useState<AIActionItem | null>(null);
   const [showAIModal, setShowAIModal] = useState(false);
-  // 実行中の提案を管理
   const [executingSuggestions, setExecutingSuggestions] = useState<Set<string>>(new Set());
+  
+  // Selaの実行結果アラート用の状態
+  const [selaAlert, setSelaAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // コメント追加ハンドラー
   const handleAddComment = () => {
@@ -295,9 +303,16 @@ export default function TaskDetailClient({ task }: { task: Task }) {
         'ai'
       );
 
-      // Selaレスポンスをシミュレート
-      const response = `Selaが「${suggestion}」を実行しました。結果はAI対応状況タブで確認できます。`;
-      setMessages(prev => [...prev, { content: response, type: 'answer' }]);
+      // アラートを表示（チャットメッセージではなく）
+      setSelaAlert({
+        message: `Selaが「${suggestion}」を実行しました。結果はAI対応状況タブで確認できます。`,
+        type: 'success'
+      });
+
+      // 5秒後にアラートを消去
+      setTimeout(() => {
+        setSelaAlert(null);
+      }, 5000);
 
     } catch (error) {
       // エラー状態に更新
@@ -305,9 +320,16 @@ export default function TaskDetailClient({ task }: { task: Task }) {
         item.id === newAIAction.id ? { ...item, status: 'error' } : item
       ));
 
-      // エラーメッセージ
-      const errorResponse = `「${suggestion}」の実行中にエラーが発生しました。再実行をお試しください。`;
-      setMessages(prev => [...prev, { content: errorResponse, type: 'answer' }]);
+      // エラーアラートを表示
+      setSelaAlert({
+        message: `「${suggestion}」の実行中にエラーが発生しました。再実行をお試しください。`,
+        type: 'error'
+      });
+
+      // 5秒後にアラートを消去
+      setTimeout(() => {
+        setSelaAlert(null);
+      }, 5000);
     } finally {
       setExecutingSuggestions(prev => {
         const newSet = new Set(prev);
@@ -423,6 +445,20 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const handleShowAIDetails = (item: AIActionItem) => {
     setSelectedAIItem(item);
     setShowAIModal(true);
+  };
+
+  // 顧客向け編集ハンドラー
+  const handleCustomerEdit = (item: AIActionItem) => {
+    console.log('顧客向け編集:', item.title);
+    // TODO: 顧客向け編集モーダルを開く
+    alert(`「${item.title}」の顧客向け編集機能を実装予定です。`);
+  };
+
+  // 送付準備ハンドラー
+  const handlePrepareSend = (item: AIActionItem) => {
+    console.log('送付準備:', item.title);
+    // TODO: 送付準備画面に遷移
+    alert(`「${item.title}」の送付準備機能を実装予定です。`);
   };
 
   return (
@@ -777,6 +813,41 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                 <h3 className="text-lg font-semibold text-gray-900">Selaからの対応提案</h3>
               </div>
               
+              {/* Sela実行結果アラート */}
+              {selaAlert && (
+                <div className="mb-4">
+                  <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                          {selaAlert.type === 'success' ? (
+                            <CheckCircle2 className="h-4 w-4 text-gray-600" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-gray-600" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="ml-3 flex-1">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {selaAlert.type === 'success' ? '実行完了' : '実行エラー'}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700">
+                          {selaAlert.message}
+                        </p>
+                      </div>
+                      <div className="ml-3 flex-shrink-0">
+                        <button
+                          onClick={() => setSelaAlert(null)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* Sela提案 */}
               <div className="mb-6">
                 <div className="space-y-3">
@@ -983,7 +1054,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">AI対応詳細</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{selectedAIItem.title}</h3>
                   <button 
                     onClick={() => {
                       setShowAIModal(false);
@@ -997,7 +1068,6 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                 
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">{selectedAIItem.title}</h4>
                     <p className="text-xs text-gray-500 mb-3">
                       {selectedAIItem.timestamp.toLocaleString('ja-JP', {
                         year: 'numeric',
@@ -1007,36 +1077,6 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                         minute: '2-digit'
                       })}
                     </p>
-                    
-                    {/* ステータス表示 */}
-                    <div className="mb-4">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedAIItem.status === 'generating' ? 'bg-blue-100 text-blue-800' :
-                        selectedAIItem.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        selectedAIItem.status === 'error' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {selectedAIItem.status === 'generating' && (
-                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                        )}
-                        {selectedAIItem.status === 'generating' ? '生成中...' :
-                         selectedAIItem.status === 'completed' ? '生成済み' :
-                         selectedAIItem.status === 'error' ? 'エラー' :
-                         '生成中...'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">詳細内容</h5>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {selectedAIItem.details.map((detail, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>{detail}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                   
                   {/* 生成済みの場合の結果表示 */}
@@ -1045,7 +1085,86 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                       <h5 className="text-sm font-medium text-gray-700 mb-2">生成結果</h5>
                       <div className="bg-gray-50 rounded-lg p-3 mb-3">
                         <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {selectedAIItem.generatedContent.content}
+                          {selectedAIItem.title === '見積書に競合他社との比較表を追加' && 
+                            `競合他社との比較表を追加した見積書が完成しました。
+
+比較表の内容：
+• 主要競合3社（A社、B社、C社）の機能比較
+• 価格比較表（初期費用・月額費用・年間総額）
+• 導入実績数の比較
+• サポート体制の比較
+
+見積書の更新内容：
+• 競合比較表を第3章として追加
+• 自社の優位性を明確に示すポイントを強調
+• 顧客の意思決定をサポートする情報を整理
+
+次回アクション：
+• 顧客への見積書送付
+• 競合比較表についての説明資料の準備
+• フォローアップミーティングの日程調整`}
+                          {selectedAIItem.title === 'フォローアップメール作成と送信' && 
+                            `フォローアップメールの作成と送信が完了しました。
+
+送信内容：
+• 件名：プロジェクト進捗について
+• 送信先：顧客担当者（山田様）
+• 送信日時：2024年7月22日 15:30
+
+メールの要点：
+• 現在の進捗状況の報告
+• 次回ミーティングの提案（来週火曜日）
+• 質問やご要望があればお気軽にご連絡ください
+
+添付ファイル：
+• 進捗報告書（PDF）
+• 次回ミーティングの議題案（Word）`}
+                          {selectedAIItem.title === '競合他社分析レポート作成' && 
+                            `競合他社分析レポートが完成しました。
+
+分析対象：
+• 主要競合3社の詳細調査
+• 市場シェアの分析
+• 技術動向の調査
+
+分析結果：
+• A社：技術力は高いが価格が高額
+• B社：価格は安いが機能が限定的
+• C社：バランスは良いが導入実績が少ない
+
+自社の優位性：
+• 価格競争力（B社より20%安価）
+• 機能の充実度（A社と同等）
+• 導入実績（業界トップクラス）
+
+次回商談での活用ポイント：
+• 競合比較表の提示
+• 自社の優位性の説明
+• 顧客の課題に合わせた提案`}
+                          {selectedAIItem.title === '顧客ヒアリング議事録作成' && 
+                            `顧客ヒアリングの議事録を作成しました。
+
+会議概要：
+• 日時：2024年7月22日 14:00-15:30
+• 参加者：顧客担当者（田中様）、営業担当（佐藤）
+• 会議形式：オンライン（Zoom）
+
+主要議題：
+• プロジェクト要件の詳細確認
+• 予算の確認
+• スケジュールの調整
+
+決定事項：
+• プロジェクト開始日：8月1日
+• 予算上限：500万円
+• 完了予定：12月末
+
+アクションアイテム：
+• 詳細仕様書の作成（営業担当）
+• 契約書の準備（法務）
+• 次回ミーティングの日程調整（営業担当）`}
+                          {!['見積書に競合他社との比較表を追加', 'フォローアップメール作成と送信', '競合他社分析レポート作成', '顧客ヒアリング議事録作成'].includes(selectedAIItem.title) && 
+                            selectedAIItem.generatedContent.content}
                         </p>
                       </div>
                       
@@ -1094,25 +1213,35 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     )}
                     
                     {selectedAIItem.status === 'completed' && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          {selectedAIItem.generatedContent?.type === 'email' && (
-                            <div onClick={() => console.log('メール送信:', selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                              <Mail className="mr-2 h-4 w-4" />
-                              メール送信
-                            </div>
-                          )}
-                          <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                            <Play className="mr-2 h-4 w-4" />
-                            再実行
-                          </div>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleCustomerEdit(selectedAIItem)}
+                          className="flex items-center space-x-2"
+                        >
+                          <FileText className="h-4 w-4" />
+                          <span>顧客向け編集</span>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handlePrepareSend(selectedAIItem)}
+                          className="flex items-center space-x-2"
+                        >
+                          <Mail className="h-4 w-4" />
+                          <span>送付準備</span>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleReExecuteAI(selectedAIItem.id)}
+                          className="flex items-center space-x-2"
+                        >
+                          <Play className="h-4 w-4" />
+                          <span>再実行</span>
+                        </Button>
+                      </div>
                     )}
                     
                     {selectedAIItem.status === 'error' && (
