@@ -673,7 +673,7 @@ export default function CasesPage() {
       accessorKey: "name",
       header: "案件名",
       cell: info => (
-        <Link href={`/cases/${info.row.original.id}`} className="font-medium text-gray-900 hover:text-gray-600">
+        <Link href="/cases/case-1" className="font-medium text-gray-900 hover:text-gray-600">
           {info.getValue() as string}
         </Link>
       )

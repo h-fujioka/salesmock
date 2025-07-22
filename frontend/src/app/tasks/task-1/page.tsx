@@ -1,16 +1,7 @@
-import { notFound } from "next/navigation";
 import TaskDetailClient from "./TaskDetailClient";
 
-// 静的パラメータを生成する関数
-export async function generateStaticParams() {
-  return [
-    { id: 'task-001' },
-    { id: 'task-002' },
-  ];
-}
-
-export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default function TaskDetailPage() {
+  const id = "task-001"; // 固定のIDを使用
   
   // ダミータスクデータ
   const dummyTasks = [
@@ -60,7 +51,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   const task = dummyTasks.find(t => t.taskId === id);
   
-  if (!task) return notFound();
+  if (!task) return <div>Task not found</div>;
 
   return <TaskDetailClient task={task} />;
 }

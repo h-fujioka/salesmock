@@ -350,7 +350,7 @@ export default function Home() {
       header: "タスク名", 
       cell: info => (
         <Link 
-          href={`/tasks/${info.row.original.taskId}`}
+          href="/tasks/task-1"
           className="text-gray-600 hover:text-gray-900 hover:underline cursor-pointer transition-colors"
           style={{ textDecoration: "none" }}
         >
