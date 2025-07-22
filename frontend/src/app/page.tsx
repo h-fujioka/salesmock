@@ -135,7 +135,7 @@ const taskColumns: ColumnDef<any, React.ReactNode>[] = [
       const row = info.row.original;
       return (
         <Link 
-          href={`/tasks/${row.taskId}`}
+          href={`/tasks/task-1`}
           className="text-gray-600 hover:text-gray-900 hover:underline cursor-pointer transition-colors"
           style={{ textDecoration: "none" }}
         >

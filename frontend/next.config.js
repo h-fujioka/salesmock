@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 動的ルートがあるため静的エクスポートを無効化
-  // output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
+  output: 'export',
+  distDir: 'out',
   basePath: process.env.NODE_ENV === 'production' ? '/salesmock' : '',
   images: {
     unoptimized: true,
