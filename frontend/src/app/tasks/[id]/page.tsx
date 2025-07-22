@@ -1,63 +1,49 @@
-'use client'
+import TaskDetailClient from "../task-1/TaskDetailClient";
 
-import { useParams } from 'next/navigation'
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Calendar, Bell, User, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-
-// タスクデータの型定義
-interface TaskDetail {
-  taskId: string
-  task: string
-  project: string
-  customerType: string
-  priority: string
-  assignee: string
-  deadline: string
-  daysLeft: string
-  status: string
-  auto: string
-  approval: string
-  description?: string
-  updates?: {
-    date: string
-    content: string
-    user: string
-  }[]
+// 静的生成するパラメータを定義
+export async function generateStaticParams() {
+  // タスクIDの一覧を返す
+  return [
+    { id: 'task-001' },
+    { id: 'task-002' },
+    { id: 'task-003' },
+    { id: 'task-004' },
+    { id: 'task-005' },
+    { id: 'task-006' },
+    { id: 'task-007' },
+    { id: 'task-008' },
+    { id: 'task-009' },
+    { id: 'task-010' },
+  ]
 }
 
-// タスク詳細のダミーデータ
-const taskDetails: { [key: string]: TaskDetail } = {
-  "task-001": {
+// ダミータスクデータ
+const dummyTasks = [
+  {
     taskId: "task-001",
     task: "顧客Aへ見積送付",
-    project: "A社案件",
+    caseName: "見積書について",
+    project: "リーガル社新規銃中案件",
     customerType: "新規",
     priority: "高",
     assignee: "山田太郎",
     deadline: "2024/07/10",
     daysLeft: "3日",
     status: "進行中",
-    auto: "AI自動",
+    auto: "Sela自動",
     approval: "承認待ち",
-    description: "A社向けの新規案件の見積書を作成し送付する。競合他社との比較表も含める。",
-    updates: [
-      {
-        date: "2024/07/07 15:30",
-        content: "見積書の初版を作成完了",
-        user: "山田太郎"
-      },
-      {
-        date: "2024/07/07 16:45",
-        content: "競合他社との比較表を追加",
-        user: "Sela"
-      }
+    description: "顧客Aに見積書を送付するタスクです。前回の商談内容を踏まえて、適切な価格設定とサービス内容を含めた見積書を作成します。",
+    progress: 60,
+    aiSuggestions: [
+      "見積書に競合他社との比較表を追加",
+      "顧客の予算に合わせた複数プランの提示",
+      "過去の成功事例を添付資料として追加"
     ]
   },
-  "task-002": {
+  {
     taskId: "task-002",
     task: "商談Bの準備",
+    caseName: "次回商談の件",
     project: "B社案件",
     customerType: "既存",
     priority: "中",
@@ -67,154 +53,20 @@ const taskDetails: { [key: string]: TaskDetail } = {
     status: "未着手",
     auto: "手動",
     approval: "",
-    description: "B社との定例商談の準備。前回の議事録の内容を確認し、新規提案資料を作成する。",
-    updates: [
-      {
-        date: "2024/07/07 10:00",
-        content: "前回の議事録を確認",
-        user: "鈴木一郎"
-      }
+    description: "B社との次回商談に向けた準備を行います。前回の議事録を確認し、顧客の課題とニーズを整理して、効果的な提案資料を作成します。",
+    progress: 0,
+    aiSuggestions: [
+      "前回商談の議事録から主要な課題を抽出",
+      "競合他社の動向調査を実施",
+      "顧客の業界動向を調査して提案内容に反映"
     ]
   }
-}
+]
 
-export default function TaskDetail() {
-  const params = useParams()
-  const taskId = params.id as string
-  const task = taskDetails[taskId]
+export default function TaskDetailPage({ params }: { params: { id: string } }) {
+  const task = dummyTasks.find(t => t.taskId === params.id);
+  
+  if (!task) return <div>Task not found</div>;
 
-  if (!task) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <span className="text-xl font-bold tracking-tight">タスク詳細</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon"><Calendar className="w-6 h-6" /></Button>
-            <Button variant="ghost" size="icon"><Bell className="w-6 h-6" /></Button>
-            <Avatar className="w-8 h-8">
-              <AvatarFallback>
-                <User className="w-5 h-5 text-gray-500" />
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </header>
-        <main className="container mx-auto py-8">
-          <div className="bg-white rounded-xl shadow p-6">
-            <h1 className="text-xl font-semibold text-gray-900">タスクが見つかりません</h1>
-            <p className="mt-2 text-gray-600">指定されたタスクは存在しないか、アクセス権限がありません。</p>
-            <Link href="/" className="mt-4 inline-block text-blue-600 hover:text-blue-800">
-              ホームに戻る
-            </Link>
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <span className="text-xl font-bold tracking-tight">タスク詳細</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon"><Calendar className="w-6 h-6" /></Button>
-          <Button variant="ghost" size="icon"><Bell className="w-6 h-6" /></Button>
-          <Avatar className="w-8 h-8">
-            <AvatarFallback>
-              <User className="w-5 h-5 text-gray-500" />
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      </header>
-
-      <main className="container mx-auto py-8">
-        <div className="space-y-6">
-          {/* タスク基本情報 */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">{task.task}</h1>
-                <p className="mt-1 text-gray-600">{task.project}</p>
-              </div>
-              <span className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium ${
-                task.priority === '高' ? 'bg-red-50 text-red-700' : 
-                task.priority === '中' ? 'bg-yellow-50 text-yellow-700' :
-                'bg-gray-50 text-gray-700'
-              }`}>
-                {task.priority}
-              </span>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm font-medium text-gray-500">担当者</p>
-                <p className="mt-1 text-gray-900">{task.assignee}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">顧客区分</p>
-                <p className="mt-1 text-gray-900">{task.customerType}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">期限</p>
-                <p className="mt-1 text-gray-900">{task.deadline} (残り{task.daysLeft})</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">ステータス</p>
-                <p className="mt-1 text-gray-900">{task.status}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">実行タイプ</p>
-                <p className="mt-1 text-gray-900">{task.auto}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">承認状態</p>
-                <p className="mt-1 text-gray-900">{task.approval || '-'}</p>
-              </div>
-            </div>
-
-            {task.description && (
-              <div className="mt-6">
-                <p className="text-sm font-medium text-gray-500">タスク詳細</p>
-                <p className="mt-1 text-gray-900">{task.description}</p>
-              </div>
-            )}
-          </div>
-
-          {/* 更新履歴 */}
-          {task.updates && task.updates.length > 0 && (
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900">更新履歴</h2>
-              <div className="mt-4 space-y-4">
-                {task.updates.map((update, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback>
-                          {update.user === 'Sela' ? 'AI' : update.user[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{update.user}</p>
-                      <p className="text-sm text-gray-500">{update.date}</p>
-                      <p className="mt-1 text-gray-900">{update.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  )
+  return <TaskDetailClient task={task} />;
 } 
