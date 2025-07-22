@@ -727,7 +727,7 @@ export default function Home() {
             <>
               {/* タイトルとコマンド入力欄 */}  
               <div className="w-full flex flex-col items-center pt-8 pb-4">
-                <h1 className="text-center font-semibold text-[32px] mb-8">千里の道も一歩から</h1>
+                <h1 className="text-center font-semibold text-[32px] mb-8">今日は何をしましょうか？</h1>
                 <div className="w-full max-w-[1000px] flex justify-center">
                   <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex items-center gap-4 bg-white border border-gray-100 rounded-xl shadow px-4 py-3">
