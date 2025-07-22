@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Mail, Send, User, Users, Zap } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // 案件詳細の型定義
@@ -88,9 +88,8 @@ function Header() {
 }
 
 export default function CaseDetailPage() {
-  const params = useParams();
   const router = useRouter();
-  const caseId = params.id as string;
+  const caseId = "case-1"; // 固定のIDを使用
 
   // 状態管理
   const [activeTab, setActiveTab] = useState<'timeline' | 'communication' | 'ai-status'>('timeline');
