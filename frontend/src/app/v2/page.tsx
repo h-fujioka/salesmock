@@ -23,7 +23,7 @@ function DashboardCard({ title, children }: { title: string; children: React.Rea
 // ヘッダーコンポーネント
 function Header({ onClear }: { onClear: () => void }) {
   return (
-    <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
+    <header className="h-14 min-h-14 w-full flex items-center justify-between bg-white/80 border-b shadow-sm">
       <span className="text-xl font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
@@ -98,7 +98,7 @@ export default function HomeV2() {
     <div className="flex flex-col min-h-screen">
       <Header onClear={handleClear} />
       
-      <main className="flex-1 container mx-auto px-8 pt-8 pb-32">
+      <main className="flex-1 container mx-auto pt-8 pb-32">
         <div className="space-y-8">
           {/* タイトル */}
           <h1 className="text-center font-semibold text-[64px]">SalesOn v2</h1>
