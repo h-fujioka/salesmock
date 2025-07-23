@@ -86,7 +86,7 @@ type AIActionItem = {
 // ヘッダーコンポーネント
 function Header() {
   return (
-    <header className="h-14 min-h-14 w-full flex items-center justify-between bg-white/80 border-b shadow-sm">
+    <header className="h-14 min-h-14 w-full flex items-center justify-between bg-white/80 border-b shadow-sm px-8">
       <span className="text-xl font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
@@ -716,7 +716,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     <div className="min-h-screen bg-white">
       <Header />
       {/* パンクズリスト */}
-      <nav className="flex items-center space-x-2 text-xs text-gray-600 pt-6 mb-6">
+      <nav className="flex items-center space-x-2 text-xs text-gray-600 px-8 pt-6 mb-6">
         <Link href="/" className="flex items-center hover:text-gray-900 transition-colors">
           <Home className="w-4 h-4" />
         </Link>
@@ -726,7 +726,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
         <span className="text-gray-900 font-medium">{task.task}</span>
       </nav>
 
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 pt-0 pb-8">
+      <div className="max-w-7xl mx-auto px-8 sm:px-6 lg:px-8 pt-0 pb-8">
         {/* タイトル */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{task.task}</h1>
