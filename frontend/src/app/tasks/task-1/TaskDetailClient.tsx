@@ -27,6 +27,14 @@ type Message = {
   type: 'question' | 'answer' | 'system';
 };
 
+// AIチャットメッセージ型の定義
+type AIChatMessage = {
+  id: string;
+  content: string;
+  type: 'user' | 'ai';
+  timestamp: Date;
+};
+
 type Comment = {
   id: string;
   content: string;
@@ -102,11 +110,13 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const [commentText, setCommentText] = useState("");
   const [aiActionItems, setAiActionItems] = useState<AIActionItem[]>([
     {
+
       id: '1',
       title: 'フォローアップメール作成と送信',
       timestamp: new Date('2025-07-23T08:49:00'),
+
       details: [
-        'Sela提案: フォローアップメール作成と送信',
+        'Sela提案: フォローアップメール作成と最適化',
         '自動生成による対応',
         'AI処理による最適化'
       ],
@@ -123,6 +133,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 • 内容: 進捗報告と次回ミーティングの提案
 
 自動生成による最適化が完了し、次回アクションの提案も生成されました。`,
+
         files: [
           { name: 'followup_email.txt', type: 'text', size: '1.8KB' },
           { name: 'progress_report.pdf', type: 'pdf', size: '2.1MB' }
@@ -137,11 +148,13 @@ export default function TaskDetailClient({ task }: { task: Task }) {
         'Sela提案: 見積書の改善',
         '競合他社との比較表追加',
         '顧客への提案価値向上'
-      ],
-      assignee: '山田太郎',
-      targetCompany: '株式会社サンプル',
-      status: 'unconfirmed',
-      generatedContent: {
+      id: 'ai-completed-2',
+      title: '競合他社分析レポート作成と最適化',
+      timestamp: new Date(Date.now() - 60 * 60 * 1000),
+      details: [
+        'Sela提案: 競合他社の動向分析',
+        '市場調査データの収集',
+        '分析レポートの自動生成'
         type: 'document',
         content: `見積書に競合他社との比較表を追加しました。
 
@@ -181,7 +194,6 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const [showSelaRequestDrawer, setShowSelaRequestDrawer] = useState(false);
   const [selaRequestMessages, setSelaRequestMessages] = useState<Message[]>([]);
   const [selaRequestCommand, setSelaRequestCommand] = useState("");
-
 
   // コメント追加ハンドラー
   const handleAddComment = () => {
@@ -443,10 +455,155 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     handleExecuteAI(itemId);
   };
 
-  // AI対応項目の詳細表示
+  // AI対応項目の詳細表示（ドロワー用）
   const handleShowAIDetails = (item: AIActionItem) => {
     setSelectedAIItem(item);
-    setShowAIModal(true);
+    setShowAIDrawer(true);
+    // チャット履歴をリセット
+    setAiChatMessages([]);
+  };
+
+  // ドロワーを閉じる
+  const handleCloseDrawer = () => {
+    setShowAIDrawer(false);
+    setSelectedAIItem(null);
+  };
+
+  // 顧客向け編集ハンドラー
+  const handleCustomerEdit = (item: AIActionItem) => {
+    console.log('顧客向け編集:', item.title);
+    // TODO: 顧客向け編集モーダルを開く
+    alert(`「${item.title}」の顧客向け編集機能を実装予定です。`);
+  };
+
+  // 送付準備ハンドラー
+  const handlePrepareSend = (item: AIActionItem) => {
+    console.log('送付準備:', item.title);
+    // TODO: 送付準備画面に遷移
+    alert(`「${item.title}」の送付準備機能を実装予定です。`);
+  };
+
+  // AIチャットメッセージ送信
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim() || !selectedAIItem) return;
+
+    // ユーザーメッセージを追加
+    const userMessage: AIChatMessage = {
+      id: `chat-${Date.now()}`,
+      content: chatInput,
+      type: 'user',
+      timestamp: new Date()
+    };
+    
+    setAiChatMessages(prev => [...prev, userMessage]);
+    setChatInput("");
+
+    // AIレスポンスをシミュレート
+    setTimeout(() => {
+      const aiResponse: AIChatMessage = {
+        id: `ai-${Date.now()}`,
+        content: `「${selectedAIItem.title}」についてのご質問ですね。\n\n${chatInput}の内容を確認しました。生成された内容について、より具体的な修正や改善点があればお聞かせください。`,
+        type: 'ai',
+        timestamp: new Date()
+      };
+      
+      setAiChatMessages(prev => [...prev, aiResponse]);
+    }, 1000);
+  };
+
+  // 内容を調整する（AI最適化）
+  const handleEditContent = (item: AIActionItem) => {
+    if (item.status === 'generating') {
+      alert('生成中の内容は調整できません。');
+      return;
+    }
+    // AIによる内容の最適化を実行
+    alert(`「${item.title}」の内容をAIが最適化しています...`);
+    // TODO: AIによる内容最適化の実装
+    setTimeout(() => {
+      alert('AIによる内容最適化が完了しました。');
+    }, 2000);
+  };
+
+  // 内容をコピーする
+  const handleCopyContent = (item: AIActionItem) => {
+    if (item.status === 'generating') {
+      alert('生成中の内容はコピーできません。');
+      return;
+    }
+    if (item.generatedContent?.content) {
+      navigator.clipboard.writeText(item.generatedContent.content);
+      alert('最適化された内容をコピーしました。');
+    } else {
+      alert('コピーする内容がありません。');
+    }
+  };
+
+  // 送信準備を実行する（AI最適化）
+  const handlePrepareForSending = (item: AIActionItem) => {
+    if (item.status === 'generating') {
+      alert('生成中の内容は送信準備できません。');
+      return;
+    }
+    // AIによる送信準備（最適化、フォーマット調整、添付ファイル準備など）
+    alert(`「${item.title}」の送信準備をAIが実行しています...`);
+    
+    setTimeout(() => {
+      setAiActionItems(prev => prev.map(i => 
+        i.id === item.id ? { ...i, isPreparedForSending: true } : i
+      ));
+      alert('AIによる送信準備が完了しました。内容を確認してから手動で送信してください。');
+    }, 2000);
+  };
+
+  // 最終確認を実行する（人間による確認）
+  const handleFinalReview = (item: AIActionItem) => {
+    if (confirm(`「${item.title}」の内容を最終確認しますか？\n\n確認後、手動でメールクライアントから送信してください。`)) {
+      // 最終確認の実行
+      alert('最終確認が完了しました。メールクライアントで手動送信を行ってください。');
+      
+      // 送信準備状態をリセット
+      setAiActionItems(prev => prev.map(i => 
+        i.id === item.id ? { ...i, isPreparedForSending: false } : i
+      ));
+    }
+  };
+
+  // ワンクリック送信ハンドラー
+  const handleOneClickSend = (item: AIActionItem) => {
+    if (item.status === 'generating') {
+      alert('生成中の内容はワンクリック送信できません。');
+      return;
+    }
+    if (!item.isPreparedForSending) {
+      alert('送信準備が完了していません。先に「送信準備」ボタンを押してください。');
+      return;
+    }
+    if (item.generatedContent?.content) {
+      if (confirm(`「${item.title}」の内容をワンクリック送信しますか？\n\n送信内容:\n${item.generatedContent.content.substring(0, 100)}...`)) {
+        // 実際の送信ロジックをここに追加
+        alert('ワンクリック送信が完了しました！');
+        
+        // 送信準備状態をリセット
+        setAiActionItems(prev => prev.map(i => 
+          i.id === item.id ? { ...i, isPreparedForSending: false } : i
+        ));
+        
+        // 送信履歴をタイムラインに追加
+        addTimelineEntry(
+          `「${item.title}」をワンクリック送信`,
+          { 
+            type: 'email_sent',
+            content: item.generatedContent.content,
+            timestamp: new Date()
+          },
+          'human',
+          'approved'
+        );
+      }
+    } else {
+      alert('送信する内容がありません。');
+    }
   };
 
   // メール送信ハンドラー
@@ -878,6 +1035,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                   </tbody>
                 </table>
               </div>
+
             </div>
           </div>
 
