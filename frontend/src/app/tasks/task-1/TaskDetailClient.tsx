@@ -1040,7 +1040,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
           <div className="bg-white rounded-lg border shadow-sm">
             {/* 案件名（一番上） */}
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-medium text-gray-900">案件名</h3>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                   <Settings className="w-3 h-3" />
@@ -1051,7 +1051,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* タスク名 */}
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-medium text-gray-900">タスク名</h3>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                   <Settings className="w-3 h-3" />
@@ -1062,7 +1062,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* 期限・進捗 */}
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-medium text-gray-900">期限・進捗</h3>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                   <Settings className="w-3 h-3" />
@@ -1095,7 +1095,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* 担当者 */}
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-medium text-gray-900">担当者</h3>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                   <Settings className="w-3 h-3" />
@@ -1111,7 +1111,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* プロジェクト */}
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-medium text-gray-900">プロジェクト</h3>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                   <Settings className="w-3 h-3" />
@@ -1122,7 +1122,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* 説明 */}
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-medium text-gray-900">説明</h3>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                   <Settings className="w-3 h-3" />
@@ -1133,7 +1133,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* 優先度 */}
             <div className="p-4 border-b border-gray-100">
-              <h3 className="text-base font-medium text-gray-900 mb-2">優先度</h3>
+              <h3 className="text-base font-medium text-gray-900 mb-1">優先度</h3>
               <div className="space-y-1">
                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-base font-medium ${
                   task.priority === '高' ? 'bg-red-100 text-red-800' :
@@ -1147,7 +1147,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* ステータス */}
             <div className="p-4 border-b border-gray-100">
-              <h3 className="text-base font-medium text-gray-900 mb-2">ステータス</h3>
+              <h3 className="text-base font-medium text-gray-900 mb-1">ステータス</h3>
               <div className="space-y-1">
                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-base font-medium ${
                   task.status === '完了' ? 'bg-green-100 text-green-800' :
@@ -1161,7 +1161,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
             {/* 顧客属性 */}
             <div className="p-4">
-              <h3 className="text-base font-medium text-gray-900 mb-2">顧客属性</h3>
+              <h3 className="text-base font-medium text-gray-900 mb-1">顧客属性</h3>
               <div className="space-y-1">
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-base font-medium bg-purple-100 text-purple-800">
                   {task.customerType}
