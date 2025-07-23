@@ -70,6 +70,7 @@ type AIActionItem = {
   assignee: string;
   targetCompany: string;
   status: 'generating' | 'completed' | 'error' | 'unconfirmed' | 'confirmed';
+  isPreparedForSending?: boolean;
   generatedContent?: {
     type: 'email' | 'document' | 'analysis' | 'report';
     content: string;
@@ -148,13 +149,11 @@ export default function TaskDetailClient({ task }: { task: Task }) {
         'Sela提案: 見積書の改善',
         '競合他社との比較表追加',
         '顧客への提案価値向上'
-      id: 'ai-completed-2',
-      title: '競合他社分析レポート作成と最適化',
-      timestamp: new Date(Date.now() - 60 * 60 * 1000),
-      details: [
-        'Sela提案: 競合他社の動向分析',
-        '市場調査データの収集',
-        '分析レポートの自動生成'
+      ],
+      assignee: '山田太郎',
+      targetCompany: '株式会社サンプル',
+      status: 'unconfirmed',
+      generatedContent: {
         type: 'document',
         content: `見積書に競合他社との比較表を追加しました。
 
@@ -194,6 +193,11 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const [showSelaRequestDrawer, setShowSelaRequestDrawer] = useState(false);
   const [selaRequestMessages, setSelaRequestMessages] = useState<Message[]>([]);
   const [selaRequestCommand, setSelaRequestCommand] = useState("");
+
+  // AIドロワー用の状態
+  const [showAIDrawer, setShowAIDrawer] = useState(false);
+  const [aiChatMessages, setAiChatMessages] = useState<AIChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
 
   // コメント追加ハンドラー
   const handleAddComment = () => {
@@ -804,13 +808,13 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                               )}
                             </div>
                                                           <span className="text-base text-gray-500">
-                                {entry.timestamp.toLocaleString('ja-JP', {
-                                  month: 'numeric',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
+                              {entry.timestamp.toLocaleString('ja-JP', {
+                                month: 'numeric',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
                           </div>
                           <p className="text-base text-gray-700">{entry.action}</p>
                           {entry.reason && (
@@ -874,15 +878,15 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
                                             {/* Selaからの対応提案 */}
                {activeTab === 'sela' && (
-                 <div>
+                <div>
                    {/* アラート表示 */}
                    {alertMessage && (
                      <div className="mb-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                       <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2">
                          <CheckCircle className="w-5 h-5 text-gray-600" />
                          <span className="text-sm text-gray-700">{alertMessage}</span>
-                       </div>
-                     </div>
+                            </div>
+                          </div>
                    )}
                      
                      {/* Sela提案 */}
@@ -897,7 +901,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                                <div className="flex items-center space-x-2 text-sm text-gray-500">
                                  <Loader2 className="h-4 w-4 animate-spin" />
                                  <span>生成中...</span>
-                               </div>
+                        </div>
                              ) : (
                                <div className="flex space-x-2">
                                  <Button 
@@ -927,13 +931,13 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                                    <Plus className="w-4 h-4 mr-1" />
                                    対応リストに追加
                                  </Button>
-                               </div>
+                            </div>
                              )}
-                           </div>
+                    </div>
                          );
                        })}
-                     </div>
-                   </div>
+                        </div>
+                  </div>
 
 
 
@@ -950,10 +954,10 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                                : 'bg-gray-100 text-gray-800'
                            }`}>
                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                           </div>
-                         </div>
-                       ))}
-                     </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                    </div>
 
                    {/* 入力欄 */}
@@ -967,10 +971,10 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                      />
                      <Button onClick={handleSend} disabled={!command.trim()}>
                        <Send className="w-4 h-4" />
-                     </Button>
-                   </div>
-                 </div>
-               )}
+                        </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 対応タスクリスト */}
@@ -979,62 +983,62 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                 <CheckCircle className="w-5 h-5 text-gray-600" />
                 <h3 className="text-lg font-semibold text-gray-900">対応タスクリスト</h3>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-4 font-medium text-gray-900">確認状況</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">対応内容</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">日時</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {aiActionItems.map((item) => (
-                      <tr 
-                        key={item.id} 
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="py-3 px-4">
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">対応内容</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">日時</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aiActionItems.map((item) => (
+                        <tr 
+                          key={item.id} 
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="py-3 px-4">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-base font-medium ${
-                            item.status === 'generating' ? 'bg-blue-100 text-blue-800' :
+                              item.status === 'generating' ? 'bg-blue-100 text-blue-800' :
                             item.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                             item.status === 'unconfirmed' ? 'bg-yellow-100 text-yellow-800' :
-                            item.status === 'error' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {item.status === 'generating' && (
-                              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            )}
-                            {item.status === 'generating' ? '生成中...' :
+                              item.status === 'error' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {item.status === 'generating' && (
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                              )}
+                              {item.status === 'generating' ? '生成中...' :
                              item.status === 'confirmed' ? '確認済み' :
                              item.status === 'unconfirmed' ? '未確認' :
-                             item.status === 'error' ? 'エラー' :
-                             '生成中...'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span 
-                            className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
-                            onClick={() => handleShowAIDetails(item)}
-                          >
-                            {item.title}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-gray-600">
-                          {item.timestamp.toLocaleString('ja-JP', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </td>
+                               item.status === 'error' ? 'エラー' :
+                               '生成中...'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span 
+                              className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                              onClick={() => handleShowAIDetails(item)}
+                            >
+                              {item.title}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-600">
+                            {item.timestamp.toLocaleString('ja-JP', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </td>
 
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+            </div>
 
             </div>
           </div>
@@ -1176,161 +1180,161 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       </div>
 
       {/* AI対応詳細ドロワー */}
-      {showAIModal && selectedAIItem && (
+          {showAIModal && selectedAIItem && (
         <div className="fixed inset-y-0 right-0 w-[600px] bg-white border-l border-gray-200 shadow-xl z-50 transform transition-transform duration-300 ease-in-out">
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">{selectedAIItem.title}</h3>
-              <button 
-                onClick={() => {
-                  setShowAIModal(false);
-                  setSelectedAIItem(null);
-                }}
+                  <button 
+                    onClick={() => {
+                      setShowAIModal(false);
+                      setSelectedAIItem(null);
+                    }}
                 className="text-gray-400 hover:text-gray-600 p-1"
-              >
-                ✕
-              </button>
-            </div>
-            
+                  >
+                    ✕
+                  </button>
+                </div>
+                
             <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-4">
-                <div>
+                <div className="space-y-4">
+                  <div>
                   <p className="text-sm text-gray-500 mb-3">
-                    {selectedAIItem.timestamp.toLocaleString('ja-JP', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  
-                  {/* ステータス表示 */}
-                  <div className="mb-4">
+                      {selectedAIItem.timestamp.toLocaleString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    
+                    {/* ステータス表示 */}
+                    <div className="mb-4">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-base font-medium ${
-                      selectedAIItem.status === 'generating' ? 'bg-blue-100 text-blue-800' :
+                        selectedAIItem.status === 'generating' ? 'bg-blue-100 text-blue-800' :
                       selectedAIItem.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                       selectedAIItem.status === 'unconfirmed' ? 'bg-yellow-100 text-yellow-800' :
-                      selectedAIItem.status === 'error' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {selectedAIItem.status === 'generating' && (
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                      )}
-                      {selectedAIItem.status === 'generating' ? '生成中...' :
+                        selectedAIItem.status === 'error' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {selectedAIItem.status === 'generating' && (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        )}
+                        {selectedAIItem.status === 'generating' ? '生成中...' :
                        selectedAIItem.status === 'confirmed' ? '確認済み' :
                        selectedAIItem.status === 'unconfirmed' ? '未確認' :
-                       selectedAIItem.status === 'error' ? 'エラー' :
-                       '生成中...'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div>
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">詳細内容</h5>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    {selectedAIItem.details.map((detail, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="mr-2">•</span>
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                {/* 生成済みの場合の結果表示 */}
-                {selectedAIItem.status === 'completed' && selectedAIItem.generatedContent && (
-                  <div className="border-t border-gray-200 pt-4">
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">生成結果</h5>
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedAIItem.generatedContent.content}
-                      </p>
+                         selectedAIItem.status === 'error' ? 'エラー' :
+                         '生成中...'}
+                      </span>
                     </div>
-                    
-                    {/* ファイル一覧 */}
-                    {selectedAIItem.generatedContent.files && selectedAIItem.generatedContent.files.length > 0 && (
-                      <div>
+                  </div>
+                  
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">詳細内容</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {selectedAIItem.details.map((detail, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="mr-2">•</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  {/* 生成済みの場合の結果表示 */}
+                  {selectedAIItem.status === 'completed' && selectedAIItem.generatedContent && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">生成結果</h5>
+                      <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {selectedAIItem.generatedContent.content}
+                        </p>
+                      </div>
+                      
+                      {/* ファイル一覧 */}
+                      {selectedAIItem.generatedContent.files && selectedAIItem.generatedContent.files.length > 0 && (
+                        <div>
                         <h6 className="text-base font-medium text-gray-600 mb-2">生成されたファイル</h6>
-                        <div className="space-y-2">
-                          {selectedAIItem.generatedContent.files.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-2">
-                              <div className="flex items-center space-x-2">
-                                <FileText className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-700">{file.name}</span>
+                          <div className="space-y-2">
+                            {selectedAIItem.generatedContent.files.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-2">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-700">{file.name}</span>
                                 <span className="text-base text-gray-500">({file.size})</span>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  ダウンロード
+                                </Button>
                               </div>
-                              <Button size="sm" variant="outline">
-                                ダウンロード
-                              </Button>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* エラーの場合のエラー詳細 */}
+                  {selectedAIItem.status === 'error' && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <h5 className="text-sm font-medium text-red-700 mb-2">エラー詳細</h5>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p className="text-sm text-red-700">
+                          処理中にエラーが発生しました。再実行をお試しください。
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* アクションボタン */}
+                  <div className="flex justify-end pt-4 border-t border-gray-200">
+                    {selectedAIItem.status === 'generating' && (
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        生成中です...
                       </div>
                     )}
-                  </div>
-                )}
-                
-                {/* エラーの場合のエラー詳細 */}
-                {selectedAIItem.status === 'error' && (
-                  <div className="border-t border-gray-200 pt-4">
-                    <h5 className="text-sm font-medium text-red-700 mb-2">エラー詳細</h5>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <p className="text-sm text-red-700">
-                        処理中にエラーが発生しました。再実行をお試しください。
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* アクションボタン */}
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  {selectedAIItem.status === 'generating' && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      生成中です...
-                    </div>
-                  )}
-                  
+                    
                   {(selectedAIItem.status === 'confirmed' || selectedAIItem.status === 'unconfirmed') && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        {selectedAIItem.generatedContent?.type === 'email' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          {selectedAIItem.generatedContent?.type === 'email' && (
                           <div onClick={() => handleSendEmail(selectedAIItem)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                            <Mail className="mr-2 h-4 w-4" />
-                            メール送信
+                              <Mail className="mr-2 h-4 w-4" />
+                              メール送信
+                            </div>
+                          )}
+                          <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <Play className="mr-2 h-4 w-4" />
+                            再実行
                           </div>
-                        )}
-                        <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                          <Play className="mr-2 h-4 w-4" />
-                          再実行
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                  
-                  {selectedAIItem.status === 'error' && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                          <Play className="mr-2 h-4 w-4" />
-                          再実行
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                    
+                    {selectedAIItem.status === 'error' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <div onClick={() => handleReExecuteAI(selectedAIItem.id)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <Play className="mr-2 h-4 w-4" />
+                            再実行
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </div>
-              </div>
             </div>
             
             {/* チャット欄（固定） */}
@@ -1564,9 +1568,9 @@ export default function TaskDetailClient({ task }: { task: Task }) {
               <Button variant="outline" onClick={() => setShowEmailModal(false)}>キャンセル</Button>
               <Button onClick={handleEmailSend}>送信</Button>
             </div>
-          </div>
-        </div>
-      )}
+              </div>
+            </div>
+          )}
     </div>
   );
 } 
