@@ -3,11 +3,14 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, User } from "lucide-react";
+import { ArrowUpDown, Bell, Calendar, ChevronDown, Filter, Search, User } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
 
 // 案件データの型定義
 type Case = {
@@ -19,16 +22,20 @@ type Case = {
   risk: "高" | "中" | "低";
   deadline: string;
   priority: "高" | "中" | "低";
-  status: "進行中" | "完了" | "保留" | "失注";
+  status: "新規受信" | "案件化検討中" | "提案中" | "進行中" | "完了" | "保留" | "失注";
   source: "メール" | "議事録" | "AI検知";
   assignee: string;
+  customerContact: string;
+  firstReceived: string;
+  lastReceived: string;
   relatedTasks: number;
+  emailCount: number; // 追加
   lastUpdated: string;
 };
 
 function Header() {
   return (
-    <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white/80 border-b shadow-sm">
+    <header className="h-14 min-h-14 w-full flex items-center justify-between px-6 bg-white border-b shadow-sm">
       <span className="text-xl font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
@@ -45,16 +52,13 @@ function Header() {
 }
 
 export default function CasesPage() {
+  // タブ状態
+  const [activeTab, setActiveTab] = useState<'assigned' | 'all'>('all');
+
   // フィルター状態
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [customerTypeFilter, setCustomerTypeFilter] = useState<string>("all");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [assigneeFilter, setAssigneeFilter] = useState<string>("all");
-  const [riskFilter, setRiskFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [deadlineFilter, setDeadlineFilter] = useState<string>("all");
-  const [deadlineStart, setDeadlineStart] = useState<string>("");
-  const [deadlineEnd, setDeadlineEnd] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // 検索状態
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,87 +67,107 @@ export default function CasesPage() {
   const [showRelatedTasksModal, setShowRelatedTasksModal] = useState(false);
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
 
-  // 案件データ
+  // 案件データ（添付画像に合わせて更新）
   const casesData: Case[] = [
     {
       id: "case-001",
-      name: "新製品導入についてのご相談",
-      customer: "株式会社みらいテック",
+      name: "LegalOn Cloudのご紹介 (佐藤様)",
+      customer: "株式会社クロステック",
       customerType: "新規",
       progress: 80,
       risk: "高",
       deadline: "2024/07/10",
       priority: "高",
-      status: "進行中",
+      status: "提案中",
       source: "メール",
-      assignee: "山田太郎",
+      assignee: "Hirokazu Tanaka",
+      customerContact: "佐藤二郎",
+      firstReceived: "2024/06/01 09:00",
+      lastReceived: "2025/05/20 12:01",
       relatedTasks: 5,
+      emailCount: 12, // 追加
       lastUpdated: "2024/07/10 15:30"
     },
     {
       id: "case-002",
-      name: "システム更改の件について",
-      customer: "東都情報サービス株式会社",
+      name: "Legalforce特別キャンペーンのご紹介 (宮下様)",
+      customer: "株式会社グローバルソーシング",
       customerType: "既存",
       progress: 40,
       risk: "中",
       deadline: "2024/07/12",
       priority: "中",
-      status: "進行中",
+      status: "提案中",
       source: "議事録",
-      assignee: "鈴木一郎",
+      assignee: "田中 裕子",
+      customerContact: "宮下 大和",
+      firstReceived: "2024/06/05 10:00",
+      lastReceived: "2025/05/20 11:59",
       relatedTasks: 3,
+      emailCount: 7, // 追加
       lastUpdated: "2024/07/10 14:45"
     },
     {
       id: "case-003",
-      name: "海外展開サポートのご依頼",
-      customer: "グローバル商事株式会社",
+      name: "【LegalOn松浦】 先日の打ち合わせの資料について",
+      customer: "株式会社デジタルソリューションズ",
       customerType: "新規",
       progress: 20,
       risk: "高",
       deadline: "2024/07/15",
       priority: "高",
-      status: "進行中",
+      status: "提案中",
       source: "AI検知",
-      assignee: "佐藤花子",
+      assignee: "佐藤 花子",
+      customerContact: "松浦 健一",
+      firstReceived: "2024/06/10 11:00",
+      lastReceived: "2025/05/20 11:45",
       relatedTasks: 7,
+      emailCount: 10, // 追加
       lastUpdated: "2024/07/10 13:20"
     },
     {
       id: "case-004",
-      name: "契約更新について",
-      customer: "日本エネルギー株式会社",
+      name: "LegalOn Cloud導入についてのご相談",
+      customer: "株式会社ITコンサルティング",
       customerType: "既存",
       progress: 60,
       risk: "中",
       deadline: "2024/07/18",
       priority: "中",
-      status: "進行中",
+      status: "提案中",
       source: "メール",
-      assignee: "田中次郎",
+      assignee: "鈴木 一郎",
+      customerContact: "田中 美咲",
+      firstReceived: "2024/06/15 12:00",
+      lastReceived: "2025/05/20 11:30",
       relatedTasks: 4,
+      emailCount: 8, // 追加
       lastUpdated: "2024/07/10 11:15"
     },
     {
       id: "case-005",
-      name: "新規サービス提案の件",
-      customer: "株式会社さくらネット",
+      name: "Legalforce機能追加のご提案",
+      customer: "株式会社セキュリティテック",
       customerType: "新規",
       progress: 50,
       risk: "高",
       deadline: "2024/07/20",
       priority: "高",
-      status: "進行中",
+      status: "提案中",
       source: "議事録",
-      assignee: "山田太郎",
+      assignee: "高橋 次郎",
+      customerContact: "山田 太郎",
+      firstReceived: "2024/06/20 13:00",
+      lastReceived: "2025/05/20 11:15",
       relatedTasks: 6,
+      emailCount: 15, // 追加
       lastUpdated: "2024/07/10 10:30"
     },
     {
       id: "case-006",
-      name: "クラウド移行についてのご相談",
-      customer: "デジタルソリューションズ",
+      name: "LegalOn Cloud移行について",
+      customer: "株式会社メンテナンス",
       customerType: "既存",
       progress: 90,
       risk: "低",
@@ -151,545 +175,368 @@ export default function CasesPage() {
       priority: "中",
       status: "完了",
       source: "メール",
-      assignee: "高橋美咲",
+      assignee: "佐藤 花子",
+      customerContact: "伊藤 恵子",
+      firstReceived: "2024/06/25 14:00",
+      lastReceived: "2024/07/10 11:00",
       relatedTasks: 2,
+      emailCount: 25,
       lastUpdated: "2024/07/10 09:15"
     },
     {
       id: "case-007",
-      name: "データ連携システムの導入について",
-      customer: "ITコンサルティング",
-      customerType: "新規",
-      progress: 30,
-      risk: "中",
-      deadline: "2024/07/28",
-      priority: "中",
-      status: "保留",
-      source: "AI検知",
-      assignee: "鈴木一郎",
-      relatedTasks: 4,
-      lastUpdated: "2024/07/10 08:45"
-    },
-    {
-      id: "case-008",
-      name: "セキュリティ対策のご相談",
-      customer: "株式会社セキュリティテック",
-      customerType: "新規",
-      progress: 15,
-      risk: "高",
-      deadline: "2024/07/30",
-      priority: "高",
-      status: "進行中",
-      source: "メール",
-      assignee: "佐藤花子",
-      relatedTasks: 8,
-      lastUpdated: "2024/07/10 07:30"
-    },
-    {
-      id: "case-009",
-      name: "既存システムの保守について",
-      customer: "株式会社メンテナンス",
-      customerType: "既存",
-      progress: 75,
-      risk: "低",
-      deadline: "2024/08/05",
-      priority: "中",
-      status: "進行中",
-      source: "議事録",
-      assignee: "田中次郎",
-      relatedTasks: 3,
-      lastUpdated: "2024/07/10 06:15"
-    },
-    {
-      id: "case-010",
-      name: "AI導入支援のご依頼",
-      customer: "株式会社AIソリューション",
-      customerType: "新規",
-      progress: 25,
-      risk: "高",
-      deadline: "2024/08/10",
-      priority: "高",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "山田太郎",
-      relatedTasks: 9,
-      lastUpdated: "2024/07/10 05:45"
-    },
-    {
-      id: "case-011",
-      name: "業務効率化の提案について",
-      customer: "株式会社エフィシエンシー",
-      customerType: "既存",
-      progress: 45,
-      risk: "中",
-      deadline: "2024/08/15",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "鈴木一郎",
-      relatedTasks: 5,
-      lastUpdated: "2024/07/10 04:30"
-    },
-    {
-      id: "case-012",
-      name: "DX推進プロジェクトの件",
-      customer: "株式会社デジタル変革",
-      customerType: "新規",
-      progress: 35,
-      risk: "高",
-      deadline: "2024/08/20",
-      priority: "高",
-      status: "進行中",
-      source: "議事録",
-      assignee: "高橋美咲",
-      relatedTasks: 7,
-      lastUpdated: "2024/07/10 03:15"
-    },
-    {
-      id: "case-013",
-      name: "リモートワーク環境構築について",
-      customer: "株式会社リモートワーク",
-      customerType: "新規",
-      progress: 85,
-      risk: "中",
-      deadline: "2024/08/25",
-      priority: "中",
-      status: "完了",
-      source: "メール",
-      assignee: "佐藤花子",
-      relatedTasks: 4,
-      lastUpdated: "2024/07/10 02:00"
-    },
-    {
-      id: "case-014",
-      name: "データ分析基盤の構築について",
-      customer: "株式会社データアナリティクス",
-      customerType: "既存",
-      progress: 55,
-      risk: "中",
-      deadline: "2024/08/30",
-      priority: "中",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "田中次郎",
-      relatedTasks: 6,
-      lastUpdated: "2024/07/10 01:45"
-    },
-    {
-      id: "case-015",
-      name: "コンプライアンス対応のご相談",
-      customer: "株式会社コンプライアンス",
-      customerType: "新規",
-      progress: 10,
-      risk: "高",
-      deadline: "2024/09/05",
-      priority: "高",
-      status: "進行中",
-      source: "メール",
-      assignee: "山田太郎",
-      relatedTasks: 10,
-      lastUpdated: "2024/07/10 00:30"
-    },
-    {
-      id: "case-016",
-      name: "既存システムの更新について",
-      customer: "株式会社システムアップデート",
-      customerType: "既存",
-      progress: 70,
-      risk: "低",
-      deadline: "2024/09/10",
-      priority: "中",
-      status: "進行中",
-      source: "議事録",
-      assignee: "鈴木一郎",
-      relatedTasks: 3,
-      lastUpdated: "2024/07/09 23:15"
-    },
-    {
-      id: "case-017",
-      name: "クラウドネイティブ化のご依頼",
-      customer: "株式会社クラウドネイティブ",
-      customerType: "新規",
-      progress: 20,
-      risk: "高",
-      deadline: "2024/09/15",
-      priority: "高",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "高橋美咲",
-      relatedTasks: 8,
-      lastUpdated: "2024/07/09 22:00"
-    },
-    {
-      id: "case-018",
-      name: "業務アプリケーション開発について",
-      customer: "株式会社アプリ開発",
-      customerType: "既存",
-      progress: 65,
-      risk: "中",
-      deadline: "2024/09/20",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "佐藤花子",
-      relatedTasks: 5,
-      lastUpdated: "2024/07/09 21:45"
-    },
-    {
-      id: "case-019",
-      name: "セキュリティ監査のご相談",
-      customer: "株式会社セキュリティ監査",
-      customerType: "新規",
-      progress: 30,
-      risk: "高",
-      deadline: "2024/09/25",
-      priority: "高",
-      status: "進行中",
-      source: "議事録",
-      assignee: "田中次郎",
-      relatedTasks: 7,
-      lastUpdated: "2024/07/09 20:30"
-    },
-    {
-      id: "case-020",
-      name: "データバックアップ体制の構築について",
-      customer: "株式会社バックアップ",
-      customerType: "既存",
-      progress: 80,
-      risk: "低",
-      deadline: "2024/09/30",
-      priority: "中",
-      status: "完了",
-      source: "メール",
-      assignee: "山田太郎",
-      relatedTasks: 4,
-      lastUpdated: "2024/07/09 19:15"
-    },
-    {
-      id: "case-021",
-      name: "API連携システムの導入について",
-      customer: "株式会社APIソリューション",
-      customerType: "新規",
-      progress: 40,
-      risk: "中",
-      deadline: "2024/10/05",
-      priority: "中",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "鈴木一郎",
-      relatedTasks: 6,
-      lastUpdated: "2024/07/09 18:00"
-    },
-    {
-      id: "case-022",
-      name: "既存システムの統合について",
-      customer: "株式会社システム統合",
-      customerType: "既存",
-      progress: 25,
-      risk: "高",
-      deadline: "2024/10/10",
-      priority: "高",
-      status: "進行中",
-      source: "メール",
-      assignee: "高橋美咲",
-      relatedTasks: 9,
-      lastUpdated: "2024/07/09 17:45"
-    },
-    {
-      id: "case-023",
-      name: "モバイルアプリ開発のご相談",
-      customer: "株式会社モバイル開発",
-      customerType: "新規",
-      progress: 15,
-      risk: "高",
-      deadline: "2024/10/15",
-      priority: "高",
-      status: "進行中",
-      source: "議事録",
-      assignee: "佐藤花子",
-      relatedTasks: 8,
-      lastUpdated: "2024/07/09 16:30"
-    },
-    {
-      id: "case-024",
-      name: "ネットワーク構築について",
-      customer: "株式会社ネットワーク",
-      customerType: "既存",
-      progress: 90,
-      risk: "低",
-      deadline: "2024/10/20",
-      priority: "中",
-      status: "完了",
-      source: "メール",
-      assignee: "田中次郎",
-      relatedTasks: 3,
-      lastUpdated: "2024/07/09 15:15"
-    },
-    {
-      id: "case-025",
-      name: "AIチャットボット導入のご依頼",
-      customer: "株式会社チャットボット",
-      customerType: "新規",
-      progress: 35,
-      risk: "中",
-      deadline: "2024/10/25",
-      priority: "中",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "山田太郎",
-      relatedTasks: 7,
-      lastUpdated: "2024/07/09 14:00"
-    },
-    {
-      id: "case-026",
-      name: "既存システムの性能改善について",
-      customer: "株式会社性能改善",
-      customerType: "既存",
-      progress: 60,
-      risk: "中",
-      deadline: "2024/10/30",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "鈴木一郎",
-      relatedTasks: 5,
-      lastUpdated: "2024/07/09 12:45"
-    },
-    {
-      id: "case-027",
-      name: "ブロックチェーン技術導入のご相談",
-      customer: "株式会社ブロックチェーン",
-      customerType: "新規",
-      progress: 20,
-      risk: "高",
-      deadline: "2024/11/05",
-      priority: "高",
-      status: "進行中",
-      source: "議事録",
-      assignee: "高橋美咲",
-      relatedTasks: 10,
-      lastUpdated: "2024/07/09 11:30"
-    },
-    {
-      id: "case-028",
-      name: "データセンター移転について",
-      customer: "株式会社データセンター",
-      customerType: "既存",
-      progress: 75,
-      risk: "中",
-      deadline: "2024/11/10",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "佐藤花子",
-      relatedTasks: 6,
-      lastUpdated: "2024/07/09 10:15"
-    },
-    {
-      id: "case-029",
-      name: "IoTシステム構築のご依頼",
-      customer: "株式会社IoTソリューション",
-      customerType: "新規",
-      progress: 30,
-      risk: "高",
-      deadline: "2024/11/15",
-      priority: "高",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "田中次郎",
-      relatedTasks: 8,
-      lastUpdated: "2024/07/09 09:00"
-    },
-    {
-      id: "case-030",
-      name: "既存システムのセキュリティ強化について",
-      customer: "株式会社セキュリティ強化",
-      customerType: "既存",
-      progress: 50,
-      risk: "中",
-      deadline: "2024/11/20",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "山田太郎",
-      relatedTasks: 4,
-      lastUpdated: "2024/07/09 08:45"
-    },
-    {
-      id: "case-031",
-      name: "機械学習システム導入のご相談",
-      customer: "株式会社機械学習",
-      customerType: "新規",
-      progress: 25,
-      risk: "高",
-      deadline: "2024/11/25",
-      priority: "高",
-      status: "進行中",
-      source: "議事録",
-      assignee: "鈴木一郎",
-      relatedTasks: 9,
-      lastUpdated: "2024/07/09 07:30"
-    },
-    {
-      id: "case-032",
-      name: "既存システムの保守契約更新について",
-      customer: "株式会社保守契約",
-      customerType: "既存",
-      progress: 85,
-      risk: "低",
-      deadline: "2024/11/30",
-      priority: "中",
-      status: "完了",
-      source: "メール",
-      assignee: "高橋美咲",
-      relatedTasks: 3,
-      lastUpdated: "2024/07/09 06:15"
-    },
-    {
-      id: "case-033",
-      name: "VR/AR技術導入のご依頼",
-      customer: "株式会社VR/AR",
-      customerType: "新規",
-      progress: 15,
-      risk: "高",
-      deadline: "2024/12/05",
-      priority: "高",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "佐藤花子",
-      relatedTasks: 7,
-      lastUpdated: "2024/07/09 05:00"
-    },
-    {
-      id: "case-034",
-      name: "既存システムのユーザビリティ改善について",
-      customer: "株式会社ユーザビリティ",
-      customerType: "既存",
-      progress: 45,
-      risk: "中",
-      deadline: "2024/12/10",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "田中次郎",
-      relatedTasks: 5,
-      lastUpdated: "2024/07/09 04:45"
-    },
-    {
-      id: "case-035",
-      name: "量子コンピューティング技術のご相談",
-      customer: "株式会社量子コンピューティング",
-      customerType: "新規",
-      progress: 10,
-      risk: "高",
-      deadline: "2024/12/15",
-      priority: "高",
-      status: "進行中",
-      source: "議事録",
-      assignee: "山田太郎",
-      relatedTasks: 12,
-      lastUpdated: "2024/07/09 03:30"
-    },
-    {
-      id: "case-036",
-      name: "既存システムの障害対応について",
-      customer: "株式会社障害対応",
+      name: "Legalforceライセンス更新のご案内",
+      customer: "株式会社ファイナンス",
       customerType: "既存",
       progress: 95,
       risk: "低",
-      deadline: "2024/12/20",
+      deadline: "2024/07/08",
       priority: "中",
       status: "完了",
       source: "メール",
-      assignee: "鈴木一郎",
-      relatedTasks: 2,
-      lastUpdated: "2024/07/09 02:15"
+      assignee: "田中 裕子",
+      customerContact: "鈴木 健太",
+      firstReceived: "2024/06/20 14:30",
+      lastReceived: "2024/07/10 10:45",
+      relatedTasks: 1,
+      emailCount: 5,
+      lastUpdated: "2024/07/10 08:30"
     },
     {
-      id: "case-037",
-      name: "5G技術導入のご依頼",
-      customer: "株式会社5Gソリューション",
+      id: "case-008",
+      name: "LegalOn Cloud新機能のご紹介",
+      customer: "株式会社マーケティング",
       customerType: "新規",
-      progress: 20,
-      risk: "高",
-      deadline: "2024/12/25",
-      priority: "高",
-      status: "進行中",
-      source: "AI検知",
-      assignee: "高橋美咲",
-      relatedTasks: 8,
-      lastUpdated: "2024/07/09 01:00"
+      progress: 30,
+      risk: "中",
+      deadline: "2024/07/22",
+      priority: "中",
+      status: "新規受信",
+      source: "メール",
+      assignee: "高橋 次郎",
+      customerContact: "佐々木 恵子",
+      firstReceived: "2024/07/09 09:15",
+      lastReceived: "2024/07/10 09:30",
+      relatedTasks: 4,
+      emailCount: 3,
+      lastUpdated: "2024/07/10 09:30"
     },
     {
-      id: "case-038",
-      name: "既存システムの容量拡張について",
-      customer: "株式会社容量拡張",
+      id: "case-009",
+      name: "Legalforce導入支援について",
+      customer: "株式会社ロジスティクス",
       customerType: "既存",
       progress: 70,
       risk: "中",
-      deadline: "2024/12/30",
-      priority: "中",
-      status: "進行中",
-      source: "メール",
-      assignee: "佐藤花子",
-      relatedTasks: 4,
-      lastUpdated: "2024/07/09 00:45"
-    },
-    {
-      id: "case-039",
-      name: "自動運転技術導入のご相談",
-      customer: "株式会社自動運転",
-      customerType: "新規",
-      progress: 5,
-      risk: "高",
-      deadline: "2025/01/05",
+      deadline: "2024/07/28",
       priority: "高",
       status: "進行中",
-      source: "議事録",
-      assignee: "田中次郎",
-      relatedTasks: 15,
-      lastUpdated: "2024/07/08 23:30"
+      source: "メール",
+      assignee: "鈴木 一郎",
+      customerContact: "田中 正義",
+      firstReceived: "2024/06/10 13:45",
+      lastReceived: "2024/07/10 08:20",
+      relatedTasks: 8,
+      emailCount: 18,
+      lastUpdated: "2024/07/10 08:20"
     },
     {
-      id: "case-040",
-      name: "既存システムの最終更新について",
-      customer: "株式会社最終更新",
-      customerType: "既存",
-      progress: 100,
-      risk: "低",
-      deadline: "2025/01/10",
-      priority: "中",
-      status: "完了",
+      id: "case-010",
+      name: "LegalOn Cloudセキュリティ機能のご相談",
+      customer: "株式会社ヘルスケア",
+      customerType: "新規",
+      progress: 25,
+      risk: "高",
+      deadline: "2024/07/30",
+      priority: "高",
+      status: "案件化検討中",
       source: "メール",
-      assignee: "山田太郎",
-      relatedTasks: 1,
-      lastUpdated: "2024/07/08 22:15"
+      assignee: "佐藤 花子",
+      customerContact: "山本 美咲",
+      firstReceived: "2024/07/08 16:00",
+      lastReceived: "2024/07/10 07:45",
+      relatedTasks: 3,
+      emailCount: 6,
+      lastUpdated: "2024/07/10 07:45"
+    },
+    {
+      id: "case-011",
+      name: "Legalforceカスタマイズのご提案",
+      customer: "株式会社エンターテイメント",
+      customerType: "既存",
+      progress: 45,
+      risk: "中",
+      deadline: "2024/08/05",
+      priority: "中",
+      status: "提案中",
+      source: "メール",
+      assignee: "田中 裕子",
+      customerContact: "中村 翔太",
+      firstReceived: "2024/06/15 11:20",
+      lastReceived: "2024/07/10 06:30",
+      relatedTasks: 5,
+      emailCount: 11,
+      lastUpdated: "2024/07/10 06:30"
+    },
+    {
+      id: "case-012",
+      name: "LegalOn Cloud API連携について",
+      customer: "株式会社テクノロジー",
+      customerType: "新規",
+      progress: 15,
+      risk: "高",
+      deadline: "2024/08/10",
+      priority: "高",
+      status: "新規受信",
+      source: "メール",
+      assignee: "高橋 次郎",
+      customerContact: "渡辺 智子",
+      firstReceived: "2024/07/10 05:15",
+      lastReceived: "2024/07/10 05:15",
+      relatedTasks: 2,
+      emailCount: 1,
+      lastUpdated: "2024/07/10 05:15"
+    },
+    {
+      id: "case-013",
+      name: "Legalforce運用サポートのご相談",
+      customer: "株式会社エデュケーション",
+      customerType: "既存",
+      progress: 85,
+      risk: "低",
+      deadline: "2024/07/15",
+      priority: "中",
+      status: "進行中",
+      source: "メール",
+      assignee: "鈴木 一郎",
+      customerContact: "小林 真理",
+      firstReceived: "2024/06/25 09:30",
+      lastReceived: "2024/07/10 04:20",
+      relatedTasks: 6,
+      emailCount: 14,
+      lastUpdated: "2024/07/10 04:20"
+    },
+    {
+      id: "case-014",
+      name: "LegalOn Cloudデータ移行について",
+      customer: "株式会社リテール",
+      customerType: "既存",
+      progress: 55,
+      risk: "中",
+      deadline: "2024/08/15",
+      priority: "中",
+      status: "提案中",
+      source: "メール",
+      assignee: "佐藤 花子",
+      customerContact: "加藤 健一",
+      firstReceived: "2024/06/30 15:45",
+      lastReceived: "2024/07/10 03:10",
+      relatedTasks: 7,
+      emailCount: 9,
+      lastUpdated: "2024/07/10 03:10"
+    },
+    {
+      id: "case-015",
+      name: "Legalforce新プランのご紹介",
+      customer: "株式会社コンサルティング",
+      customerType: "新規",
+      progress: 35,
+      risk: "中",
+      deadline: "2024/08/20",
+      priority: "中",
+      status: "案件化検討中",
+      source: "メール",
+      assignee: "田中 裕子",
+      customerContact: "高田 恵美",
+      firstReceived: "2024/07/05 12:00",
+      lastReceived: "2024/07/10 02:45",
+      relatedTasks: 4,
+      emailCount: 7,
+      lastUpdated: "2024/07/10 02:45"
+    },
+    {
+      id: "case-016",
+      name: "LegalOn Cloudバックアップ機能のご相談",
+      customer: "株式会社マニュファクチャリング",
+      customerType: "既存",
+      progress: 65,
+      risk: "中",
+      deadline: "2024/08/25",
+      priority: "高",
+      status: "進行中",
+      source: "メール",
+      assignee: "高橋 次郎",
+      customerContact: "森田 直樹",
+      firstReceived: "2024/06/20 10:15",
+      lastReceived: "2024/07/10 01:30",
+      relatedTasks: 8,
+      emailCount: 16,
+      lastUpdated: "2024/07/10 01:30"
+    },
+    {
+      id: "case-017",
+      name: "Legalforce統合システムのご提案",
+      customer: "株式会社フィンテック",
+      customerType: "新規",
+      progress: 10,
+      risk: "高",
+      deadline: "2024/09/01",
+      priority: "高",
+      status: "新規受信",
+      source: "メール",
+      assignee: "鈴木 一郎",
+      customerContact: "井上 美穂",
+      firstReceived: "2024/07/10 00:45",
+      lastReceived: "2024/07/10 00:45",
+      relatedTasks: 3,
+      emailCount: 1,
+      lastUpdated: "2024/07/10 00:45"
+    },
+    {
+      id: "case-018",
+      name: "LegalOn Cloud監査機能のご紹介",
+      customer: "株式会社アカウンティング",
+      customerType: "既存",
+      progress: 75,
+      risk: "低",
+      deadline: "2024/08/30",
+      priority: "中",
+      status: "提案中",
+      source: "メール",
+      assignee: "佐藤 花子",
+      customerContact: "石川 雅子",
+      firstReceived: "2024/06/28 14:20",
+      lastReceived: "2024/07/09 23:15",
+      relatedTasks: 5,
+      emailCount: 12,
+      lastUpdated: "2024/07/09 23:15"
+    },
+    {
+      id: "case-019",
+      name: "Legalforceワークフロー機能のご相談",
+      customer: "株式会社ホスピタリティ",
+      customerType: "新規",
+      progress: 40,
+      risk: "中",
+      deadline: "2024/09/05",
+      priority: "中",
+      status: "案件化検討中",
+      source: "メール",
+      assignee: "田中 裕子",
+      customerContact: "松本 和也",
+      firstReceived: "2024/07/03 16:30",
+      lastReceived: "2024/07/09 22:00",
+      relatedTasks: 6,
+      emailCount: 8,
+      lastUpdated: "2024/07/09 22:00"
+    },
+    {
+      id: "case-020",
+      name: "LegalOn Cloudモバイル対応について",
+      customer: "株式会社トランスポート",
+      customerType: "既存",
+      progress: 60,
+      risk: "中",
+      deadline: "2024/09/10",
+      priority: "中",
+      status: "進行中",
+      source: "メール",
+      assignee: "高橋 次郎",
+      customerContact: "清水 麻衣",
+      firstReceived: "2024/06/22 11:45",
+      lastReceived: "2024/07/09 21:30",
+      relatedTasks: 7,
+      emailCount: 13,
+      lastUpdated: "2024/07/09 21:30"
     }
   ];
 
-  // 案件テーブルのカラム定義
-  const caseColumns: ColumnDef<Case, React.ReactNode>[] = [
+  // フィルタリングされたデータ
+  const filteredData = casesData.filter(caseItem => {
+    const matchesSearch = searchQuery === "" || 
+      caseItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      caseItem.customer.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCompany = companyFilter === "all" || caseItem.customer === companyFilter;
+    const matchesAssignee = assigneeFilter === "all" || caseItem.assignee === assigneeFilter;
+    const matchesStatus = statusFilter === "all" || caseItem.status === statusFilter;
+    
+    return matchesSearch && matchesCompany && matchesAssignee && matchesStatus;
+  });
+
+  // テーブル列の定義（添付画像に合わせて調整）
+  const caseColumns: ColumnDef<Case>[] = [
     {
       accessorKey: "name",
       header: "案件名",
       cell: info => (
-        <Link href="/cases/case-1" className="font-medium text-gray-900 hover:text-gray-600">
+        <Link href={`/cases/${info.row.original.id}`} className="text-gray-900 hover:text-gray-700 font-medium">
           {info.getValue() as string}
         </Link>
       )
     },
     {
       accessorKey: "customer",
-      header: "顧客名",
-      cell: info => <span className="text-gray-700">{info.getValue() as string}</span>
+      header: "企業名",
+      cell: info => (
+        <span className="text-gray-900">{info.getValue() as string}</span>
+      )
     },
     {
       accessorKey: "customerType",
       header: "顧客区分",
       cell: info => (
-        <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700">
-          {info.getValue() as string}
-        </span>
+        <span className="text-gray-700">{info.getValue() as string}</span>
+      )
+    },
+    {
+      accessorKey: "firstReceived",
+      header: "初回受信日",
+      cell: info => {
+        const date = info.getValue() as string;
+        const [datePart, timePart] = date.split(' ');
+        return (
+          <div className="text-gray-700">
+            <div>{datePart}</div>
+            <div className="text-sm text-gray-500">{timePart}</div>
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: "lastReceived",
+      header: "最終受信日",
+      cell: info => {
+        const date = info.getValue() as string;
+        const [datePart, timePart] = date.split(' ');
+        return (
+          <div className="text-gray-700">
+            <div>{datePart}</div>
+            <div className="text-sm text-gray-500">{timePart}</div>
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: "relatedTasks",
+      header: "タスク件数",
+      cell: info => (
+        <div className="text-center">
+          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+            {info.getValue() as number}件
+          </span>
+        </div>
+      )
+    },
+    {
+      accessorKey: "emailCount",
+      header: "受信メール数",
+      cell: info => (
+        <div className="text-center">
+          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+            {info.getValue() as number}通
+            </span>
+          </div>
       )
     },
     {
@@ -698,358 +545,226 @@ export default function CasesPage() {
       cell: info => {
         const status = info.getValue() as string;
         return (
-          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700">
-            {status}
+          <div className="text-center">
+            <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800">
+              {status}
           </span>
-        );
-      }
-    },
-    {
-      accessorKey: "priority",
-      header: "優先度",
-      cell: info => {
-        const priority = info.getValue() as string;
-        return (
-          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700">
-            {priority}
-          </span>
-        );
-      }
-    },
-    {
-      accessorKey: "progress",
-      header: "進捗率",
-      cell: info => {
-        const progress = info.getValue() as number;
-        return (
-          <div className="flex items-center gap-2">
-            <div className="w-16 bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gray-600 h-2 rounded-full"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            <span className="text-sm text-gray-600">{progress}%</span>
           </div>
         );
       }
     },
     {
-      accessorKey: "risk",
-      header: "リスク",
-      cell: info => {
-        const risk = info.getValue() as string;
-        return (
-          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700">
-            {risk}
-          </span>
-        );
-      }
-    },
-    {
-      accessorKey: "deadline",
-      header: "期限",
-      cell: info => {
-        const deadline = info.getValue() as string;
-        const today = new Date();
-        const deadlineDate = new Date(deadline);
-        const daysLeft = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
-        return (
-          <div className="flex flex-col">
-            <span className="text-gray-700">{deadline}</span>
-            <span className="text-xs text-gray-500">
-              {daysLeft < 0 ? `${Math.abs(daysLeft)}日超過` : 
-               daysLeft === 0 ? '今日' : 
-               daysLeft === 1 ? '明日' : `${daysLeft}日後`}
-            </span>
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: "source",
-      header: "発生源",
-      cell: info => {
-        const source = info.getValue() as string;
-        return (
-          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700">
-            {source}
-          </span>
-        );
-      }
-    },
-    {
-      accessorKey: "relatedTasks",
-      header: "関連タスク",
+      accessorKey: "customerContact",
+      header: "顧客担当者",
       cell: info => (
-        <button
-          onClick={() => handleRelatedTasksClick(info.row.original)}
-          className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer"
-        >
-          {info.getValue() as number}
-        </button>
+        <span className="text-gray-900">{info.getValue() as string}</span>
       )
     },
     {
-      accessorKey: "lastUpdated",
-      header: "最終更新",
-      cell: info => {
-        const date = info.getValue() as string;
-        const updateDate = new Date(date);
-        const today = new Date();
-        const diffTime = Math.abs(today.getTime() - updateDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        return (
-          <div className="flex flex-col">
-            <span className="text-gray-700">{date.split(' ')[0]}</span>
-            <span className="text-xs text-gray-500">
-              {diffDays === 0 ? '今日' : 
-               diffDays === 1 ? '昨日' : 
-               diffDays <= 3 ? `${diffDays}日前` : '古い'}
-            </span>
+      accessorKey: "assignee",
+      header: "営業担当者",
+      cell: info => (
+        <div className="flex items-center gap-2">
+          <Avatar className="w-6 h-6">
+            <AvatarFallback className="text-xs">
+              {(info.getValue() as string).charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-gray-900">{info.getValue() as string}</span>
           </div>
-        );
-      }
-    }
+      )
+    },
   ];
 
-  // フィルター適用済みデータ
-  const filteredData = casesData.filter(caseItem => {
-    const today = new Date();
-    // ステータスフィルター
-    if (statusFilter !== "all" && caseItem.status !== statusFilter) return false;
-    
-    // 優先度フィルター
-    if (priorityFilter !== "all" && caseItem.priority !== priorityFilter) return false;
-    
-    // 顧客区分フィルター
-    if (customerTypeFilter !== "all" && caseItem.customerType !== customerTypeFilter) return false;
-    
-    // リスクフィルター
-    if (riskFilter !== "all" && caseItem.risk !== riskFilter) return false;
-    
-    // 発生源フィルター
-    if (sourceFilter !== "all" && caseItem.source !== sourceFilter) return false;
+  // 企業一覧（フィルター用）
+  const companies = Array.from(new Set(casesData.map(c => c.customer)));
+  const assignees = Array.from(new Set(casesData.map(c => c.assignee)));
+  const statuses = Array.from(new Set(casesData.map(c => c.status)));
 
-    // 期限フィルター
-    if (deadlineFilter === "thisWeek") {
-      const caseDeadline = new Date(caseItem.deadline);
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      return caseDeadline >= startOfWeek && caseDeadline <= endOfWeek;
-    }
-    if (deadlineFilter === "thisMonth") {
-      const caseDeadline = new Date(caseItem.deadline);
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      return caseDeadline >= startOfMonth && caseDeadline <= endOfMonth;
-    }
-    if (deadlineFilter === "overdue") {
-      const caseDeadline = new Date(caseItem.deadline);
-      return caseDeadline < today;
-    }
-    if (deadlineFilter === "range") {
-      const caseDeadline = new Date(caseItem.deadline);
-      const start = new Date(deadlineStart);
-      const end = new Date(deadlineEnd);
-      return caseDeadline >= start && caseDeadline <= end;
-    }
-    
-    // 検索クエリ
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        caseItem.name.toLowerCase().includes(query) ||
-        caseItem.customer.toLowerCase().includes(query)
-      );
-    }
-    
-    return true;
-  });
-
-  // カラム表示状態
-  const [columnVisibility, setColumnVisibility] = useState<boolean[]>(caseColumns.map(() => true));
-
-  // 関連タスククリックハンドラー
   const handleRelatedTasksClick = (caseItem: Case) => {
     setSelectedCase(caseItem);
     setShowRelatedTasksModal(true);
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen bg-white">
+      {/* ヘッダー */}
       <Header />
       
-      {/* メインコンテンツエリア */}
-      <main className="flex-1 container mx-auto px-8 pt-8 pb-48">
-        <div className="space-y-6">
-          {/* ヘッダー */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">案件一覧</h1>
-            </div>
-          </div>
+      {/* メインコンテンツ */}
+      <main className="w-full">
+        <div className="w-full px-6 py-6">
+          {/* タブと検索・フィルターを横並び */}
+          <div className="flex items-center justify-between mb-6">
+            {/* タブ */}
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'assigned' | 'all')}>
+              <TabsList className="inline-flex">
+                <TabsTrigger value="assigned">担当案件</TabsTrigger>
+                <TabsTrigger value="all">すべて</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-          {/* 案件テーブル */}
-          <div className="bg-white border border-gray-100 rounded-xl shadow">
-            <div className="p-6">
-              {/* 検索・ソート機能 */}
-              <div className="flex flex-wrap gap-4 items-center mb-2">
+            {/* 検索・フィルター */}
+            <div className="flex items-center gap-3">
                 {/* 検索ボックス */}
-                <div className="flex-1 min-w-[100px] max-w-[240px]">
+              <div className="w-60">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
-                    placeholder="案件名・顧客名で検索..."
+                    placeholder="案件・企業名で検索"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full"
+                    className="pl-10 border-gray-200 focus:border-gray-400 focus:ring-1 focus:ring-gray-400"
                   />
                 </div>
+                </div>
 
-                {/* ステータス */}
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">ステータス: すべて</option>
-                  <option value="進行中">進行中</option>
-                  <option value="完了">完了</option>
-                  <option value="保留">保留</option>
-                  <option value="失注">失注</option>
-                </select>
+              {/* 企業フィルター */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className={`justify-between min-w-[80px] ${
+                      companyFilter !== "all" 
+                        ? "border-gray-900 bg-gray-50 text-gray-900" 
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {companyFilter === "all" ? "企業" : companyFilter}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setCompanyFilter("all")}>
+                    すべて
+                  </DropdownMenuItem>
+                  {companies.map(company => (
+                    <DropdownMenuItem key={company} onClick={() => setCompanyFilter(company)}>
+                      {company}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                {/* 優先度 */}
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">優先度: すべて</option>
-                  <option value="高">高</option>
-                  <option value="中">中</option>
-                  <option value="低">低</option>
-                </select>
+              {/* ステータスフィルター */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className={`justify-between min-w-[100px] ${
+                      statusFilter !== "all" 
+                        ? "border-gray-900 bg-gray-50 text-gray-900" 
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {statusFilter === "all" ? "ステータス" : statusFilter}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setStatusFilter("all")}>
+                    すべて
+                  </DropdownMenuItem>
+                  {statuses.map(status => (
+                    <DropdownMenuItem key={status} onClick={() => setStatusFilter(status)}>
+                      {status}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                {/* 顧客区分 */}
-                <select
-                  value={customerTypeFilter}
-                  onChange={(e) => setCustomerTypeFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">顧客区分: すべて</option>
-                  <option value="新規">新規</option>
-                  <option value="既存">既存</option>
-                </select>
+              {/* 自社担当者フィルター */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className={`justify-between min-w-[120px] ${
+                      assigneeFilter !== "all" 
+                        ? "border-gray-900 bg-gray-50 text-gray-900" 
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {assigneeFilter === "all" ? "自社担当者" : assigneeFilter}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setAssigneeFilter("all")}>
+                    すべて
+                  </DropdownMenuItem>
+                  {assignees.map(assignee => (
+                    <DropdownMenuItem key={assignee} onClick={() => setAssigneeFilter(assignee)}>
+                      {assignee}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                {/* リスク */}
-                <select
-                  value={riskFilter}
-                  onChange={(e) => setRiskFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">リスク: すべて</option>
-                  <option value="高">高</option>
-                  <option value="中">中</option>
-                  <option value="低">低</option>
-                </select>
+              {/* 並び替えボタン */}
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-gray-200 hover:border-gray-300"
+                title="並び替え"
+              >
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
 
-                {/* 発生源 */}
-                <select
-                  value={sourceFilter}
-                  onChange={(e) => setSourceFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">発生源: すべて</option>
-                  <option value="メール">メール</option>
-                  <option value="議事録">議事録</option>
-                  <option value="AI検知">AI検知</option>
-                </select>
-
-                {/* 期限フィルタ */}
-                <select
-                  value={deadlineFilter}
-                  onChange={(e) => setDeadlineFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">期限: すべて</option>
-                  <option value="thisWeek">今週</option>
-                  <option value="thisMonth">今月</option>
-                  <option value="overdue">期限超過</option>
-                  <option value="range">日付範囲</option>
-                </select>
-                {/* 日付範囲選択（必要な場合のみ表示） */}
-                {deadlineFilter === "range" && (
-                  <>
-                    <input
-                      type="date"
-                      value={deadlineStart}
-                      onChange={e => setDeadlineStart(e.target.value)}
-                      className="px-2 py-1 border border-gray-300 rounded-md text-sm"
-                    />
-                    <span className="mx-1">〜</span>
-                    <input
-                      type="date"
-                      value={deadlineEnd}
-                      onChange={e => setDeadlineEnd(e.target.value)}
-                      className="px-2 py-1 border border-gray-300 rounded-md text-sm"
-                    />
-                  </>
-                )}
+              {/* フィルタリングボタン */}
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-gray-200 hover:border-gray-300"
+                title="フィルタリング"
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
               </div>
 
+          {/* テーブル */}
+          <div className="overflow-x-auto">
               <DataTable
-                columns={caseColumns.filter((_, index) => columnVisibility[index])}
+                columns={caseColumns}
                 data={filteredData}
                 pageSize={20}
                 showPagination={true}
+                searchSlot={null}
+                columnSelectorSlot={null}
               />
-            </div>
           </div>
         </div>
       </main>
 
       {/* 関連タスクモーダル */}
-      {showRelatedTasksModal && selectedCase && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {selectedCase.name} - 関連タスク
-              </h2>
-              <button
-                onClick={() => setShowRelatedTasksModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+      <Dialog open={showRelatedTasksModal} onOpenChange={setShowRelatedTasksModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedCase?.name} - 関連タスク
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[60vh]">
               <div className="space-y-4">
                 {/* 案件情報 */}
-                <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-100 rounded-lg p-4">
                   <h3 className="font-medium text-gray-900 mb-2">案件情報</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-600">顧客名:</span>
-                      <span className="ml-2 text-gray-900">{selectedCase.customer}</span>
+                    <span className="ml-2 text-gray-900">{selectedCase?.customer}</span>
                     </div>
                     <div>
                       <span className="text-gray-600">進捗:</span>
-                      <span className="ml-2 text-gray-900">{selectedCase.progress}%</span>
+                    <span className="ml-2 text-gray-900">{selectedCase?.progress}%</span>
                     </div>
                     <div>
                       <span className="text-gray-600">ステータス:</span>
-                      <span className="ml-2 text-gray-900">{selectedCase.status}</span>
+                    <span className="ml-2 text-gray-900">{selectedCase?.status}</span>
                     </div>
                     <div>
                       <span className="text-gray-600">期限:</span>
-                      <span className="ml-2 text-gray-900">{selectedCase.deadline}</span>
+                    <span className="ml-2 text-gray-900">{selectedCase?.deadline}</span>
                     </div>
                   </div>
                 </div>
@@ -1058,8 +773,8 @@ export default function CasesPage() {
                 <div>
                   <h3 className="font-medium text-gray-900 mb-3">関連タスク一覧</h3>
                   <div className="space-y-3">
-                    {Array.from({ length: selectedCase.relatedTasks }, (_, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  {selectedCase && Array.from({ length: selectedCase.relatedTasks }, (_, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <h4 className="font-medium text-gray-900">
@@ -1071,9 +786,9 @@ export default function CasesPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`inline-flex items-center justify-center rounded-full px-2 py-1 text-xs font-medium ${
-                              getTaskPriority(index) === '高' ? 'bg-red-100 text-red-700' :
-                              getTaskPriority(index) === '中' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-green-100 text-green-700'
+                            getTaskPriority(index) === '高' ? 'bg-gray-800 text-white' :
+                            getTaskPriority(index) === '中' ? 'bg-gray-500 text-white' :
+                            'bg-gray-300 text-gray-800'
                             }`}>
                               {getTaskPriority(index)}
                             </span>
@@ -1088,17 +803,13 @@ export default function CasesPage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end p-6 border-t">
-              <button
-                onClick={() => setShowRelatedTasksModal(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-              >
-                閉じる
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRelatedTasksModal(false)}>
+              閉じる
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

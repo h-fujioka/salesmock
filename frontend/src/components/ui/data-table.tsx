@@ -39,7 +39,7 @@ export function DataTable<TData, TValue>({
   columnSelectorSlot, 
   rowSelection, 
   setRowSelection,
-  pageSize = 10,
+  pageSize = 20,
   showPagination = false
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -76,11 +76,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-2">
-        {searchSlot}
-        {columnSelectorSlot}
-      </div>
-      <div className="rounded-md border w-full">
+      <div className="w-full border border-gray-200 rounded-lg">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -129,30 +125,28 @@ export function DataTable<TData, TValue>({
       </div>
       
       {/* ページネーション */}
-      {showPagination && table.getPageCount() > 1 && (
+      {showPagination && (
         <div className="flex items-center justify-between space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+          <div className="flex-1 text-sm text-gray-600">
+            {table.getFilteredRowModel().rows.length}件中 {table.getState().pagination.pageIndex * pageSize + 1}-{Math.min((table.getState().pagination.pageIndex + 1) * pageSize, table.getFilteredRowModel().rows.length)}件を表示
           </div>
           <div className="space-x-2">
             <button
-              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50"
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              Previous
+              前へ
             </button>
-            <span className="px-3 py-1 text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
+            <span className="px-3 py-1 text-sm text-gray-700">
+              {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}ページ
             </span>
             <button
-              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50"
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              Next
+              次へ
             </button>
           </div>
         </div>
