@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Send, Settings, User, Zap } from "lucide-react";
+import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Plus, Send, Settings, User, Zap } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -61,7 +61,7 @@ type AIActionItem = {
   details: string[];
   assignee: string;
   targetCompany: string;
-  status: 'generating' | 'completed' | 'error';
+  status: 'generating' | 'completed' | 'error' | 'unconfirmed' | 'confirmed';
   generatedContent?: {
     type: 'email' | 'document' | 'analysis' | 'report';
     content: string;
@@ -112,7 +112,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       ],
       assignee: '山田太郎',
       targetCompany: '株式会社サンプル',
-      status: 'completed',
+      status: 'confirmed',
       generatedContent: {
         type: 'email',
         content: `フォローアップメールの作成と送信が完了しました。
@@ -140,7 +140,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
       ],
       assignee: '山田太郎',
       targetCompany: '株式会社サンプル',
-      status: 'completed',
+      status: 'unconfirmed',
       generatedContent: {
         type: 'document',
         content: `見積書に競合他社との比較表を追加しました。
@@ -170,6 +170,18 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     attachments: [] as Array<{ name: string; type: string; size: string }>
   });
   
+  // 提案ドロワー用の状態
+  const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
+  const [showProposalDrawer, setShowProposalDrawer] = useState(false);
+  const [proposalMessages, setProposalMessages] = useState<Message[]>([]);
+  const [proposalCommand, setProposalCommand] = useState("");
+
+  // Sela依頼ドロワー用の状態
+  const [selectedSelaRequest, setSelectedSelaRequest] = useState<string | null>(null);
+  const [showSelaRequestDrawer, setShowSelaRequestDrawer] = useState(false);
+  const [selaRequestMessages, setSelaRequestMessages] = useState<Message[]>([]);
+  const [selaRequestCommand, setSelaRequestCommand] = useState("");
+
 
   // コメント追加ハンドラー
   const handleAddComment = () => {
@@ -206,8 +218,14 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   const handleSend = async () => {
     if (!command.trim()) return;
 
-    // ユーザーのメッセージを履歴に追加
-    setMessages(prev => [...prev, { content: command, type: 'question' }]);
+    // Sela依頼ドロワーを開く
+    setSelectedSelaRequest(command);
+    setShowSelaRequestDrawer(true);
+    
+    // 初期メッセージを設定
+    setSelaRequestMessages([
+      { content: command, type: 'question' }
+    ]);
 
     // Selaレスポンスをシミュレート
     const aiResponse = `タスク「${task.task}」について、以下の提案をいたします：
@@ -229,7 +247,10 @@ export default function TaskDetailClient({ task }: { task: Task }) {
 
 これらの提案を実行しますか？`;
 
-    setMessages(prev => [...prev, { content: aiResponse, type: 'answer' }]);
+    setSelaRequestMessages([
+      { content: command, type: 'question' },
+      { content: aiResponse, type: 'answer' }
+    ]);
     setCommand("");
   };
 
@@ -468,6 +489,68 @@ export default function TaskDetailClient({ task }: { task: Task }) {
     }
   };
 
+  // 提案ドロワーでのメッセージ送信
+  const handleProposalSend = () => {
+    if (!proposalCommand.trim()) return;
+
+    const newMessage: Message = {
+      content: proposalCommand,
+      type: 'question'
+    };
+    setProposalMessages(prev => [...prev, newMessage]);
+    setProposalCommand("");
+
+    // Selaレスポンスをシミュレート
+    const aiResponse = `提案「${selectedProposal}」について、以下の回答をいたします：
+
+1. **提案内容の理解**：
+   - 提案内容: ${selectedProposal}
+   - 提案の目的: 現在のタスク状況を分析し、自動生成された提案です。
+
+2. **提案の詳細**：
+   - 提案の実装方法: この提案は、SelaのAIモデルによって自動生成されたものです。
+   - 提案の効果: この提案を実装することで、タスクの進捗が加速し、リスクが軽減されます。
+
+3. **次のアクション**：
+   - 提案の実装: この提案を実装するために、必要な手順や注意点を説明します。
+   - 提案の評価: 提案の実装が完了したら、その結果を確認し、次のアクションを提案します。
+
+この提案について、何かご質問はありますか？`;
+
+    setProposalMessages(prev => [...prev, { content: aiResponse, type: 'answer' }]);
+  };
+
+  // Sela依頼ドロワーでのメッセージ送信
+  const handleSelaRequestSend = () => {
+    if (!selaRequestCommand.trim()) return;
+
+    const newMessage: Message = {
+      content: selaRequestCommand,
+      type: 'question'
+    };
+    setSelaRequestMessages(prev => [...prev, newMessage]);
+    setSelaRequestCommand("");
+
+    // Selaレスポンスをシミュレート
+    const aiResponse = `依頼「${selaRequestCommand}」について、以下の回答をいたします：
+
+1. **依頼内容の理解**：
+   - 依頼内容: ${selaRequestCommand}
+   - 依頼の目的: 現在のタスク状況を分析し、最適な対応を提案します。
+
+2. **対応の詳細**：
+   - 対応方法: この依頼に対して、SelaのAIモデルが最適な対応を自動生成します。
+   - 対応の効果: この対応を実装することで、タスクの進捗が加速し、効率が向上します。
+
+3. **次のアクション**：
+   - 対応の実装: この対応を実装するために、必要な手順や注意点を説明します。
+   - 対応の評価: 対応の実装が完了したら、その結果を確認し、次のアクションを提案します。
+
+この依頼について、何かご質問はありますか？`;
+
+    setSelaRequestMessages(prev => [...prev, { content: aiResponse, type: 'answer' }]);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
@@ -511,7 +594,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  作業タイムライン
+                  タイムライン
                 </button>
                 <button
                   onClick={() => setActiveTab('sela')}
@@ -525,7 +608,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                 </button>
               </div>
 
-              {/* 作業タイムライン */}
+              {/* タイムライン */}
               {activeTab === 'timeline' && (
                 <div>
                   {/* タイムラインエントリー部分 */}
@@ -659,15 +742,35 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                                  <span>生成中...</span>
                                </div>
                              ) : (
-                               <Button 
-                                 variant="outline" 
-                                 size="sm" 
-                                 onClick={() => handleExecuteSuggestion(suggestion)}
-                                 className="flex items-center space-x-2"
-                               >
-                                 <Play className="h-4 w-4" />
-                                 <span>実行</span>
-                               </Button>
+                               <div className="flex space-x-2">
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm" 
+                                   onClick={() => {
+                                     setSelectedProposal(suggestion);
+                                     setShowProposalDrawer(true);
+                                     // 初期メッセージをクリア
+                                     setProposalMessages([]);
+                                   }}
+                                   className="flex items-center space-x-2"
+                                 >
+                                   <span>詳細を見る</span>
+                                 </Button>
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm" 
+                                   onClick={() => {
+                                     // 対応リストに追加する処理
+                                     console.log('対応リストに追加:', suggestion);
+                                     setAlertMessage('対応リストに追加しました');
+                                     setTimeout(() => setAlertMessage(null), 3000);
+                                   }}
+                                   className="flex items-center space-x-2"
+                                 >
+                                   <Plus className="w-4 h-4 mr-1" />
+                                   対応リストに追加
+                                 </Button>
+                               </div>
                              )}
                            </div>
                          );
@@ -713,17 +816,17 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                )}
             </div>
 
-            {/* 対応予定リスト */}
+            {/* 対応タスクリスト */}
             <div className="bg-white rounded-lg border shadow-sm p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <CheckCircle className="w-5 h-5 text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-900">対応予定リスト</h3>
+                <h3 className="text-lg font-semibold text-gray-900">対応タスクリスト</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">ステータス</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">確認状況</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">対応内容</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">日時</th>
                     </tr>
@@ -737,7 +840,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                         <td className="py-3 px-4">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-base font-medium ${
                             item.status === 'generating' ? 'bg-blue-100 text-blue-800' :
-                            item.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            item.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                            item.status === 'unconfirmed' ? 'bg-yellow-100 text-yellow-800' :
                             item.status === 'error' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
@@ -745,7 +849,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                               <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                             )}
                             {item.status === 'generating' ? '生成中...' :
-                             item.status === 'completed' ? '生成済み' :
+                             item.status === 'confirmed' ? '確認済み' :
+                             item.status === 'unconfirmed' ? '未確認' :
                              item.status === 'error' ? 'エラー' :
                              '生成中...'}
                           </span>
@@ -932,7 +1037,6 @@ export default function TaskDetailClient({ task }: { task: Task }) {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">{selectedAIItem.title}</h4>
                   <p className="text-sm text-gray-500 mb-3">
                     {selectedAIItem.timestamp.toLocaleString('ja-JP', {
                       year: 'numeric',
@@ -947,7 +1051,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                   <div className="mb-4">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-base font-medium ${
                       selectedAIItem.status === 'generating' ? 'bg-blue-100 text-blue-800' :
-                      selectedAIItem.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      selectedAIItem.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      selectedAIItem.status === 'unconfirmed' ? 'bg-yellow-100 text-yellow-800' :
                       selectedAIItem.status === 'error' ? 'bg-red-100 text-red-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
@@ -955,7 +1060,8 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                         <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                       )}
                       {selectedAIItem.status === 'generating' ? '生成中...' :
-                       selectedAIItem.status === 'completed' ? '生成済み' :
+                       selectedAIItem.status === 'confirmed' ? '確認済み' :
+                       selectedAIItem.status === 'unconfirmed' ? '未確認' :
                        selectedAIItem.status === 'error' ? 'エラー' :
                        '生成中...'}
                     </span>
@@ -1028,7 +1134,7 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                     </div>
                   )}
                   
-                  {selectedAIItem.status === 'completed' && (
+                  {(selectedAIItem.status === 'confirmed' || selectedAIItem.status === 'unconfirmed') && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -1072,32 +1178,21 @@ export default function TaskDetailClient({ task }: { task: Task }) {
             {/* チャット欄（固定） */}
             <div className="border-t border-gray-200 p-4 bg-gray-50">
               {/* 次のアクションボタン（横並び、モノクロ） */}
-              {selectedAIItem.status === 'completed' && (
+              {(selectedAIItem.status === 'confirmed' || selectedAIItem.status === 'unconfirmed') && (
                 <div className="mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex space-x-2">
+                  <div>
                     {selectedAIItem.generatedContent?.type === 'email' && (
                       <Button 
                         onClick={() => handleSendEmail(selectedAIItem)}
                         variant="outline"
-                        className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                        className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         size="sm"
                       >
                         この内容でメール送信
                       </Button>
                     )}
                     
-                    <Button 
-                      onClick={() => {
-                        // 次のアクションへの移行処理
-                        console.log('次のアクションへ移行:', selectedAIItem.id);
-                        // ここで次のアクションを生成または提案する処理を追加
-                      }}
-                      variant="outline"
-                      className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                      size="sm"
-                    >
-                      次のアクションを提案
-                    </Button>
+
                   </div>
                 </div>
               )}
@@ -1111,6 +1206,154 @@ export default function TaskDetailClient({ task }: { task: Task }) {
                   className="flex-1 text-base"
                 />
                 <Button onClick={handleSend} disabled={!command.trim()} size="sm">
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 提案詳細ドロワー */}
+      {showProposalDrawer && selectedProposal && (
+        <div className="fixed inset-y-0 right-0 w-[600px] bg-white border-l border-gray-200 shadow-xl z-50 transform transition-transform duration-300 ease-in-out">
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">{selectedProposal}</h3>
+              <button 
+                onClick={() => {
+                  setShowProposalDrawer(false);
+                  setSelectedProposal(null);
+                  setProposalMessages([]);
+                  setProposalCommand("");
+                }}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-4">
+                <div>
+                  <p className="font-medium text-gray-900 mb-3">{selectedProposal}</p>
+                  
+                  <div className="mb-4">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-base font-medium bg-blue-100 text-blue-800">
+                      提案中
+                    </span>
+                  </div>
+                </div>
+                
+
+              </div>
+            </div>
+            
+            {/* チャット欄（固定） */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50">
+                             {/* アクションボタン */}
+               <div className="mb-4 pb-4 border-b border-gray-200">
+                 <Button 
+                   onClick={() => {
+                     console.log('対応リストに追加:', selectedProposal);
+                     setAlertMessage('対応リストに追加しました');
+                     setTimeout(() => setAlertMessage(null), 3000);
+                     setShowProposalDrawer(false);
+                   }}
+                   variant="outline"
+                   className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                   size="sm"
+                 >
+                   <Plus className="w-4 h-4 mr-1" />
+                   対応リストに追加
+                 </Button>
+               </div>
+              
+              {/* メッセージ履歴 */}
+              <div className="mb-4 max-h-48 overflow-y-auto space-y-3">
+                {proposalMessages.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.type === 'question' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                      msg.type === 'question' 
+                        ? 'bg-gray-900 text-white' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* 入力欄 */}
+              <div className="flex space-x-2">
+                <Input
+                  value={proposalCommand}
+                  onChange={(e) => setProposalCommand(e.target.value)}
+                  placeholder="Selaに質問しましょう..."
+                  onKeyDown={(e) => e.key === 'Enter' && handleProposalSend()}
+                  className="flex-1 text-base"
+                />
+                <Button onClick={handleProposalSend} disabled={!proposalCommand.trim()} size="sm">
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sela依頼詳細ドロワー */}
+      {showSelaRequestDrawer && (
+        <div className="fixed inset-y-0 right-0 w-[600px] bg-white shadow-xl transform transition-transform z-40">
+          <div className="h-full flex flex-col">
+            {/* ヘッダー */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {selectedSelaRequest}
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSelaRequestDrawer(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* 中央エリア（空） */}
+            <div className="flex-1"></div>
+            
+            {/* 下部固定エリア */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50">
+              {/* アクションボタン */}
+              <div className="mb-4">
+                <Button 
+                  onClick={() => {
+                    console.log('対応リストに追加:', selectedSelaRequest);
+                    setAlertMessage('対応リストに追加しました');
+                    setTimeout(() => setAlertMessage(null), 3000);
+                    setShowSelaRequestDrawer(false);
+                  }}
+                  variant="outline"
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  対応リストに追加
+                </Button>
+              </div>
+              
+              {/* コマンド入力欄 */}
+              <div className="flex space-x-2">
+                <Input
+                  value={selaRequestCommand}
+                  onChange={(e) => setSelaRequestCommand(e.target.value)}
+                  placeholder="Selaに依頼しましょう..."
+                  onKeyDown={(e) => e.key === 'Enter' && handleSelaRequestSend()}
+                  className="flex-1 text-base"
+                />
+                <Button onClick={handleSelaRequestSend} disabled={!selaRequestCommand.trim()} size="sm">
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
