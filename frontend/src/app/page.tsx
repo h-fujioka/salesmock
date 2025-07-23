@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,10 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User, CheckCircle2 } from "lucide-react";
+import { Bell, Calendar, CheckCircle2, ChevronDown, FileSpreadsheet, PenLine, Plus, Search, Send, User } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // 検索結果テンプレートコンポーネント
 interface SearchResultTemplateProps {
@@ -772,7 +772,7 @@ export default function Home() {
       <Header onClear={handleClear} />
       
       {/* メインコンテンツエリア */}
-      <main className="flex-1 container mx-auto px-8 pt-8 pb-48">
+      <main className="flex-1 w-full mx-auto px-8 pt-8 pb-48">
         <div className="space-y-4">
           {/* Selaの実行結果メッセージ */}
           {selaMessage}
