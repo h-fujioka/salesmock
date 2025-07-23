@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Bell, Calendar, ChevronDown, Filter, Search, User } from "lucide-react";
+import { ArrowUpDown, Bell, Calendar, ChevronDown, ChevronRight, Filter, Home, Search, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -590,10 +590,17 @@ export default function CasesPage() {
     <div className="min-h-screen bg-white">
       {/* ヘッダー */}
       <Header />
-      
+      {/* パンクズリスト */}
+      <nav className="flex items-center space-x-2 text-xs text-gray-600 px-6 pt-6 mb-6">
+        <Link href="/" className="flex items-center hover:text-gray-900 transition-colors">
+          <Home className="w-4 h-4" />
+        </Link>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-gray-900 font-medium">案件一覧</span>
+      </nav>
       {/* メインコンテンツ */}
       <main className="w-full">
-        <div className="w-full px-6 py-6">
+        <div className="w-full px-6 pb-6">
           {/* タブと検索・フィルターを横並び */}
           <div className="flex items-center justify-between mb-6">
             {/* タブ */}

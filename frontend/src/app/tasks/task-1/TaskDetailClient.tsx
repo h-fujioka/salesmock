@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Bell, Calendar, CheckCircle, FileText, Loader2, Mail, MoreHorizontal, Play, Plus, Send, Settings, User, Zap } from "lucide-react";
+import { ArrowLeft, Bell, Calendar, CheckCircle, ChevronRight, FileText, Home, Loader2, Mail, MoreHorizontal, Play, Plus, Send, Settings, User, Zap } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -713,25 +713,18 @@ export default function TaskDetailClient({ task }: { task: Task }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ヘッダー */}
+    <div className="min-h-screen bg-white">
       <Header />
-      
-      {/* ナビゲーション */}
-      <div>
-        <div className="max-w-7xl mx-auto py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-4 h-12">
-            <Link href="/" className="flex items-center text-gray-600 hover:text-gray-600">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              ホーム
-            </Link>
-            <span className="text-gray-400">/</span>
-            <Link href="/" className="text-gray-600 hover:text-gray-600">
-              タスク一覧
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* パンクズリスト */}
+      <nav className="flex items-center space-x-2 text-xs text-gray-600 px-8 pt-6 mb-6">
+        <Link href="/" className="flex items-center hover:text-gray-900 transition-colors">
+          <Home className="w-4 h-4" />
+        </Link>
+        <ChevronRight className="w-4 h-4" />
+        <Link href="/cases" className="hover:text-gray-900 transition-colors">案件一覧</Link>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-gray-900 font-medium">{task.task}</span>
+      </nav>
 
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 pt-0 pb-8">
         {/* タイトル */}
