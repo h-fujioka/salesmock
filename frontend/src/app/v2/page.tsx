@@ -214,19 +214,19 @@ export default function HomeV2() {
           <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
                 <Tabs defaultValue="tasks" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
                   <div className="flex items-center justify-between mb-2 gap-4">
-                    <TabsList className="bg-gray-100 text-base flex-shrink-0">
-                  <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                    <TabsList className="bg-gray-100 flex-shrink-0">
+                  <TabsTrigger value="tasks" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                     優先タスク
                     <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">3</span>
                   </TabsTrigger>
-                  <TabsTrigger value="risks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                  <TabsTrigger value="risks" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                     リスク案件
                     <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">2</span>
                   </TabsTrigger>
-                      <TabsTrigger value="members" className="text-gray-700 font-normal text-base">メンバー実績</TabsTrigger>
-                      <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
-                      <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
-                  <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                      <TabsTrigger value="members" className="text-gray-700 font-normal text-sm">メンバー実績</TabsTrigger>
+                      <TabsTrigger value="competitors" className="text-gray-700 font-normal text-sm">競合利用企業</TabsTrigger>
+                      <TabsTrigger value="slips" className="text-gray-700 font-normal text-sm">スリップ案件</TabsTrigger>
+                  <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                     AI承認待ち
                     <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">1</span>
                   </TabsTrigger>

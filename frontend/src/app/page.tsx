@@ -29,25 +29,18 @@ function SearchResultTemplate({
   nextActionText
 }: SearchResultTemplateProps) {
   return (
-    <div className="w-full max-w-[1000px] mx-auto flex flex-col gap-4">
-      {/* 説明＋テーブルエリア（テンプレート化） */}
-      <div className="flex flex-col gap-4">
-        <div className="text-xl font-bold text-gray-800">
-          {title}
-        </div>
-        <div className="text-gray-600 text-base leading-relaxed">
-          {description}
-        </div>
-        <div className="overflow-x-auto">
-          {dataComponent}
-        </div>
-        <div className="flex flex-col gap-4 mt-6">
-          <div className="text-base text-gray-700">
-            {nextActionText}
-          </div>
-        </div>
+    <section className="w-full max-w-7xl mx-auto flex flex-col gap-6 p-6">
+      <header className="mb-2">
+        <h2 className="text-xl font-bold text-gray-700 mb-1">{title}</h2>
+        <p className="text-sm font-normal text-gray-600 leading-relaxed">{description}</p>
+      </header>
+      <div className="overflow-x-auto bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+        {dataComponent}
       </div>
-    </div>
+      <footer className="mt-4">
+        <p className="text-sm font-normal text-gray-700">{nextActionText}</p>
+      </footer>
+    </section>
   );
 }
 
@@ -69,14 +62,14 @@ function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditabl
     <div
       className={
         isAnswer
-          ? "bg-gray-800 rounded-3xl px-8 py-6 w-fit text-xl text-white font-medium mb-4"
-          : "w-full max-w-[1000px] mx-auto bg-gray-100 border border-gray-100 rounded-xl shadow px-4 py-3 flex items-center justify-between text-base font-normal text-gray-800 mb-4"
+          ? "bg-gray-800 rounded-xl px-6 py-4 w-fit text-lg font-medium mb-4 text-white"
+          : "w-full max-w-7xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 flex items-center justify-between text-sm font-normal text-gray-700 mb-4"
       }
       style={isAnswer ? { maxWidth: 1000, marginLeft: 'auto' } : {}}
     >
       {isEditing ? (
         <input
-          className={isAnswer ? "flex-1 bg-transparent outline-none border-none text-xl text-white font-medium mr-2 px-2 py-1 rounded" : "flex-1 bg-transparent outline-none border-none text-base font-normal text-gray-800 mr-2 px-2 py-1 rounded"}
+          className={isAnswer ? "flex-1 bg-transparent outline-none border-none text-lg font-medium mr-2 px-2 py-1 rounded text-white" : "flex-1 bg-transparent outline-none border-none text-sm font-normal text-gray-700 mr-2 px-2 py-1 rounded"}
           value={editableQuestion}
           onChange={e => setEditableQuestion(e.target.value)}
           onBlur={onEditComplete}
@@ -90,11 +83,13 @@ function QuestionBox({ question, onEdit, isEditing, editableQuestion, setEditabl
         <Button
           size="icon"
           variant="ghost"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10 ml-4"
+          className="h-10 w-10 ml-4 text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-gray-500"
           onClick={onEdit}
           aria-label="編集"
         >
-          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
         </Button>
       )}
     </div>
@@ -128,7 +123,18 @@ type Message = {
 
 // カラム定義
 const taskColumns: ColumnDef<any, React.ReactNode>[] = [
-  { accessorKey: "priority", header: "優先度", cell: info => <span className="text-black rounded px-2 py-0.5 font-normal bg-gray-100">{info.getValue()}</span> },
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: info => {
+      const priority = info.getValue() as string;
+      return (
+        <span className="bg-gray-100 text-gray-800 rounded px-2 py-0.5 font-semibold text-xs">
+          {priority}
+        </span>
+      );
+    }
+  },
   { 
     accessorKey: "task", 
     header: "タスク名", 
@@ -148,19 +154,147 @@ const taskColumns: ColumnDef<any, React.ReactNode>[] = [
   { accessorKey: "project", header: "案件名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
   { accessorKey: "customerType", header: "顧客区分", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
   { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "daysLeft", header: "残日数", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "auto", header: "AI/手動", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "approval", header: "承認", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
+  { 
+    accessorKey: "deadline", 
+    header: "期限・残日数", 
+    cell: info => {
+      const deadline = info.getValue() as string;
+      const daysLeft = info.row.original.daysLeft as string;
+      const isUrgent = daysLeft === '0日' || daysLeft === '1日';
+      
+      return (
+        <div className="flex flex-col">
+          <span className="text-gray-700 font-normal">{deadline}</span>
+          <span className={`text-xs font-semibold ${isUrgent ? 'text-gray-800' : 'text-gray-500'}`}>
+            {daysLeft}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "status", 
+    header: "ステータス", 
+    cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+  { 
+    accessorKey: "auto", 
+    header: "AI/手動", 
+    cell: info => {
+      const auto = info.getValue() as string;
+      const isAI = auto === 'AI自動';
+      return (
+        <div className="flex items-center gap-1">
+          <span className="text-sm">{isAI ? '🤖' : '👤'}</span>
+          <span className="bg-gray-100 text-gray-800 rounded px-2 py-0.5 font-semibold text-xs">
+            {auto}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "approval", 
+    header: "承認", 
+    cell: info => {
+      const approval = info.getValue() as string;
+      if (!approval) return <span className="text-gray-400">-</span>;
+      
+      const getApprovalIcon = (approval: string) => {
+        switch (approval) {
+          case '承認待ち':
+            return '⏳';
+          case '承認済み':
+            return '✅';
+          case '却下':
+            return '❌';
+          default:
+            return '';
+        }
+      };
+      
+      return (
+        <div className="flex items-center gap-1">
+          <span className="text-sm">{getApprovalIcon(approval)}</span>
+          <span className="bg-gray-100 text-gray-800 rounded px-2 py-0.5 font-semibold text-xs">
+            {approval}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "actions", 
+    header: "アクション", 
+    cell: info => {
+      const row = info.row.original;
+      const approval = row.approval;
+      
+      return (
+        <div className="flex items-center gap-1">
+          {approval === '承認待ち' && (
+            <>
+              <button className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-2 py-1 rounded transition-colors">
+                承認
+              </button>
+              <button className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded transition-colors">
+                却下
+              </button>
+            </>
+          )}
+          <button className="bg-gray-400 hover:bg-gray-500 text-white text-xs px-2 py-1 rounded transition-colors">
+            編集
+          </button>
+        </div>
+      );
+    }
+  }
 ]
 
 const riskColumns: ColumnDef<any, React.ReactNode>[] = [
-  { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : 'bg-yellow-100'}`}>{info.getValue()}</span> },
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: info => {
+      const priority = info.getValue() as string;
+      return (
+        <span className="bg-gray-100 text-gray-800 rounded px-2 py-0.5 font-semibold text-xs">
+          {priority}
+        </span>
+      );
+    }
+  },
   { accessorKey: "project", header: "案件名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
   { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "risk", header: "リスク", cell: info => <span className="text-red-600 font-normal">{info.getValue()}</span> }
+  { 
+    accessorKey: "deadline", 
+    header: "期限・残日数", 
+    cell: info => {
+      const deadline = info.getValue() as string;
+      const daysLeft = info.row.original.daysLeft as string;
+      const isUrgent = daysLeft === '0日' || daysLeft === '1日';
+      
+      return (
+        <div className="flex flex-col">
+          <span className="text-gray-700 font-normal">{deadline}</span>
+          <span className={`text-xs font-semibold ${isUrgent ? 'text-gray-800' : 'text-gray-500'}`}>
+            {daysLeft}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "risk", 
+    header: "リスク", 
+    cell: info => {
+      const risk = info.getValue() as string;
+      return (
+        <span className="bg-gray-100 text-gray-800 font-semibold text-xs rounded px-2 py-0.5">
+          {risk}
+        </span>
+      );
+    }
+  }
 ]
 
 const memberColumns: ColumnDef<any, React.ReactNode>[] = [
@@ -187,11 +321,181 @@ const slipColumns: ColumnDef<any, React.ReactNode>[] = [
 ]
 
 const aiApprovalColumns: ColumnDef<any, React.ReactNode>[] = [
-  { accessorKey: "priority", header: "優先度", cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-red-100' : 'bg-yellow-100'}`}>{info.getValue()}</span> },
-  { accessorKey: "taskName", header: "タスク名", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
+  { 
+    accessorKey: "executionDate", 
+    header: "実行日時", 
+    cell: info => <span className="text-gray-700 font-normal text-sm">{info.getValue()}</span>
+  },
+  { 
+    accessorKey: "actionType", 
+    header: "アクション種別", 
+    cell: info => {
+      const actionType = info.getValue() as string;
+      const getActionIcon = (actionType: string) => {
+        switch (actionType) {
+          case 'メール送信':
+            return '📧';
+          case '議事録作成':
+            return '📝';
+          case '提案書作成':
+            return '📄';
+          default:
+            return '🤖';
+        }
+      };
+      return (
+        <div className="flex items-center gap-1">
+          <span className="text-sm">{getActionIcon(actionType)}</span>
+          <span className="text-gray-700 font-normal">{actionType}</span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "target", 
+    header: "対象", 
+    cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
+  },
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: info => {
+      const priority = info.getValue() as string;
+      return (
+        <span className="bg-gray-100 text-gray-800 rounded px-2 py-0.5 font-semibold text-xs">
+          {priority}
+        </span>
+      );
+    }
+  },
+  { 
+    accessorKey: "taskName", 
+    header: "タスク名", 
+    cell: info => {
+      const row = info.row.original;
+      return (
+        <Link 
+          href={`/tasks/task-1`}
+          className="text-gray-600 hover:text-gray-900 hover:underline cursor-pointer transition-colors"
+          style={{ textDecoration: "none" }}
+        >
+          {info.getValue()}
+        </Link>
+      );
+    }
+  },
+  { 
+    accessorKey: "aiProposal", 
+    header: "AI提案内容", 
+    cell: info => {
+      const proposal = info.getValue() as string;
+      return (
+        <div className="max-w-xs">
+          <span className="text-gray-700 font-normal text-sm line-clamp-2">
+            {proposal}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "executionResult", 
+    header: "実行結果", 
+    cell: info => {
+      const result = info.getValue() as string;
+      return (
+        <span className="bg-gray-50 text-gray-700 font-normal text-sm rounded px-2 py-1">
+          {result}
+        </span>
+      );
+    }
+  },
   { accessorKey: "assignee", header: "担当者", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "deadline", header: "期限", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> },
-  { accessorKey: "status", header: "ステータス", cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span> }
+  { 
+    accessorKey: "approver", 
+    header: "承認者", 
+    cell: info => {
+      const approver = info.getValue() as string;
+      if (approver === '-') return <span className="text-gray-400">-</span>;
+      return <span className="text-gray-700 font-normal">{approver}</span>;
+    }
+  },
+  { 
+    accessorKey: "deadline", 
+    header: "期限・残日数", 
+    cell: info => {
+      const deadline = info.getValue() as string;
+      const daysLeft = info.row.original.daysLeft as string;
+      const isUrgent = daysLeft === '0日' || daysLeft === '1日';
+      
+      return (
+        <div className="flex flex-col">
+          <span className="text-gray-700 font-normal">{deadline}</span>
+          <span className={`text-xs font-semibold ${isUrgent ? 'text-gray-800' : 'text-gray-500'}`}>
+            {daysLeft}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "status", 
+    header: "ステータス", 
+    cell: info => {
+      const status = info.getValue() as string;
+      
+      const getStatusIcon = (status: string) => {
+        switch (status) {
+          case '承認待ち':
+            return '⏳';
+          case '承認済み':
+            return '✅';
+          case '却下':
+            return '❌';
+          default:
+            return '';
+        }
+      };
+      
+      return (
+        <div className="flex items-center gap-1">
+          <span className="text-sm">{getStatusIcon(status)}</span>
+          <span className="bg-gray-100 text-gray-800 rounded px-2 py-0.5 font-semibold text-xs">
+            {status}
+          </span>
+        </div>
+      );
+    }
+  },
+  { 
+    accessorKey: "actions", 
+    header: "アクション", 
+    cell: info => {
+      const row = info.row.original;
+      const status = row.status;
+      
+      return (
+        <div className="flex items-center gap-1">
+          {status === '承認待ち' && (
+            <>
+              <button className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-2 py-1 rounded transition-colors">
+                承認
+              </button>
+              <button className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded transition-colors">
+                却下
+              </button>
+            </>
+          )}
+          <button className="bg-gray-400 hover:bg-gray-500 text-white text-xs px-2 py-1 rounded transition-colors">
+            詳細
+          </button>
+          <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs px-2 py-1 rounded transition-colors">
+            修正
+          </button>
+        </div>
+      );
+    }
+  }
 ]
 
 // データ定義
@@ -233,8 +537,48 @@ const slipData = [
 ]
 
 const aiApprovalData = [
-  { priority: "優先", taskName: "フォローアップメール作成と送信", assignee: "山田太郎", deadline: "2024/07/11", status: "承認待ち" },
-  { priority: "通常", taskName: "商談議事録作成と共有", assignee: "鈴木一郎", deadline: "2024/07/11", status: "修正中" }
+  { 
+    priority: "高", 
+    taskName: "フォローアップメール作成と送信", 
+    assignee: "山田太郎", 
+    deadline: "2024/07/11", 
+    daysLeft: "0日",
+    status: "承認待ち",
+    actionType: "メール送信",
+    target: "A社案件",
+    aiProposal: "顧客Aへのフォローアップメールを自動生成しました",
+    executionResult: "メール作成完了",
+    approver: "-",
+    executionDate: "2024/07/10 14:30"
+  },
+  { 
+    priority: "中", 
+    taskName: "商談議事録作成と共有", 
+    assignee: "鈴木一郎", 
+    deadline: "2024/07/12", 
+    daysLeft: "1日",
+    status: "承認済み",
+    actionType: "議事録作成",
+    target: "B社案件",
+    aiProposal: "商談Bの議事録を自動生成しました",
+    executionResult: "議事録作成・共有完了",
+    approver: "山田太郎",
+    executionDate: "2024/07/10 16:15"
+  },
+  { 
+    priority: "高", 
+    taskName: "C社提案書ドラフト作成", 
+    assignee: "佐藤花子", 
+    deadline: "2024/07/15", 
+    daysLeft: "2日",
+    status: "承認待ち",
+    actionType: "提案書作成",
+    target: "C社新規案件",
+    aiProposal: "C社向け提案書のドラフトを自動生成しました",
+    executionResult: "ドラフト作成完了",
+    approver: "-",
+    executionDate: "2024/07/10 10:45"
+  }
 ]
 
 export default function Home() {
@@ -251,13 +595,14 @@ export default function Home() {
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
   const [editingMailId, setEditingMailId] = useState<string | null>(null)
   const [editedMails, setEditedMails] = useState<{[key: string]: {subject: string, body: string}}>({})
-  const [currentTab, setCurrentTab] = useState('tasks')
+  const [currentTab, setCurrentTab] = useState('today')
   const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true))
   const [riskColumnVisibility, setRiskColumnVisibility] = useState(riskColumns.map(() => true))
   const [memberColumnVisibility, setMemberColumnVisibility] = useState(memberColumns.map(() => true))
   const [competitorColumnVisibility, setCompetitorColumnVisibility] = useState(competitorColumns.map(() => true))
   const [slipColumnVisibility, setSlipColumnVisibility] = useState(slipColumns.map(() => true))
   const [aiApprovalColumnVisibility, setAiApprovalColumnVisibility] = useState(aiApprovalColumns.map(() => true))
+  const [analyticsColumnVisibility, setAnalyticsColumnVisibility] = useState([true, true, true, true, true])
 
   // Selaの実行結果メッセージ用の状態
   const [selaMessage, setSelaMessage] = useState<React.ReactNode | null>(null);
@@ -821,24 +1166,26 @@ export default function Home() {
 
               {/* タブ付きテーブル */}
               <div className="w-full bg-white border border-gray-100 rounded-xl shadow p-4">
-                <Tabs defaultValue="tasks" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
+                <Tabs defaultValue="today" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
                   <div className="flex items-center justify-between mb-2 gap-4">
-                    <TabsList className="bg-gray-100 text-base flex-shrink-0">
-                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                    <TabsList className="bg-gray-100 flex-shrink-0">
+                      <TabsTrigger value="today" className="text-gray-700 font-normal text-sm flex items-center gap-1">
+                        今日の状況
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{taskData.filter(task => task.priority === '高' && task.status !== '完了').length + riskData.filter(risk => risk.priority === '高').length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="tasks" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                         優先タスク
                         <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{taskData.filter(task => task.priority === '高').length}</span>
                       </TabsTrigger>
-                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-base flex items-center gap-1">
+                      <TabsTrigger value="ai-actions" className="text-gray-700 font-normal text-sm flex items-center gap-1">
+                        AI実行履歴
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiApprovalData.filter(item => item.status === '承認待ち').length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="risks" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                         リスク案件
                         <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{riskData.filter(risk => risk.priority === '高').length}</span>
                       </TabsTrigger>
-                      <TabsTrigger value="members" className="text-gray-700 font-normal text-base">メンバー実績</TabsTrigger>
-                      <TabsTrigger value="competitors" className="text-gray-700 font-normal text-base">競合利用企業</TabsTrigger>
-                      <TabsTrigger value="slips" className="text-gray-700 font-normal text-base">スリップ案件</TabsTrigger>
-                      <TabsTrigger value="ai-history" className="text-gray-700 font-normal text-base flex items-center gap-1">
-                        AI承認待ち
-                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiApprovalData.filter(item => item.status === '承認待ち' && item.priority === '優先').length}</span>
-                      </TabsTrigger>
+                      <TabsTrigger value="analytics" className="text-gray-700 font-normal text-sm">分析・レポート</TabsTrigger>
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -861,7 +1208,43 @@ export default function Home() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {currentTab === 'risks' ? (
+                          {currentTab === 'today' ? (
+                            taskColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={taskColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setTaskColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'tasks' ? (
+                            taskColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={taskColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setTaskColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'ai-actions' ? (
+                            aiApprovalColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={aiApprovalColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setAiApprovalColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'risks' ? (
                             riskColumns.map((col, idx) => (
                               <DropdownMenuCheckboxItem
                                 key={typeof col.header === 'string' ? col.header : `col${idx}`}
@@ -873,7 +1256,7 @@ export default function Home() {
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
                               </DropdownMenuCheckboxItem>
                             ))
-                          ) : currentTab === 'members' ? (
+                          ) : currentTab === 'analytics' ? (
                             memberColumns.map((col, idx) => (
                               <DropdownMenuCheckboxItem
                                 key={typeof col.header === 'string' ? col.header : `col${idx}`}
@@ -885,33 +1268,6 @@ export default function Home() {
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
                               </DropdownMenuCheckboxItem>
                             ))
-                          ) : currentTab === 'competitors' ? (
-                            competitorColumns.map((col, idx) => (
-                              <DropdownMenuCheckboxItem
-                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
-                                checked={competitorColumnVisibility[idx]}
-                                onCheckedChange={checked => {
-                                  setCompetitorColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
-                                }}
-                              >
-                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
-                              </DropdownMenuCheckboxItem>
-                            ))
-                          ) : currentTab === 'slips' ? (
-                            slipColumns.map((col, idx) => (
-                              <DropdownMenuCheckboxItem
-                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
-                                checked={slipColumnVisibility[idx]}
-                                onCheckedChange={checked => {
-                                  setSlipColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
-                                }}
-                              >
-                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
-                              </DropdownMenuCheckboxItem>
-                            ))
-                          ) : currentTab === 'ai' ? (
-                            // aiApprovalColumnsのカラム選択ロジックも削除
-                            null
                           ) : (
                             taskColumns.map((col, idx) => (
                               <DropdownMenuCheckboxItem
@@ -929,9 +1285,37 @@ export default function Home() {
                       </DropdownMenu>
                     </div>
                   </div>
+                  <TabsContent value="today">
+                    <div className="overflow-x-auto">
+                      <DataTable columns={taskColumns.filter((_, i) => taskColumnVisibility[i])} data={taskData.filter(task => task.priority === '高' && task.status !== '完了').concat(riskData.map(risk => ({
+                        taskId: `risk-${risk.project}`,
+                        task: risk.project,
+                        project: risk.project,
+                        customerType: '-',
+                        assignee: risk.assignee,
+                        deadline: risk.deadline,
+                        daysLeft: risk.daysLeft,
+                        status: risk.status,
+                        auto: 'AI自動',
+                        approval: '-',
+                        priority: risk.priority
+                      })))} 
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
+                    </div>
+                  </TabsContent>
                   <TabsContent value="tasks">
                     <div className="overflow-x-auto">
                       <DataTable columns={taskColumns.filter((_, i) => taskColumnVisibility[i])} data={taskData}
+                        searchSlot={null}
+                        columnSelectorSlot={null}
+                      />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="ai-actions">
+                    <div className="overflow-x-auto">
+                      <DataTable columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} data={aiApprovalData}
                         searchSlot={null}
                         columnSelectorSlot={null}
                       />
@@ -945,33 +1329,9 @@ export default function Home() {
                       />
                     </div>
                   </TabsContent>
-                  <TabsContent value="members">
+                  <TabsContent value="analytics">
                     <div className="overflow-x-auto">
                       <DataTable columns={memberColumns.filter((_, i) => memberColumnVisibility[i])} data={memberData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="competitors">
-                    <div className="overflow-x-auto">
-                      <DataTable columns={competitorColumns.filter((_, i) => competitorColumnVisibility[i])} data={competitorData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="slips">
-                    <div className="overflow-x-auto">
-                      <DataTable columns={slipColumns.filter((_, i) => slipColumnVisibility[i])} data={slipData}
-                        searchSlot={null}
-                        columnSelectorSlot={null}
-                      />
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="ai-history">
-                    <div className="overflow-x-auto">
-                      <DataTable columns={aiApprovalColumns.filter((_, i) => aiApprovalColumnVisibility[i])} data={aiApprovalData.filter(item => item.status === '承認待ち')}
                         searchSlot={null}
                         columnSelectorSlot={null}
                       />
