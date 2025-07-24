@@ -322,8 +322,8 @@ export default function CaseDetailPage() {
                         {entry.type === 'email' && (
                           <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Mail className="w-4 h-4 text-blue-600" />
+                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                <Mail className="w-4 h-4 text-gray-600" />
                               </div>
                               <div className="flex-1">
                                 <div className="text-base font-semibold text-gray-700">{entry.title}</div>
@@ -381,8 +381,8 @@ export default function CaseDetailPage() {
                         {entry.type === 'ai' && (
                           <div className="space-y-3">
                             <div className="flex items-start gap-3">
-                              <Avatar className="w-8 h-8 bg-blue-100">
-                                <AvatarFallback className="text-blue-600 text-xs">AI</AvatarFallback>
+                              <Avatar className="w-8 h-8 bg-gray-100">
+                                <AvatarFallback className="text-gray-600 text-xs">AI</AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
@@ -396,7 +396,7 @@ export default function CaseDetailPage() {
                                 </div>
                                 {entry.warning && (
                                   <div className="flex items-center gap-2 mb-2">
-                                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                                    <AlertTriangle className="w-4 h-4 text-gray-600" />
                                     <span className="text-base text-gray-700">{entry.title}</span>
                                   </div>
                                 )}
@@ -409,8 +409,8 @@ export default function CaseDetailPage() {
                         {entry.type === 'meeting' && (
                           <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <Calendar className="w-4 h-4 text-green-600" />
+                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                <Calendar className="w-4 h-4 text-gray-600" />
                               </div>
                               <div className="flex-1">
                                 <div className="text-base font-semibold text-gray-700">{entry.title}</div>

@@ -72,7 +72,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle font-semibold text-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left align-middle font-semibold !text-sm text-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}
@@ -105,6 +105,7 @@ const TableCaption = React.forwardRef<
 TableCaption.displayName = "TableCaption"
 
 export {
-    Table, TableBody, TableCaption, TableCell, TableFooter,
-    TableHead, TableHeader, TableRow
+  Table, TableBody, TableCaption, TableCell, TableFooter,
+  TableHead, TableHeader, TableRow
 }
+

@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Bell, Calendar, ChevronDown, ChevronRight, Filter, Home, Search, User } from "lucide-react";
+import { Bell, Calendar, ChevronDown, ChevronRight, Home, Search, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -39,8 +39,8 @@ function Header() {
       <span className="text-xl font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
-        <Button variant="ghost" size="icon"><Calendar className="w-6 h-6" /></Button>
-        <Button variant="ghost" size="icon"><Bell className="w-6 h-6" /></Button>
+        <Button variant="ghost" size="icon"><Calendar className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon"><Bell className="w-4 h-4" /></Button>
         <Avatar className="w-8 h-8">
           <AvatarFallback>
             <User className="w-5 h-5 text-gray-500" />
@@ -163,6 +163,139 @@ export default function CasesPage() {
       relatedTasks: 4,
       emailCount: 8,
       lastUpdated: "2024/07/10 11:15"
+    },
+    {
+      id: "case-006",
+      name: "新規顧客からの問い合わせ",
+      customer: "株式会社スタートアップ",
+      customerType: "新規",
+      progress: 10,
+      risk: "低",
+      deadline: "2024/07/30",
+      priority: "中",
+      status: "新規受信",
+      source: "メール",
+      assignee: "高橋 美咲",
+      customerContact: "山田 次郎",
+      firstReceived: "2024/07/20 09:00",
+      lastReceived: "2024/07/20 09:00",
+      relatedTasks: 1,
+      emailCount: 1,
+      lastUpdated: "2024/07/20 09:00"
+    },
+    {
+      id: "case-007",
+      name: "既存顧客の契約更新案件",
+      customer: "株式会社エンタープライズ",
+      customerType: "既存",
+      progress: 25,
+      risk: "中",
+      deadline: "2024/08/15",
+      priority: "高",
+      status: "案件化検討中",
+      source: "議事録",
+      assignee: "田中 太郎",
+      customerContact: "佐藤 三郎",
+      firstReceived: "2024/07/18 14:30",
+      lastReceived: "2024/07/19 16:45",
+      relatedTasks: 3,
+      emailCount: 5,
+      lastUpdated: "2024/07/19 16:45"
+    },
+    {
+      id: "case-008",
+      name: "AI検知による潜在顧客案件",
+      customer: "株式会社デジタルイノベーション",
+      customerType: "新規",
+      progress: 15,
+      risk: "中",
+      deadline: "2024/08/10",
+      priority: "中",
+      status: "新規受信",
+      source: "AI検知",
+      assignee: "佐藤 花子",
+      customerContact: "鈴木 四郎",
+      firstReceived: "2024/07/19 11:20",
+      lastReceived: "2024/07/19 11:20",
+      relatedTasks: 2,
+      emailCount: 2,
+      lastUpdated: "2024/07/19 11:20"
+    },
+    {
+      id: "case-009",
+      name: "大型案件の商談進行中",
+      customer: "株式会社グローバルコーポレーション",
+      customerType: "新規",
+      progress: 85,
+      risk: "高",
+      deadline: "2024/07/31",
+      priority: "高",
+      status: "進行中",
+      source: "メール",
+      assignee: "鈴木 一郎",
+      customerContact: "田中 五郎",
+      firstReceived: "2024/06/01 10:00",
+      lastReceived: "2024/07/20 17:30",
+      relatedTasks: 12,
+      emailCount: 25,
+      lastUpdated: "2024/07/20 17:30"
+    },
+    {
+      id: "case-010",
+      name: "契約書レビュー案件（完了）",
+      customer: "株式会社テックソリューション",
+      customerType: "既存",
+      progress: 100,
+      risk: "低",
+      deadline: "2024/07/15",
+      priority: "中",
+      status: "完了",
+      source: "メール",
+      assignee: "高橋 美咲",
+      customerContact: "山田 六郎",
+      firstReceived: "2024/06/20 13:00",
+      lastReceived: "2024/07/15 16:00",
+      relatedTasks: 6,
+      emailCount: 15,
+      lastUpdated: "2024/07/15 16:00"
+    },
+    {
+      id: "case-011",
+      name: "予算見直しにより保留中の案件",
+      customer: "株式会社ミディアムエンタープライズ",
+      customerType: "既存",
+      progress: 45,
+      risk: "中",
+      deadline: "2024/09/30",
+      priority: "中",
+      status: "保留",
+      source: "議事録",
+      assignee: "田中 太郎",
+      customerContact: "佐藤 七郎",
+      firstReceived: "2024/06/10 09:30",
+      lastReceived: "2024/07/10 14:20",
+      relatedTasks: 4,
+      emailCount: 8,
+      lastUpdated: "2024/07/10 14:20"
+    },
+    {
+      id: "case-012",
+      name: "競合他社に敗れた案件",
+      customer: "株式会社スタートアップB",
+      customerType: "新規",
+      progress: 0,
+      risk: "高",
+      deadline: "2024/07/05",
+      priority: "高",
+      status: "失注",
+      source: "メール",
+      assignee: "佐藤 花子",
+      customerContact: "田中 八郎",
+      firstReceived: "2024/06/15 11:00",
+      lastReceived: "2024/07/05 18:00",
+      relatedTasks: 8,
+      emailCount: 20,
+      lastUpdated: "2024/07/05 18:00"
     }
   ];
 
@@ -185,7 +318,7 @@ export default function CasesPage() {
       accessorKey: "name",
       header: "案件名",
       cell: info => (
-        <Link href={`/cases/${info.row.original.id}/`} className="text-gray-900 hover:text-gray-700 font-medium">
+        <Link href={`/cases/${info.row.original.id}/`} className="text-gray-900 hover:text-gray-700 text-sm font-medium">
           {info.getValue() as string}
         </Link>
       )
@@ -194,15 +327,29 @@ export default function CasesPage() {
       accessorKey: "customer",
       header: "企業名",
       cell: info => (
-        <span className="text-gray-900">{info.getValue() as string}</span>
+        <span className="text-gray-900 text-sm">{info.getValue() as string}</span>
       )
     },
     {
       accessorKey: "customerType",
       header: "顧客区分",
       cell: info => (
-        <span className="text-gray-700">{info.getValue() as string}</span>
+        <span className="text-gray-700 text-sm">{info.getValue() as string}</span>
       )
+    },
+    {
+      accessorKey: "priority",
+      header: "優先度",
+      cell: info => {
+        const priority = info.getValue() as string;
+        return (
+          <div className="text-center">
+            <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-sm font-medium text-gray-800">
+              {priority}
+            </span>
+          </div>
+        );
+      }
     },
     {
       accessorKey: "firstReceived",
@@ -211,7 +358,7 @@ export default function CasesPage() {
         const date = info.getValue() as string;
         const [datePart, timePart] = date.split(' ');
         return (
-          <div className="text-gray-700">
+          <div className="text-gray-700 text-sm">
             <div>{datePart}</div>
             <div className="text-sm text-gray-500">{timePart}</div>
           </div>
@@ -225,7 +372,7 @@ export default function CasesPage() {
         const date = info.getValue() as string;
         const [datePart, timePart] = date.split(' ');
         return (
-          <div className="text-gray-700">
+          <div className="text-gray-700 text-sm">
             <div>{datePart}</div>
             <div className="text-sm text-gray-500">{timePart}</div>
           </div>
@@ -237,7 +384,7 @@ export default function CasesPage() {
       header: "タスク件数",
       cell: info => (
         <div className="text-center">
-          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-sm font-medium text-gray-800">
             {info.getValue() as number}件
           </span>
         </div>
@@ -248,7 +395,7 @@ export default function CasesPage() {
       header: "受信メール数",
       cell: info => (
         <div className="text-center">
-          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2 py-1 text-sm font-medium text-gray-800">
             {info.getValue() as number}通
             </span>
           </div>
@@ -259,11 +406,39 @@ export default function CasesPage() {
       header: "ステータス",
       cell: info => {
         const status = info.getValue() as string;
+        const source = info.row.original.source;
+        
+        // AI/人間連携プロセスに応じたステータス表示
+        let displayStatus = status;
+        let statusConfig = {
+          bg: "bg-gray-100",
+          text: "text-gray-800"
+        };
+        
+        // AI検知案件の場合は特別なステータス表示
+        if (source === "AI検知") {
+          displayStatus = "AI自動";
+          statusConfig = {
+            bg: "bg-gray-100",
+            text: "text-gray-800"
+          };
+        } else if (status === "提案中") {
+          statusConfig = {
+            bg: "bg-gray-100",
+            text: "text-gray-800"
+          };
+        } else if (status === "進行中") {
+          statusConfig = {
+            bg: "bg-gray-100",
+            text: "text-gray-800"
+          };
+        }
+        
         return (
           <div className="text-center">
-            <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800">
-              {status}
-          </span>
+            <span className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-sm font-medium ${statusConfig.bg} ${statusConfig.text}`}>
+              {displayStatus}
+            </span>
           </div>
         );
       }
@@ -272,23 +447,16 @@ export default function CasesPage() {
       accessorKey: "customerContact",
       header: "顧客担当者",
       cell: info => (
-        <span className="text-gray-900">{info.getValue() as string}</span>
+        <span className="text-gray-900 text-sm">{info.getValue() as string}</span>
       )
     },
     {
       accessorKey: "assignee",
-      header: "営業担当者",
+      header: "担当者",
       cell: info => (
-        <div className="flex items-center gap-2">
-          <Avatar className="w-6 h-6">
-            <AvatarFallback className="text-xs">
-              {(info.getValue() as string).charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-gray-900">{info.getValue() as string}</span>
-          </div>
+        <span className="text-gray-700 text-sm">{info.getValue() as string}</span>
       )
-    },
+    }
   ];
 
   // 企業一覧（フィルター用）
@@ -423,26 +591,6 @@ export default function CasesPage() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {/* 並び替えボタン */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="border-gray-200 hover:border-gray-300"
-                title="並び替え"
-              >
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
-
-              {/* フィルタリングボタン */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="border-gray-200 hover:border-gray-300"
-                title="フィルタリング"
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
             </div>
               </div>
 
