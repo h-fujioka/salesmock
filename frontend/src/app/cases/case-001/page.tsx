@@ -3,12 +3,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 // import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SectionTitle } from "@/components/ui/section-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AlertCircle,
   AlertTriangle,
+  BarChart,
   Brain,
+  Building,
   Calendar,
   CheckCircle,
   CheckCircle2,
@@ -24,6 +25,8 @@ import {
   Star,
   Target,
   TrendingUp,
+  User,
+  Users,
   Zap
 } from 'lucide-react';
 import Link from 'next/link';
@@ -109,8 +112,8 @@ export default function CaseDetailPage() {
   // ダミーデータ
   const caseData: Case = {
     id: 'case-001',
-    name: 'ABC株式会社 営業支援システム導入案件',
-    company: 'ABC株式会社',
+    name: '契約書レビュー支援ツールのご提案',
+    company: 'ABC物流株式会社',
     customerType: '既存',
     status: '提案中',
     priority: '高',
@@ -118,64 +121,64 @@ export default function CaseDetailPage() {
     stakeholders: ['田中 博一', '佐藤 美咲'],
     customerOwner: '佐藤 太郎',
     customerStakeholders: ['山田 次郎', '鈴木 花子'],
-    project: '営業支援システム導入',
-    description: '営業活動の効率化と顧客管理の改善を目的としたシステム導入案件。現在のExcel管理からクラウドベースのシステムへの移行を検討中。',
-    budget: '500万円',
-    deadline: '2025/03/31',
-    progress: 65,
-    firstContact: '2024/03/15',
+    project: '契約書レビュー支援ツール導入',
+    description: '法務部門の業務効率化を目的とした契約書レビュー支援ツールの導入案件。現在の手動レビュープロセスからAI支援による自動チェック機能を活用した効率的なワークフローへの移行を検討中。',
+    budget: '300万円',
+    deadline: '2025/02/28',
+    progress: 75,
+    firstContact: '2024/04/10',
     lastContact: '2024/07/20',
-    taskCount: 12,
-    emailCount: 45,
-    meetingCount: 3,
-    daysSinceLastContact: 10,
-    nextActionDate: '2024/08/05',
+    taskCount: 8,
+    emailCount: 32,
+    meetingCount: 4,
+    daysSinceLastContact: 5,
+    nextActionDate: '2024/07/25',
     customerPsychology: {
       challenges: [
-        '営業活動の進捗管理が煩雑',
-        '顧客情報の共有が不十分',
-        'レポート作成に時間がかかる'
+        '契約書レビューに時間がかかりすぎる',
+        '法務担当者の負荷が高い',
+        'レビュー品質のばらつきがある'
       ],
       needs: [
-        '営業活動の可視化',
-        '顧客情報の一元管理',
-        'レポートの自動生成'
+        'レビュー時間の短縮',
+        '品質の標準化',
+        'リスク検出の自動化'
       ],
       emotionalFactors: [
-        '業務改善への強い意欲',
-        '新しいツール導入への不安',
-        '経営陣への成果報告へのプレッシャー'
+        '業務効率化への強い期待',
+        'AIツール導入への慎重な姿勢',
+        '法的リスク軽減への安心感'
       ],
       dailyBenefits: [
-        '営業活動の進捗がリアルタイムで把握できる',
-        '顧客情報がいつでもどこでも確認できる',
-        'レポート作成時間が50%短縮される'
+        '契約書レビュー時間が70%短縮される',
+        'リスク検出精度が向上する',
+        '法務担当者の負荷が軽減される'
       ]
     },
     decisionMaker: {
       name: '田中 次郎',
-      role: '営業部長',
+      role: '法務部長',
       businessMetrics: {
-        roi: '150%',
-        costSaving: '年間300万円',
-        revenueImpact: '売上20%向上'
+        roi: '200%',
+        costSaving: '年間200万円',
+        revenueImpact: 'リスク軽減効果'
       },
       companyImpact: [
-        '営業効率の向上',
-        '顧客満足度の向上',
-        '競合他社との差別化'
+        '法務業務の効率化',
+        '契約リスクの軽減',
+        'コンプライアンス強化'
       ],
       competitiveAdvantage: [
-        '迅速な顧客対応',
-        'データドリブンな営業活動',
-        '顧客との関係性強化'
+        '迅速な契約締結',
+        'リスク管理の向上',
+        '法務コストの削減'
       ]
     },
     aiInsights: {
       nextActions: [
-        '経営陣への最終提案書の準備',
+        '最終提案書の準備',
         'デモンストレーションの実施',
-        '導入スケジュールの詳細化'
+        '導入スケジュールの確定'
       ],
       riskFactors: [
         '予算承認の遅れ',
@@ -201,7 +204,7 @@ export default function CaseDetailPage() {
       timestamp: new Date("2024-07-20T10:30:00"),
       type: "meeting",
       title: "最終提案ミーティング",
-      content: "【When】7月20日 10:30-12:00 【Where】ABC物流本社会議室 【Who】法務部長・佐藤美咲、IT部長・山田太郎、営業担当・田中博一 【What】最終提案とROI説明 【Why】契約締結に向けた最終確認 【How】プレゼン資料でROI 200%・年間500万円削減効果を説明。経営陣から前向きな反応。",
+      content: "【When】7月20日 10:30-12:00 【Where】ABC物流本社会議室 【Who】法務部長・田中次郎、IT部長・山田太郎、営業担当・田中博一 【What】最終提案とROI説明 【Why】契約締結に向けた最終確認 【How】プレゼン資料でROI 200%・年間200万円削減効果を説明。経営陣から前向きな反応。",
       author: "田中博一",
       aiGenerated: false,
       sourceChannel: "ミーティング"
@@ -211,8 +214,8 @@ export default function CaseDetailPage() {
       timestamp: new Date("2024-07-19T17:00:00"),
       type: "slack",
       title: "法務部長からの追加要件依頼",
-      content: "【When】7月19日 17:00 【Where】Slack #abc-legal 【Who】法務部長・佐藤美咲、営業担当・田中博一 【What】契約書レビュー機能の追加要件確認 【Why】社内規定との自動照合機能を追加希望 【How】Slackで要件リストを共有し、開発チームへ展開依頼。",
-      author: "佐藤美咲",
+      content: "【When】7月19日 17:00 【Where】Slack #abc-legal 【Who】法務部長・田中次郎、営業担当・田中博一 【What】契約書レビュー機能の追加要件確認 【Why】社内規定との自動照合機能を追加希望 【How】Slackで要件リストを共有し、開発チームへ展開依頼。",
+      author: "田中次郎",
       channel: "abc-legal",
       threadCount: 3,
       aiGenerated: false,
@@ -223,8 +226,8 @@ export default function CaseDetailPage() {
       timestamp: new Date("2024-07-19T09:30:00"),
       type: "email",
       title: "顧客からのリマインドメール",
-      content: "【When】7月19日 9:30 【Where】メール 【Who】顧客担当・山田太郎、営業担当・田中博一 【What】提案書送付のリマインド 【Why】社内決裁のため早期提出希望 【How】顧客より丁寧なリマインドメール。提出予定日を返信。",
-      author: "山田太郎",
+      content: "【When】7月19日 9:30 【Where】メール 【Who】顧客担当・佐藤太郎、営業担当・田中博一 【What】提案書送付のリマインド 【Why】社内決裁のため早期提出希望 【How】顧客より丁寧なリマインドメール。提出予定日を返信。",
+      author: "佐藤太郎",
       aiGenerated: false,
       sourceChannel: "メール"
     },
@@ -266,7 +269,7 @@ export default function CaseDetailPage() {
       timestamp: new Date("2024-07-15T10:00:00"),
       type: "email",
       title: "法務部長への仕様確認メール",
-      content: "【When】7月15日 10:00 【Where】メール 【Who】営業担当・田中博一、法務部長・佐藤美咲 【What】契約書自動チェック仕様の確認依頼 【Why】要件の最終確定 【How】仕様書を添付し、追加要望があれば返信依頼。",
+      content: "【When】7月15日 10:00 【Where】メール 【Who】営業担当・田中博一、法務部長・田中次郎 【What】契約書自動チェック仕様の確認依頼 【Why】要件の最終確定 【How】仕様書を添付し、追加要望があれば返信依頼。",
       author: "田中博一",
       aiGenerated: false,
       sourceChannel: "メール"
@@ -287,8 +290,8 @@ export default function CaseDetailPage() {
       timestamp: new Date("2024-07-13T11:00:00"),
       type: "meeting",
       title: "顧客キックオフミーティング",
-      content: "【When】7月13日 11:00-12:00 【Where】ABC物流本社会議室 【Who】顧客担当・山田太郎、営業担当・田中博一、法務部長・佐藤美咲 【What】プロジェクト開始の顔合わせとゴール共有 【Why】全員の認識合わせ 【How】今後の進め方・連絡体制・スケジュールを確認。",
-      author: "山田太郎",
+      content: "【When】7月13日 11:00-12:00 【Where】ABC物流本社会議室 【Who】顧客担当・佐藤太郎、営業担当・田中博一、法務部長・田中次郎 【What】プロジェクト開始の顔合わせとゴール共有 【Why】全員の認識合わせ 【How】今後の進め方・連絡体制・スケジュールを確認。",
+      author: "佐藤太郎",
       aiGenerated: false,
       sourceChannel: "ミーティング"
     },
@@ -416,7 +419,7 @@ export default function CaseDetailPage() {
             <div className="flex-1 bg-white border border-gray-100 rounded-xl shadow p-4">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="flex items-center justify-between mb-4">
-                  <TabsList className="bg-gray-100 flex-shrink-0">
+                  <TabsList className="bg-gray-100 flex-shrink-0 w-full">
                     <TabsTrigger value="timeline" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       活動履歴
@@ -435,201 +438,230 @@ export default function CaseDetailPage() {
                     </TabsTrigger>
                     <TabsTrigger value="customer" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <Heart className="w-4 h-4" />
-                      顧客心理
-                    </TabsTrigger>
-                    <TabsTrigger value="decision" className="text-gray-700 font-normal text-sm flex items-center gap-2">
-                      <PieChart className="w-4 h-4" />
-                      決裁者
+                      顧客現状分析
                     </TabsTrigger>
                     <TabsTrigger value="analysis" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <Brain className="w-4 h-4" />
-                      AI分析
+                      Sela予測分析
                     </TabsTrigger>
                   </TabsList>
                 </div>
 
-                {/* 顧客心理タブ */}
+                {/* 顧客分析タブ */}
                 <TabsContent value="customer" className="mt-6">
                   <div className="space-y-6">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow">
-                      <div className="pt-6 px-6">
-                        <SectionTitle
-                          icon={Heart}
-                          title="顧客の課題・感情"
-                        />
-                      </div>
-                      <div className="p-6 space-y-6">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">現在の課題</h4>
-                          <div className="space-y-2">
-                            {caseData.customerPsychology.challenges.map((challenge, index) => (
-                              <div key={index} className="flex items-start gap-2">
-                                <AlertTriangle className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{challenge}</span>
+                    {/* セクション1: 基本情報 */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        基本情報
+                      </h3>
+                      <div className="space-y-3">
+                        {/* 顧客心理スコア */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Heart className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">顧客心理スコア</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">信頼度: 85%</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">関心度: 高</span>
                               </div>
-                            ))}
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                最終更新: 7月20日 | 分析者: Sela
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">ニーズ</h4>
-                          <div className="space-y-2">
-                            {caseData.customerPsychology.needs.map((need, index) => (
-                              <div key={index} className="flex items-start gap-2">
-                                <Target className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{need}</span>
+                        {/* 決裁者情報 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <User className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">決裁者: 田中次郎（法務部長）</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">最終決裁権限</span>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">感情的要因</h4>
-                          <div className="space-y-2">
-                            {caseData.customerPsychology.emotionalFactors.map((factor, index) => (
-                              <div key={index} className="flex items-start gap-2">
-                                <Heart className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{factor}</span>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                関心事: ROI重視、競合優位性、営業効率化
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-xl shadow">
-                      <div className="pt-6 px-6">
-                        <SectionTitle
-                          icon={Zap}
-                          title="日常業務への効果"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <div className="space-y-2">
-                          {caseData.customerPsychology.dailyBenefits.map((benefit, index) => (
-                            <div key={index} className="flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm text-gray-700">{benefit}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-6">
-                          <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                            <Lightbulb className="w-4 h-4 text-gray-600" />
-                            提案のポイント
-                          </h4>
-                          <p className="text-sm text-gray-700">
-                            佐藤様は業務改善への強い意欲を持っている一方で、新しいツール導入への不安も感じています。
-                            具体的な数値と安心できる導入サポートを強調することが重要です。
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* 決裁者タブ */}
-                <TabsContent value="decision" className="mt-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow">
-                      <div className="pt-6 px-6">
-                        <SectionTitle
-                          icon={PieChart}
-                          title="経営指標・ROI"
-                        />
-                      </div>
-                      <div className="p-6 space-y-6">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">経営指標</h4>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                              <span className="text-sm text-gray-700">ROI</span>
-                              <span className="font-semibold text-gray-900">{caseData.decisionMaker.businessMetrics.roi}</span>
-                            </div>
-                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                              <span className="text-sm text-gray-700">コスト削減</span>
-                              <span className="font-semibold text-gray-900">{caseData.decisionMaker.businessMetrics.costSaving}</span>
-                            </div>
-                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                              <span className="text-sm text-gray-700">売上への影響</span>
-                              <span className="font-semibold text-gray-900">{caseData.decisionMaker.businessMetrics.revenueImpact}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white border border-gray-200 rounded-xl shadow">
-                      <div className="pt-6 px-6">
-                        <SectionTitle
-                          icon={TrendingUp}
-                          title="競合優位性"
-                        />
-                      </div>
-                      <div className="p-6 space-y-4">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">企業への影響</h4>
-                          <div className="space-y-2">
-                            {caseData.decisionMaker.companyImpact.map((impact, index) => (
-                              <div key={index} className="flex items-start gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{impact}</span>
+                    {/* セクション2: 課題・ニーズ */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        課題・ニーズ
+                      </h3>
+                      <div className="space-y-3">
+                        {/* 現在の課題 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">現在の課題</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">3件</span>
                               </div>
-                            ))}
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                契約書レビューに時間がかかりすぎる、法務担当者の負荷が高い、レビュー品質のばらつきがある
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">競合優位性</h4>
-                          <div className="space-y-2">
-                            {caseData.decisionMaker.competitiveAdvantage.map((advantage, index) => (
-                              <div key={index} className="flex items-start gap-2">
-                                <Star className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{advantage}</span>
+                        {/* 優先ニーズ */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Target className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">優先ニーズ</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">レビュー時間の短縮</span>
                               </div>
-                            ))}
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                レビュー時間が70%短縮される、リスク検出精度が向上する、法務担当者の負荷が軽減される
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 感情的要因 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Heart className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">感情的要因</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">不安要素あり</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                業務効率化への強い期待、AIツール導入への慎重な姿勢、法的リスク軽減への安心感
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </TabsContent>
 
-                {/* AI分析タブ */}
-                <TabsContent value="analysis" className="mt-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow">
-                      <div className="pt-6 px-6">
-                        <SectionTitle
-                          icon={Brain}
-                          title="次のアクション"
-                        />
-                      </div>
-                      <div className="p-6 space-y-4">
-                        {caseData.aiInsights.nextActions.map((action, index) => (
-                          <div key={index} className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
-                            <Target className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-gray-700">{action}</span>
+                    {/* セクション3: ビジネス価値 */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <PieChart className="w-4 h-4" />
+                        ビジネス価値
+                      </h3>
+                      <div className="space-y-3">
+                        {/* ROI・経営指標 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <PieChart className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">ROI・経営指標</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">ROI: 200%</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">リスク軽減効果</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                年間200万円削減、リスク軽減効果、コンプライアンス強化
+                              </div>
+                            </div>
                           </div>
-                        ))}
+                        </div>
+
+                        {/* 競合優位性 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <TrendingUp className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">競合優位性</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">迅速な契約締結</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">リスク管理の向上</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                迅速な契約締結、リスク管理の向上、法務コストの削減
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 企業への影響 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Building className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">企業への影響</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">全社効果</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                営業効率向上、顧客満足度向上、競合他社との差別化、他部門展開可能
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 期待効果 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">期待効果</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">時短70%</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                リアルタイム進捗把握、いつでもどこでも顧客情報確認、レポート作成時間70%短縮
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-white border border-gray-200 rounded-xl shadow">
-                      <div className="pt-6 px-6">
-                        <SectionTitle
-                          icon={CheckCircle2}
-                          title="推奨事項"
-                        />
-                      </div>
-                      <div className="p-6 space-y-4">
-                        {caseData.aiInsights.recommendations.map((recommendation, index) => (
-                          <div key={index} className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
-                            <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-blue-700">{recommendation}</span>
+                    {/* セクション4: 対応策・リスク */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        対応策・リスク
+                      </h3>
+                      <div className="space-y-3">
+                        {/* 推奨アプローチ */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Target className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">推奨アプローチ</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Sela提案</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                ROI数値を前面に、競合比較資料準備、他社導入事例の具体的効果を提示
+                              </div>
+                            </div>
                           </div>
-                        ))}
+                        </div>
+
+                        {/* リスク・機会 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">リスク・機会</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">要注意</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                リスク: 予算承認遅れ、競合参入 | 機会: 早期導入利益、他部門展開
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -734,13 +766,13 @@ export default function CaseDetailPage() {
                         <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                              <img src="/avatars/yamada.jpg" alt="山田太郎" className="w-full h-full object-cover" />
+                              <img src="/avatars/tanaka.jpg" alt="田中次郎" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-sm font-semibold text-gray-900">山田太郎</span>
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">#abc-company</span>
+                                  <span className="text-sm font-semibold text-gray-900">田中次郎</span>
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">#abc-legal</span>
                                 </div>
                                 <span className="text-sm leading-normal text-gray-600">7月19日</span>
                               </div>
@@ -759,42 +791,6 @@ export default function CaseDetailPage() {
                         <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                              <img src="/avatars/suzuki.jpg" alt="鈴木花子" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-sm font-semibold text-gray-900">鈴木花子</span>
-                                </div>
-                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
-                              </div>
-                              <p className="text-sm leading-relaxed text-gray-700">承知しました。開発チームのスケジュールを確認したところ、来週火曜日の14時から1時間程度であれば調整可能です。その時間帯でミーティングを設定させていただいてもよろしいでしょうか？</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 返信2 */}
-                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                              <img src="/avatars/yamada.jpg" alt="山田太郎" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-sm font-semibold text-gray-900">山田太郎</span>
-                                </div>
-                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
-                              </div>
-                              <p className="text-sm leading-relaxed text-gray-700">はい、火曜日14時で問題ありません。ABC物流様の法務部門からの具体的な要件も整理できていますので、その内容も含めて議論できればと思います。</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 返信3 */}
-                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
                               <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -804,25 +800,35 @@ export default function CaseDetailPage() {
                                 </div>
                                 <span className="text-sm leading-normal text-gray-600">7月19日</span>
                               </div>
-                              <p className="text-sm leading-relaxed text-gray-700">コスト面での詳細分析も含めて検討したいと思います。導入効果の測定方法についても議論できればと思います。</p>
+                              <p className="text-sm leading-relaxed text-gray-700">田中部長、承知いたしました。開発チームと調整して、明日の午後にミーティングを設定いたします。
+
+また、契約書レビュー支援ツールの機能について、以下の追加要件も検討いただけますでしょうか：
+
+- 過去の契約書との比較分析機能
+- リスクスコアの自動算出
+- 承認者への自動通知機能
+
+これらの機能があれば、より効率的なレビュープロセスが実現できると思います。</p>
                             </div>
                           </div>
                         </div>
 
-                        {/* 返信4 */}
+                        {/* 返信2 */}
                         <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                              <img src="/avatars/tanaka.jpg" alt="田中博一" className="w-full h-full object-cover" />
+                              <img src="/avatars/tanaka.jpg" alt="田中次郎" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-sm font-semibold text-gray-900">田中博一</span>
+                                  <span className="text-sm font-semibold text-gray-900">田中次郎</span>
                                 </div>
                                 <span className="text-sm leading-normal text-gray-600">7月19日</span>
                               </div>
-                              <p className="text-sm leading-relaxed text-gray-700">セキュリティ要件の確認も重要ですね。特に契約書データの暗号化と アクセス制御について詳しく確認したいと思います。</p>
+                              <p className="text-sm leading-relaxed text-gray-700">佐藤さん、ありがとうございます。追加要件についても検討いたします。
+
+特に過去の契約書との比較分析機能は、リスク管理の観点から非常に重要だと思います。明日のミーティングで詳細を確認させていただきます。</p>
                             </div>
                           </div>
                         </div>
@@ -839,7 +845,7 @@ export default function CaseDetailPage() {
                         <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-semibold text-gray-900">契約条件の最終確認</span>
+                            <span className="text-sm font-semibold text-gray-900">最終提案書の作成</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
                           </div>
@@ -856,12 +862,12 @@ export default function CaseDetailPage() {
                         <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-semibold text-gray-900">導入スケジュールの調整</span>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">待機中</span>
+                            <span className="text-sm font-semibold text-gray-900">デモンストレーション準備</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 7月30日 | 担当: 佐藤美咲
+                            期限: 7月26日 | 担当: 佐藤美咲
                           </div>
                         </div>
                       </div>
@@ -873,12 +879,12 @@ export default function CaseDetailPage() {
                         <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-semibold text-gray-900">技術要件の詳細確認</span>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">低</span>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">未着手</span>
+                            <span className="text-sm font-semibold text-gray-900">要件定義書の最終確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">待機中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 8月5日 | 担当: 山田太郎
+                            期限: 7月27日 | 担当: 田中次郎
                           </div>
                         </div>
                       </div>
@@ -890,12 +896,12 @@ export default function CaseDetailPage() {
                         <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-semibold text-gray-900">セキュリティ要件の確認</span>
+                            <span className="text-sm font-semibold text-gray-900">導入スケジュールの確定</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 7月28日 | 担当: 鈴木花子
+                            期限: 7月28日 | 担当: 佐藤美咲
                           </div>
                         </div>
                       </div>
@@ -946,12 +952,12 @@ export default function CaseDetailPage() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                          <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
+                          <img src="/avatars/tanaka.jpg" alt="田中次郎" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className={`text-sm ${unreadEmails.has('1') ? 'font-bold' : 'font-semibold'} text-gray-900`}>佐藤美咲</span>
+                              <span className={`text-sm ${unreadEmails.has('1') ? 'font-bold' : 'font-semibold'} text-gray-900`}>田中次郎</span>
                               {unreadEmails.has('1') && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                                   未読
@@ -974,12 +980,12 @@ export default function CaseDetailPage() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                          <img src="/avatars/tanaka.jpg" alt="田中博一" className="w-full h-full object-cover" />
+                          <img src="/avatars/sato.jpg" alt="佐藤太郎" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className={`text-sm ${unreadEmails.has('2') ? 'font-bold' : 'font-semibold'} text-gray-900`}>田中博一</span>
+                              <span className={`text-sm ${unreadEmails.has('2') ? 'font-bold' : 'font-semibold'} text-gray-900`}>佐藤太郎</span>
                               {unreadEmails.has('2') && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                                   未読
@@ -1002,22 +1008,22 @@ export default function CaseDetailPage() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                          <img src="/avatars/yamada.jpg" alt="山田太郎" className="w-full h-full object-cover" />
+                          <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className={`text-sm ${unreadEmails.has('3') ? 'font-bold' : 'font-normal'} text-gray-900`}>山田太郎</span>
+                              <span className={`text-sm ${unreadEmails.has('3') ? 'font-bold' : 'font-semibold'} text-gray-900`}>佐藤美咲</span>
                               {unreadEmails.has('3') && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                                   未読
                                 </span>
                               )}
                             </div>
-                            <span className="text-sm leading-normal text-gray-600">7月16日</span>
+                            <span className="text-sm leading-normal text-gray-600">7月17日</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm leading-relaxed ${unreadEmails.has('3') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>競合他社分析資料をお送りします。機能比較表と価格体系の違いについてまとめましたので、ご参考ください。</p>
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('3') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>契約書レビュー支援ツールの機能について、追加要件を整理いたしました。社内規定との自動照合機能について詳しく説明いただけますでしょうか。</p>
                           </div>
                         </div>
                       </div>
@@ -1027,17 +1033,17 @@ export default function CaseDetailPage() {
                     <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                          <img src="/avatars/suzuki.jpg" alt="鈴木花子" className="w-full h-full object-cover" />
+                          <img src="/avatars/sela.jpg" alt="Sela" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className="text-sm font-normal text-gray-900">鈴木花子</span>
+                              <span className="text-sm font-semibold text-gray-900">Sela</span>
                             </div>
-                            <span className="text-sm leading-normal text-gray-600">7月14日</span>
+                            <span className="text-sm leading-normal text-gray-600">7月16日</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className="text-sm leading-relaxed font-normal text-gray-700 flex-1 line-clamp-1">導入スケジュールの詳細案を作成いたしました。段階的な導入により、業務への影響を最小限に抑える計画となっています。</p>
+                            <p className="text-sm leading-relaxed text-gray-700 flex-1 line-clamp-1">競合分析レポートが完成いたしました。ABC物流様の要件に最適化された提案内容をまとめております。ご確認ください。</p>
                           </div>
                         </div>
                       </div>
@@ -1047,17 +1053,236 @@ export default function CaseDetailPage() {
                     <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
-                          <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
+                          <img src="/avatars/sela.jpg" alt="Sela" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className="text-sm font-normal text-gray-900">佐藤美咲</span>
+                              <span className="text-sm font-semibold text-gray-900">Sela</span>
                             </div>
-                            <span className="text-sm leading-normal text-gray-600">7月12日</span>
+                            <span className="text-sm leading-normal text-gray-600">7月15日</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className="text-sm leading-relaxed font-normal text-gray-700 flex-1 line-clamp-1">予算申請の承認を得るために、ROIの詳細な計算根拠をお示しいただけますでしょうか。経営陣への説明資料として使用したいと思います。</p>
+                            <p className="text-sm leading-relaxed text-gray-700 flex-1 line-clamp-1">顧客心理分析が完了いたしました。法務部門の意思決定要因を分析し、提案書の最適化ポイントをまとめております。</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* AI分析タブ */}
+                <TabsContent value="analysis" className="mt-6">
+                  <div className="space-y-6">
+                    {/* セクション1: 予測分析 */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Brain className="w-4 h-4" />
+                        予測分析
+                      </h3>
+                      <div className="space-y-3">
+                        {/* 成約確率予測 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Brain className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">成約確率予測</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">78%</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">+6%改善</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                最終更新: 7月20日 15:30 | 前回予測: 72% | 分析者: Sela
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 成約時期予測 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">成約時期予測</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">8月中旬</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高確度</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                予算承認プロセス完了後、2週間以内の成約を予測
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* セクション2: 戦略的アドバイス */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4" />
+                        戦略的アドバイス
+                      </h3>
+                      <div className="space-y-3">
+                        {/* 次回アクション推奨 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Target className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">推奨次回アクション</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">優先度: 高</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                経営陣への最終提案書準備、デモンストレーション実施、導入スケジュール詳細化
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 戦略レコメンデーション */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Lightbulb className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">戦略レコメンデーション</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Sela提案</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                ROI具体数値提示、段階的導入プラン提案、充実サポート体制アピール
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* アプローチ戦略 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <TrendingUp className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">アプローチ戦略</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">最適化済み</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                決裁者への直接アプローチ、ROI重視の提案、競合優位性の強調
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* セクション3: リスク・機会分析 */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        リスク・機会分析
+                      </h3>
+                      <div className="space-y-3">
+                        {/* リスク要因 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">リスク要因</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">要注意</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                予算承認の遅れ、他社提案との競合、導入時期の調整が必要
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* チャンス・機会 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <TrendingUp className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">チャンス・機会</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">拡大可能</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                早期導入による先行者利益、他部門への展開可能性、顧客事例としての活用
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 競合分析 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <BarChart className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">競合分析</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">優位性確認</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                市場成長率15%、競合A社より機能・価格優位、当社シェア拡大のチャンス
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* セクション4: 市場・トレンド分析 */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <BarChart className="w-4 h-4" />
+                        市場・トレンド分析
+                      </h3>
+                      <div className="space-y-3">
+                        {/* 市場動向 */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <TrendingUp className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">市場動向</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">成長期</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                営業支援ツール市場は年率20%成長、AI機能への需要が急増中
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 顧客トレンド */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Users className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">顧客トレンド</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">好転</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                物流業界でのデジタル化加速、効率化投資の優先度向上
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 技術トレンド */}
+                        <div className="p-3 bg-white border border-gray-100 rounded-md">
+                          <div className="flex items-start gap-3">
+                            <Zap className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">技術トレンド</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">先行</span>
+                              </div>
+                              <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                                AI・機械学習の実用化、クラウドベースの統合ソリューションが主流
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
