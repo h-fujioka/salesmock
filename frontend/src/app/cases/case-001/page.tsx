@@ -97,10 +97,11 @@ type TimelineEntry = {
   channel?: string; // Slackチャンネル名
   threadCount?: number; // Slackスレッド数
   isUnread?: boolean; // 未読状態
+  sourceChannel?: string; // アクションの発生源チャンネル（Slack、メール、電話など）
 };
 
 export default function CaseDetailPage() {
-  const [activeTab, setActiveTab] = useState('customer');
+  const [activeTab, setActiveTab] = useState('timeline');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic-info']));
   const [commentText, setCommentText] = useState('');
   const [unreadEmails, setUnreadEmails] = useState<Set<string>>(new Set(['1', '2', '3'])); // 未読メールのIDを管理（メール1、2、3を未読に設定）
@@ -200,85 +201,97 @@ export default function CaseDetailPage() {
       timestamp: new Date("2024-07-20T10:30:00"),
       type: "meeting",
       title: "最終提案ミーティング",
-      content: "【When】7月20日 10:30-12:00 【Where】ABC物流本社会議室 【Who】法務部長・佐藤様、IT部長・田中様、営業担当・田中 【What】最終提案とROI説明 【Why】契約締結に向けた最終確認 【How】プレゼン資料を使用し、ROI 200%と年間500万円削減効果を説明。決裁者から前向きな反応。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
+      content: "【When】7月20日 10:30-12:00 【Where】ABC物流本社会議室 【Who】法務部長・佐藤美咲、IT部長・山田太郎、営業担当・田中博一 【What】最終提案とROI説明 【Why】契約締結に向けた最終確認 【How】プレゼン資料でROI 200%・年間500万円削減効果を説明。経営陣から前向きな反応。",
+      author: "田中博一",
+      aiGenerated: false,
+      sourceChannel: "ミーティング"
     },
     {
       id: "2",
-      timestamp: new Date("2024-07-19T16:45:00"),
+      timestamp: new Date("2024-07-19T17:00:00"),
       type: "slack",
-      title: "IT部長との技術要件確認",
-      content: "【When】7月19日 16:45-17:30 【Where】Slack #abc-company 【Who】IT部長・田中様、営業担当・田中 【What】技術要件とシステム連携の詳細確認 【Why】導入時の技術的課題を事前に解決 【How】Slackで資料を共有しながら、既存システム連携方法とデータ移行手順を確認。セキュリティ要件も明確化。",
-      author: "Hirokazu Tanaka",
-      channel: "#abc-company",
-      threadCount: 8,
-      aiGenerated: false
+      title: "法務部長からの追加要件依頼",
+      content: "【When】7月19日 17:00 【Where】Slack #abc-legal 【Who】法務部長・佐藤美咲、営業担当・田中博一 【What】契約書レビュー機能の追加要件確認 【Why】社内規定との自動照合機能を追加希望 【How】Slackで要件リストを共有し、開発チームへ展開依頼。",
+      author: "佐藤美咲",
+      channel: "abc-legal",
+      threadCount: 3,
+      aiGenerated: false,
+      sourceChannel: "Slack"
     },
     {
       id: "3",
-      timestamp: new Date("2024-07-18T14:15:00"),
-      type: "analysis",
-      title: "競合他社の動向確認",
-      content: "【When】7月18日 14:15-15:00 【Where】営業部オフィス 【Who】営業担当・田中、マーケティング部・鈴木 【What】競合他社A社の提案内容調査 【Why】差別化ポイントの明確化と価格戦略の策定 【How】業界情報と顧客からの情報を収集。A社は我社より20%高い価格で同等機能を提案中。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
+      timestamp: new Date("2024-07-19T09:30:00"),
+      type: "email",
+      title: "顧客からのリマインドメール",
+      content: "【When】7月19日 9:30 【Where】メール 【Who】顧客担当・山田太郎、営業担当・田中博一 【What】提案書送付のリマインド 【Why】社内決裁のため早期提出希望 【How】顧客より丁寧なリマインドメール。提出予定日を返信。",
+      author: "山田太郎",
+      aiGenerated: false,
+      sourceChannel: "メール"
     },
     {
       id: "4",
-      timestamp: new Date("2024-07-17T11:20:00"),
-      type: "meeting",
-      title: "法務部長との個別面談",
-      content: "【When】7月17日 11:20-12:30 【Where】ABC物流法務部会議室 【Who】法務部長・佐藤様、営業担当・田中 【What】導入への懸念事項の確認と安心感の提供 【Why】顧客の不安を解消し、契約締結への道筋を作る 【How】個別面談で懸念事項（精度、責任範囲）を確認。具体的なサポート体制と保証内容を説明。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
+      timestamp: new Date("2024-07-18T15:00:00"),
+      type: "analysis",
+      title: "Selaによる競合分析レポート提出",
+      content: "【When】7月18日 15:00 【Where】社内AIシステム 【Who】Sela、営業担当・田中博一 【What】競合A社・B社の提案内容分析 【Why】差別化ポイントの明確化 【How】Selaが価格・機能・サポート体制を比較し、当社の優位性をレポート。",
+      author: "Sela",
+      aiGenerated: true,
+      humanApproved: true,
+      sourceChannel: "分析"
     },
     {
       id: "5",
-      timestamp: new Date("2024-07-16T09:30:00"),
-      type: "email",
-      title: "予算承認申請の提出",
-      content: "【When】7月16日 9:30 【Where】ABC物流経営陣 【Who】経営陣、営業担当・田中 【What】予算承認申請書の提出 【Why】契約締結に必要な予算の承認を得る 【How】ROI計算根拠と他社事例を含む詳細資料を添付してメール送信。承認プロセスは2週間程度の見込み。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
+      timestamp: new Date("2024-07-17T13:00:00"),
+      type: "meeting",
+      title: "開発チームとの仕様すり合わせ",
+      content: "【When】7月17日 13:00-14:00 【Where】Zoom 【Who】開発リーダー・佐藤美咲、営業担当・田中博一 【What】要件定義の最終確認 【Why】追加要件の反映と納期調整 【How】Zoomで画面共有しながら仕様を確認。納期を1週間前倒しで合意。",
+      author: "佐藤美咲",
+      aiGenerated: false,
+      sourceChannel: "ミーティング"
     },
     {
       id: "6",
-      timestamp: new Date("2024-07-15T14:00:00"),
-      type: "meeting",
-      title: "初回提案ミーティング",
-      content: "【When】7月15日 14:00-16:00 【Where】ABC物流本社会議室 【Who】法務部・IT部合同、営業担当・田中 【What】初回提案と現状課題の説明 【Why】顧客の課題を理解し、解決策を提示する 【How】法務部・IT部合同で現状の課題と解決策を説明。参加者から多くの質問があり、関心の高さを確認。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
+      timestamp: new Date("2024-07-16T18:30:00"),
+      type: "slack",
+      title: "営業部内での進捗共有",
+      content: "【When】7月16日 18:30 【Where】Slack #abc-sales 【Who】営業担当全員 【What】案件進捗の週次報告 【Why】全体の状況把握と課題共有 【How】Slackで進捗表を共有し、課題点をコメントで収集。",
+      author: "田中博一",
+      channel: "abc-sales",
+      threadCount: 5,
+      aiGenerated: false,
+      sourceChannel: "Slack"
     },
     {
       id: "7",
-      timestamp: new Date("2024-07-14T10:00:00"),
-      type: "analysis",
-      title: "顧客心理分析完了",
-      content: "【When】7月14日 10:00-11:00 【Where】営業部オフィス 【Who】AI Assistant、営業担当・田中 【What】顧客心理分析の実施 【Why】顧客の真のニーズと不安要素を把握する 【How】AIによる顧客心理分析が完了。佐藤法務部長の業務改善への意欲とAI導入への不安要素を特定。提案内容の調整が必要。",
-      author: "AI Assistant",
-      aiGenerated: true,
-      humanApproved: true
+      timestamp: new Date("2024-07-15T10:00:00"),
+      type: "email",
+      title: "法務部長への仕様確認メール",
+      content: "【When】7月15日 10:00 【Where】メール 【Who】営業担当・田中博一、法務部長・佐藤美咲 【What】契約書自動チェック仕様の確認依頼 【Why】要件の最終確定 【How】仕様書を添付し、追加要望があれば返信依頼。",
+      author: "田中博一",
+      aiGenerated: false,
+      sourceChannel: "メール"
     },
     {
       id: "8",
-      timestamp: new Date("2024-07-12T16:00:00"),
-      type: "email",
-      title: "要件定義書の送付",
-      content: "【When】7月12日 16:00 【Where】ABC物流法務部 【Who】法務部長・佐藤様、営業担当・田中 【What】要件定義書の送付 【Why】顧客の要件を明確化し、提案内容を具体化する 【How】顧客からの要件を整理した要件定義書をメール送信。契約書の自動チェック機能と承認フローの自動化について具体的な実装方法を記載。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
+      timestamp: new Date("2024-07-14T16:00:00"),
+      type: "analysis",
+      title: "Selaによる顧客心理分析フィードバック",
+      content: "【When】7月14日 16:00 【Where】社内AIシステム 【Who】Sela、営業担当・田中博一 【What】顧客の意思決定要因分析 【Why】提案内容の最適化 【How】Selaが過去のやりとりから顧客の重視ポイントを抽出し、提案書に反映。",
+      author: "Sela",
+      aiGenerated: true,
+      humanApproved: true,
+      sourceChannel: "分析"
     },
     {
       id: "9",
-      timestamp: new Date("2024-07-10T11:00:00"),
+      timestamp: new Date("2024-07-13T11:00:00"),
       type: "meeting",
-      title: "初回商談",
-      content: "【When】7月10日 11:00-12:30 【Where】ABC物流本社会議室 【Who】法務部長・佐藤様、営業担当・田中 【What】初回商談と課題ヒアリング 【Why】顧客の現状課題を把握し、ニーズを明確化する 【How】ABC物流の法務部長と初回商談。年間約500件の契約書レビュー業務の課題を確認。工数削減への強いニーズを確認。",
-      author: "Hirokazu Tanaka",
-      aiGenerated: false
-    }
+      title: "顧客キックオフミーティング",
+      content: "【When】7月13日 11:00-12:00 【Where】ABC物流本社会議室 【Who】顧客担当・山田太郎、営業担当・田中博一、法務部長・佐藤美咲 【What】プロジェクト開始の顔合わせとゴール共有 【Why】全員の認識合わせ 【How】今後の進め方・連絡体制・スケジュールを確認。",
+      author: "山田太郎",
+      aiGenerated: false,
+      sourceChannel: "ミーティング"
+    },
   ];  const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
     if (newExpanded.has(sectionId)) {
@@ -404,9 +417,13 @@ export default function CaseDetailPage() {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="flex items-center justify-between mb-4">
                   <TabsList className="bg-gray-100 flex-shrink-0">
+                    <TabsTrigger value="timeline" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      活動履歴
+                    </TabsTrigger>
                     <TabsTrigger value="tasks" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" />
-                      タスク
+                      関連タスク
                     </TabsTrigger>
                     <TabsTrigger value="emails" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <Mail className="w-4 h-4" />
@@ -415,10 +432,6 @@ export default function CaseDetailPage() {
                     <TabsTrigger value="slack" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <MessageSquare className="w-4 h-4" />
                       Slack
-                    </TabsTrigger>
-                    <TabsTrigger value="timeline" className="text-gray-700 font-normal text-sm flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      活動履歴
                     </TabsTrigger>
                     <TabsTrigger value="customer" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <Heart className="w-4 h-4" />
@@ -646,6 +659,11 @@ export default function CaseDetailPage() {
                             <div className="flex items-center justify-between mb-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-semibold text-gray-900">{entry.title}</span>
+                                {entry.sourceChannel && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 mr-2">
+                                    {entry.sourceChannel}
+                                  </span>
+                                )}
                                 <div className="flex gap-1">
                                   {entry.aiGenerated && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
@@ -668,20 +686,37 @@ export default function CaseDetailPage() {
                               {entry.channel && ` • #${entry.channel}`}
                               {entry.threadCount && ` • ${entry.threadCount}件`}
                             </div>
-                            <div className="text-sm text-gray-700 leading-relaxed space-y-2">
-                              {entry.content.split("【").map((part, index) => {
-                                if (index === 0) return null;
-                                const [tag, ...contentParts] = part.split("】");
-                                const content = contentParts.join("】");
-                                return (
-                                  <div key={index} className="flex items-start gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">
-                                      {tag}
-                                    </span>
-                                    <span className="text-sm text-gray-700">{content}</span>
-                                  </div>
-                                );
-                              })}
+                            <div className="text-sm text-gray-700 leading-relaxed">
+                              {(() => {
+                                const contentParts = entry.content.split("【");
+                                if (contentParts.length <= 1) return entry.content;
+                                
+                                // WhatとWhyの情報のみを抽出して短くまとめる
+                                let what = "";
+                                let why = "";
+                                
+                                contentParts.forEach((part, index) => {
+                                  if (index === 0) return;
+                                  const [tag, ...contentParts] = part.split("】");
+                                  const content = contentParts.join("】").trim();
+                                  
+                                  if (tag === "What" && content) {
+                                    what = content;
+                                  } else if (tag === "Why" && content) {
+                                    why = content;
+                                  }
+                                });
+                                
+                                if (what && why) {
+                                  return `${what}。${why}。`;
+                                } else if (what) {
+                                  return `${what}。`;
+                                } else if (why) {
+                                  return `${why}。`;
+                                }
+                                
+                                return entry.content;
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -795,7 +830,7 @@ export default function CaseDetailPage() {
                     </div>
                   </div>
                 </TabsContent>
-                {/* タスクタブ */}
+                {/* 関連タスクタブ */}
                 <TabsContent value="tasks" className="mt-6">
                   <div className="space-y-0">
                     {/* タスク1 */}
@@ -806,9 +841,10 @@ export default function CaseDetailPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-semibold text-gray-900">契約条件の最終確認</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 7月25日 | 担当: 田中博一 | ステータス: 進行中
+                            期限: 7月25日 | 担当: 田中博一
                           </div>
                         </div>
                       </div>
@@ -822,9 +858,10 @@ export default function CaseDetailPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-semibold text-gray-900">導入スケジュールの調整</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">待機中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 7月30日 | 担当: 佐藤美咲 | ステータス: 待機中
+                            期限: 7月30日 | 担当: 佐藤美咲
                           </div>
                         </div>
                       </div>
@@ -838,9 +875,10 @@ export default function CaseDetailPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-semibold text-gray-900">技術要件の詳細確認</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">低</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">未着手</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 8月5日 | 担当: 山田太郎 | ステータス: 未着手
+                            期限: 8月5日 | 担当: 山田太郎
                           </div>
                         </div>
                       </div>
@@ -854,9 +892,10 @@ export default function CaseDetailPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-semibold text-gray-900">セキュリティ要件の確認</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 7月28日 | 担当: 鈴木花子 | ステータス: 進行中
+                            期限: 7月28日 | 担当: 鈴木花子
                           </div>
                         </div>
                       </div>
@@ -870,9 +909,10 @@ export default function CaseDetailPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-semibold text-gray-900">導入後サポート体制の準備</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">計画中</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 8月10日 | 担当: 田中博一 | ステータス: 計画中
+                            期限: 8月10日 | 担当: 田中博一
                           </div>
                         </div>
                       </div>
@@ -885,10 +925,11 @@ export default function CaseDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-semibold text-gray-900">契約書の最終確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">低</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">完了</span>
                           </div>
                           <div className="text-[13px] leading-normal text-gray-600 mb-1">
-                            期限: 7月20日 | 担当: 佐藤美咲 | ステータス: 完了
+                            期限: 7月20日 | 担当: 佐藤美咲
                           </div>
                         </div>
                       </div>
