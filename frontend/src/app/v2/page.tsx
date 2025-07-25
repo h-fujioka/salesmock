@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/ui/data-table"
 import { Input } from "@/components/ui/input"
+import { SectionTitle } from "@/components/ui/section-title"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { ColumnDef } from "@tanstack/react-table"
@@ -14,8 +15,10 @@ import React, { useState } from "react"
 function DashboardCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white border border-gray-100 rounded-xl shadow p-4">
-      <h2 className="text-lg font-medium mb-4">{title}</h2>
-      {children}
+      <SectionTitle title={title} />
+      <div className="mt-4">
+        {children}
+      </div>
     </div>
   )
 }

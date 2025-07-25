@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/ui/data-table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnDef } from "@tanstack/react-table";
 import { Bell, Calendar, CheckCircle2, ChevronDown, Plus, User } from "lucide-react";
@@ -15,23 +16,21 @@ import React, { useState } from "react";
 // 検索結果テンプレートコンポーネント
 interface SearchResultTemplateProps {
   title: string;
-  description: string;
   dataComponent: React.ReactNode;
   nextActionText: string; // 追加：具体的なネクストアクション名
 }
 
 function SearchResultTemplate({
   title,
-  description,
   dataComponent,
   nextActionText
 }: SearchResultTemplateProps) {
   return (
     <section className="w-full max-w-7xl mx-auto flex flex-col gap-6 p-6">
-      <header className="mb-2">
-        <h2 className="text-xl font-bold text-gray-700 mb-1">{title}</h2>
-        <p className="text-sm font-normal text-gray-600 leading-relaxed">{description}</p>
-      </header>
+      <SectionTitle
+        title={title}
+        className="mb-2"
+      />
       <div className="overflow-x-auto bg-white border border-gray-200 rounded-xl shadow-sm p-4">
         {dataComponent}
       </div>
@@ -1377,7 +1376,7 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
                   </button>
-                </div>
+                  </div>
                 
                 {/* サジェストボタン */}
                 <div className="mt-4 space-y-2">
@@ -1389,7 +1388,7 @@ export default function Home() {
                     <div>
                       <div className="font-medium text-lg">A社向け提案書作成の詳細分析をしてください</div>
                       <div className="text-xs text-gray-600 mt-1">顧客心理・決裁者向け・競合分析</div>
-                    </div>
+                      </div>
                   </button>
                   
                   <button 
@@ -1400,7 +1399,7 @@ export default function Home() {
                     <div>
                       <div className="font-medium text-lg">B社案件の失注リスク対策を立案してください</div>
                       <div className="text-xs text-gray-600 mt-1">リスク分析・対策立案・挽回戦略</div>
-                    </div>
+                  </div>
                   </button>
                   
                   <button 
@@ -1411,7 +1410,7 @@ export default function Home() {
                     <div>
                       <div className="font-medium text-lg">C社の決裁者向け情報を整理してください</div>
                       <div className="text-xs text-gray-600 mt-1">経営指標・企業価値・競合優位性</div>
-                    </div>
+                </div>
                   </button>
                   
                   <button 
@@ -1422,7 +1421,7 @@ export default function Home() {
                     <div>
                       <div className="font-medium text-lg">私の営業スキルの改善点を教えてください</div>
                       <div className="text-xs text-gray-600 mt-1">成功パターン・スキル向上・顧客心理</div>
-                    </div>
+              </div>
                   </button>
                   
                   <button 

@@ -1,22 +1,31 @@
 "use client";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+// import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SectionTitle } from "@/components/ui/section-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
-    AlertTriangle,
-    Building,
-    Calendar,
-    FileText,
-    Home,
-    Info,
-    Mail,
-    MessageSquare,
-    MoreVertical,
-    RotateCcw,
-    Settings,
-    Star,
-    User
+  AlertTriangle,
+  Brain,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  FileText,
+  Heart,
+  Home,
+  Lightbulb,
+  Mail,
+  MessageSquare,
+  MoreVertical,
+  PieChart,
+  Plus,
+  Settings,
+  Star,
+  Target,
+  TrendingUp,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -42,13 +51,40 @@ type Case = {
   lastContact: string;
   taskCount: number;
   emailCount: number;
+  meetingCount: number; // 商談回数
+  daysSinceLastContact: number; // 最終連絡からの日数
+  nextActionDate: string; // 次回アクション日
+  // 新しい項目
+  customerPsychology: {
+    challenges: string[];
+    needs: string[];
+    emotionalFactors: string[];
+    dailyBenefits: string[];
+  };
+  decisionMaker: {
+    name: string;
+    role: string;
+    businessMetrics: {
+      roi: string;
+      costSaving: string;
+      revenueImpact: string;
+    };
+    companyImpact: string[];
+    competitiveAdvantage: string[];
+  };
+  aiInsights: {
+    nextActions: string[];
+    riskFactors: string[];
+    opportunities: string[];
+    recommendations: string[];
+  };
 };
 
 // タイムラインエントリの型定義
 type TimelineEntry = {
   id: string;
   timestamp: Date;
-  type: 'email' | 'comment' | 'meeting' | 'ai' | 'system';
+  type: 'email' | 'comment' | 'meeting' | 'ai' | 'system' | 'analysis' | 'slack';
   title: string;
   content: string;
   author?: string;
@@ -56,146 +92,181 @@ type TimelineEntry = {
   attachments?: string[];
   warning?: boolean;
   status?: 'pending' | 'completed' | 'cancelled';
-};
-
-// コメントの型定義
-type Comment = {
-  id: string;
-  content: string;
-  timestamp: Date;
-  author: string;
-  authorAvatar?: string;
+  aiGenerated?: boolean;
+  humanApproved?: boolean;
+  analysisType?: 'customer' | 'decision' | 'competitive';
+  channel?: string; // Slackチャンネル名
+  threadCount?: number; // Slackスレッド数
 };
 
 export default function CaseDetailPage() {
+  const [activeTab, setActiveTab] = useState('customer');
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic-info']));
   const [commentText, setCommentText] = useState('');
-  const [hoveredEntry, setHoveredEntry] = useState<string | null>(null);
 
-  // リアルな案件データ
+  // ダミーデータ
   const caseData: Case = {
-    id: "case-001",
-    name: "LegalOn Cloudのご紹介 (佐藤様)",
-    company: "株式会社クロステック",
-    customerType: "新規",
-    status: "提案中",
-    priority: "高",
-    assignee: "Hirokazu Tanaka",
-    stakeholders: ["木村拓真", "中村 結衣", "田中次郎"],
-    customerOwner: "佐藤二郎",
-    customerStakeholders: ["山田太郎", "高橋洋子", "西野淳一", "鈴木美咲"],
-    project: "クロステック様法務業務効率化PJ",
-    description: "クロステック様は現在、契約業務のクラウド化を検討されており、LegalOn Cloudの導入にご興味をお持ちです。現在はPoC（概念実証）の提案段階で、具体的な導入スコープとROIの検討を行っています。既存の契約管理システムとの連携や、社内の承認フローの最適化も含めた包括的なソリューションを求められています。",
-    budget: "500万円〜800万円",
-    deadline: "2024年8月31日",
+    id: 'case-001',
+    name: 'ABC株式会社 営業支援システム導入案件',
+    company: 'ABC株式会社',
+    customerType: '既存',
+    status: '提案中',
+    priority: '高',
+    assignee: 'Hirokazu Tanaka',
+    stakeholders: ['田中 博一', '佐藤 美咲'],
+    customerOwner: '佐藤 太郎',
+    customerStakeholders: ['山田 次郎', '鈴木 花子'],
+    project: '営業支援システム導入',
+    description: '営業活動の効率化と顧客管理の改善を目的としたシステム導入案件。現在のExcel管理からクラウドベースのシステムへの移行を検討中。',
+    budget: '500万円',
+    deadline: '2025/03/31',
     progress: 65,
-    firstContact: "2024年6月1日 09:00",
-    lastContact: "2024年7月20日 12:01",
-    taskCount: 5,
-    emailCount: 12
+    firstContact: '2024/03/15',
+    lastContact: '2024/07/20',
+    taskCount: 12,
+    emailCount: 45,
+    meetingCount: 3,
+    daysSinceLastContact: 10,
+    nextActionDate: '2024/08/05',
+    customerPsychology: {
+      challenges: [
+        '営業活動の進捗管理が煩雑',
+        '顧客情報の共有が不十分',
+        'レポート作成に時間がかかる'
+      ],
+      needs: [
+        '営業活動の可視化',
+        '顧客情報の一元管理',
+        'レポートの自動生成'
+      ],
+      emotionalFactors: [
+        '業務改善への強い意欲',
+        '新しいツール導入への不安',
+        '経営陣への成果報告へのプレッシャー'
+      ],
+      dailyBenefits: [
+        '営業活動の進捗がリアルタイムで把握できる',
+        '顧客情報がいつでもどこでも確認できる',
+        'レポート作成時間が50%短縮される'
+      ]
+    },
+    decisionMaker: {
+      name: '田中 次郎',
+      role: '営業部長',
+      businessMetrics: {
+        roi: '150%',
+        costSaving: '年間300万円',
+        revenueImpact: '売上20%向上'
+      },
+      companyImpact: [
+        '営業効率の向上',
+        '顧客満足度の向上',
+        '競合他社との差別化'
+      ],
+      competitiveAdvantage: [
+        '迅速な顧客対応',
+        'データドリブンな営業活動',
+        '顧客との関係性強化'
+      ]
+    },
+    aiInsights: {
+      nextActions: [
+        '経営陣への最終提案書の準備',
+        'デモンストレーションの実施',
+        '導入スケジュールの詳細化'
+      ],
+      riskFactors: [
+        '予算承認の遅れ',
+        '他社提案との競合',
+        '導入時期の調整'
+      ],
+      opportunities: [
+        '早期導入による先行者利益',
+        '他部門への展開可能性',
+        '顧客事例としての活用'
+      ],
+      recommendations: [
+        'ROIの具体的な数値提示',
+        '段階的導入プランの提案',
+        'サポート体制の充実'
+      ]
+    }
   };
 
-  // リアルなタイムラインデータ
   const timelineData: TimelineEntry[] = [
     {
-      id: "1",
-      timestamp: new Date('2024-07-20T12:01:00'),
-      type: 'email',
-      title: "LegalOn営業 → info@crosstech.co.jp",
-      content: "契約書レビュー支援ツールのご提案について、詳細な資料を添付いたします。ご検討いただけますと幸いです。",
-      author: "LegalOn営業",
-      replies: 3,
-      attachments: ["proposal_20240720.pdf", "comparison_table.xlsx"]
-    },
-    {
-      id: "2",
-      timestamp: new Date('2024-07-20T14:21:00'),
-      type: 'comment',
-      title: "ディスカウントの依頼について",
-      content: "佐藤様からディスカウントの依頼が来ているのですが、どのように進めましょうか？価格交渉の戦略を検討する必要があります。",
-      author: "Hirokazu Tanaka",
-      replies: 1
-    },
-    {
-      id: "3",
-      timestamp: new Date('2024-07-20T14:34:00'),
-        type: 'ai',
-      title: "AI提案: 返信保留の理由",
-      content: "佐藤様からのメール、以下の理由で返信保留しました:\n\n• ご質問の内容が曖昧 (導入済か検討中かが不明)\n• 製品AとBの混在に関する記載あり\n• 予算範囲の確認が必要\n\nご確認のうえ、対応方針を教えていただけますか？必要なら下書きの作成も承ります！",
-      author: "Sela",
-      warning: true
-    },
-    {
-      id: "4",
-      timestamp: new Date('2024-07-19T15:30:00'),
-      type: 'meeting',
-      title: "初回商談実施",
-      content: "佐藤様との初回商談を実施。契約業務の現状課題とLegalOn Cloudの導入効果について詳細な議論を行いました。",
-      author: "Hirokazu Tanaka",
-      status: 'completed'
-    },
-    {
-      id: "5",
-      timestamp: new Date('2024-07-18T10:15:00'),
-      type: 'email',
-      title: "info@crosstech.co.jp → LegalOn営業",
-      content: "LegalOn Cloudについて興味があります。詳細な資料とデモのご提案をお願いします。",
-      author: "佐藤二郎",
-      replies: 2
-    }
-  ];
-
-  // リアルなコメントデータ
-  const commentsData: Comment[] = [
-    {
-      id: "1",
-      content: "CorporeteOnも関心あり。競合他社との比較資料も準備しておきましょう。",
+      id: '1',
       timestamp: new Date('2024-07-20T10:30:00'),
-      author: "Hirokazu Tanaka",
-      authorAvatar: "HT"
+      type: 'meeting',
+      title: '最終提案ミーティング',
+      content: '経営陣を交えた最終提案を実施。ROIと導入効果について詳細な説明を行い、好意的な反応を得た。',
+      author: 'Hirokazu Tanaka',
+      aiGenerated: false
     },
     {
-      id: "2",
-      content: "予算交渉の際は、ROIの具体的な数値も提示する必要がありますね。",
+      id: '2',
       timestamp: new Date('2024-07-19T16:45:00'),
-      author: "木村拓真",
-      authorAvatar: "KT"
+      type: 'slack',
+      title: 'Slackでの技術相談',
+      content: 'ABC株式会社のIT部長とSlackで技術的な詳細について相談。システム要件の確認と導入スケジュールについて議論。',
+      author: 'Hirokazu Tanaka',
+      channel: '#abc-company',
+      threadCount: 8,
+      aiGenerated: false
     },
     {
-      id: "3",
-      content: "技術的な質問が来る可能性が高いので、技術資料も準備しておきましょう。",
-      timestamp: new Date('2024-07-19T14:20:00'),
-      author: "中村 結衣",
-      authorAvatar: "NY"
+      id: '3',
+      timestamp: new Date('2024-07-18T14:15:00'),
+      type: 'analysis',
+      title: '顧客心理分析完了',
+      content: 'AIによる顧客心理分析が完了。佐藤様の業務改善への意欲と不安要素を特定。提案内容の調整が必要。',
+      author: 'AI Assistant',
+      aiGenerated: true,
+      humanApproved: true
+    },
+    {
+      id: '4',
+      timestamp: new Date('2024-07-17T11:20:00'),
+      type: 'slack',
+      title: '営業部内での案件共有',
+      content: '営業部のSlackチャンネルでABC株式会社案件の進捗を共有。チームメンバーからのフィードバックを受けて提案内容を調整。',
+      author: 'Hirokazu Tanaka',
+      channel: '#sales-team',
+      threadCount: 12,
+      aiGenerated: false
+    },
+    {
+      id: '5',
+      timestamp: new Date('2024-07-15T09:00:00'),
+      type: 'email',
+      title: '提案書送付',
+      content: '詳細な提案書を送付。予算、スケジュール、導入効果について具体的な数値を含めて説明。',
+      author: 'Hirokazu Tanaka',
+      aiGenerated: false
     }
   ];
 
-  // 案件一覧データ（左サイドバー用）
-  const caseListData = [
-    { id: "case-001", name: "LegalOn Cloudのご紹介 (佐藤様)", company: "株式会社クロステック", status: "提案中", priority: "高" },
-    { id: "case-002", name: "契約管理システム導入支援", company: "株式会社テックソリューション", status: "進行中", priority: "中" },
-    { id: "case-003", name: "法務業務効率化コンサルティング", company: "ABC株式会社", status: "完了", priority: "低" },
-    { id: "case-004", name: "新規サービス提案", company: "XYZコーポレーション", status: "保留", priority: "高" },
-    { id: "case-005", name: "契約書テンプレート作成支援", company: "株式会社イノベーション", status: "進行中", priority: "中" }
-  ];
-
-  // ブックマーク案件データ
-  const bookmarkData = [
-    { id: "case-001", name: "LegalOn Cloudのご紹介 (佐藤様)", company: "株式会社クロステック" },
-    { id: "case-002", name: "契約管理システム導入支援", company: "株式会社テックソリューション" }
-  ];
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
+  };
 
   const handleAddComment = () => {
     if (commentText.trim()) {
-      // コメント追加のロジック
       setCommentText('');
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="min-h-screen w-full flex flex-col bg-gray-50">
       {/* ヘッダー */}
       <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white border-b shadow-sm">
-        <span className="text-xl font-bold tracking-tight">デモ画面</span>
+        <span className="text-xl font-bold tracking-tight">営業支援システム</span>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon">
             <Calendar className="w-5 h-5" />
@@ -210,374 +281,722 @@ export default function CaseDetailPage() {
       </header>
 
       {/* パンくず */}
-      <nav className="flex items-center space-x-2 text-xs text-gray-600 px-8 pt-6 mb-6">
-        <Home className="w-4 h-4" />
-        <span>&gt;</span>
-        <Link href="/cases" className="text-gray-700 font-medium hover:text-gray-900 transition-colors">案件一覧</Link>
-        <span>&gt;</span>
-        <span className="text-gray-700 font-medium">{caseData.name}</span>
+      <nav className="flex items-center space-x-2 text-sm text-gray-600 px-8 pt-6 mb-6">
+        <div className="w-full max-w-[1280px] mx-auto flex items-center space-x-2">
+          <Home className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4" />
+          <Link href="/cases" className="text-gray-700 font-medium hover:text-gray-900 transition-colors">案件一覧</Link>
+        </div>
       </nav>
 
-      {/* 3カラムレイアウト */}
-      <div className="flex flex-1 w-full px-8 gap-6 min-h-0">
-        {/* 左サイドバー: Slack風ナビゲーション */}
-        <aside className="w-80 bg-white border border-gray-200 rounded-lg shadow-sm">
-          <div className="py-6">
-            {/* 現在の案件セクション */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3 text-base font-medium text-gray-600 px-4">
-                <span>▼</span>
-                <span>現在の案件</span>
+      {/* メインコンテンツ */}
+      <div className="flex-1 px-8 pb-8">
+        <div className="w-full max-w-[1280px] mx-auto">
+          {/* 案件ヘッダー */}
+          <div className="mb-6">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{caseData.name}</h1>
+                <div className="flex items-center gap-4 mt-2">
+                  <span className="text-sm text-gray-700">担当: Hirokazu Tanaka</span>
+                </div>
               </div>
-              <div className="space-y-1">
-                <div className="p-3 bg-gray-100 border-gray-400">
-                  <div className="text-sm font-medium text-gray-700">{caseData.name}</div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm">
+                  <Star className="w-4 h-4 mr-2" />
+                  ブックマーク
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Settings className="w-4 h-4 mr-2" />
+                  設定
+                </Button>
+                <Button size="sm" className="bg-gray-900 text-white hover:bg-gray-800">
+                  <Plus className="w-4 h-4 mr-2" />
+                  アクション
+                </Button>
+              </div>
+            </div>
+
+            {/* 統計セクション - シンプルなデザイン */}
+            <div className="bg-white border border-gray-100 rounded-xl shadow px-6 py-4 mb-6">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="text-left border-r border-gray-200 pr-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-1 whitespace-nowrap">期限</div>
+                  <div className="text-sm text-gray-700">
+                    {(() => {
+                      const today = new Date();
+                      const deadline = new Date(caseData.deadline);
+                      const diff = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      return `${caseData.deadline}（${diff}日）`;
+                    })()}
+                  </div>
+                </div>
+                <div className="text-left border-r border-gray-200 pr-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-1 whitespace-nowrap">次回アクション日</div>
+                  <div className="text-sm text-gray-700">{caseData.nextActionDate}</div>
+                </div>
+                <div className="text-left border-r border-gray-200 pr-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-1 whitespace-nowrap">進捗率</div>
+                  <div className="text-sm text-gray-700">{caseData.progress}%</div>
+                </div>
+                <div className="text-left border-r border-gray-200 pr-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-1 whitespace-nowrap">商談回数</div>
+                  <div className="text-sm text-gray-700">{caseData.meetingCount}回</div>
+                </div>
+                <div className="text-left border-r border-gray-200 pr-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-1 whitespace-nowrap">ステータス</div>
+                  <div className="text-sm text-gray-700">{caseData.status}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-gray-700 mb-1 whitespace-nowrap">リスク</div>
+                  <div className="text-sm text-gray-700">競合他社の参入</div>
                 </div>
               </div>
             </div>
-
-            {/* 案件一覧セクション */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3 text-base font-medium text-gray-600 px-4">
-                <span>▼</span>
-                <span>案件一覧</span>
-              </div>
-              <div className="space-y-1">
-                {caseListData.map((caseItem) => (
-                  <Link key={caseItem.id} href={`/cases/${caseItem.id}/`} className="block">
-                    <div className="p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors px-4">
-                      <div className="text-sm text-gray-700">{caseItem.name}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* ブックマークセクション */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3 text-base font-medium text-gray-600 px-4">
-                <span>▼</span>
-                <span>ブックマーク</span>
-              </div>
-              <div className="space-y-1">
-                {bookmarkData.map((caseItem) => (
-                  <Link key={caseItem.id} href={`/cases/${caseItem.id}/`} className="block">
-                    <div className="p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors px-4">
-                      <div className="flex items-center gap-2">
-                        <Star className="w-3 h-3 text-yellow-500" />
-                        <div className="text-sm text-gray-700">{caseItem.name}</div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
           </div>
-        </aside>
 
-        {/* 中央: タイムライン */}
-        <main className="flex-1 flex flex-col min-h-0">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex-1 flex flex-col min-h-0">
-            {/* ヘッダー部分 */}
-            <div className="p-6 pb-4">
-              <h1 className="text-xl font-bold text-gray-700 mb-4">{caseData.name}</h1>
-            </div>
+          {/* タブコンテンツと基本情報の2カラムレイアウト */}
+          <div className="flex gap-6">
+            {/* 左カラム - タブコンテンツ */}
+            <div className="flex-1 bg-white border border-gray-100 rounded-xl shadow p-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex items-center justify-between mb-4">
+                  <TabsList className="bg-gray-100 flex-shrink-0">
+                    <TabsTrigger value="tasks" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      タスク
+                    </TabsTrigger>
+                    <TabsTrigger value="emails" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      メール
+                    </TabsTrigger>
+                    <TabsTrigger value="slack" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      Slack
+                    </TabsTrigger>
+                    <TabsTrigger value="meetings" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      商談
+                    </TabsTrigger>
+                    <TabsTrigger value="timeline" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      活動履歴
+                    </TabsTrigger>
+                    <TabsTrigger value="customer" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <Heart className="w-4 h-4" />
+                      顧客心理
+                    </TabsTrigger>
+                    <TabsTrigger value="decision" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <PieChart className="w-4 h-4" />
+                      決裁者
+                    </TabsTrigger>
+                    <TabsTrigger value="analysis" className="text-gray-700 font-normal text-sm flex items-center gap-2">
+                      <Brain className="w-4 h-4" />
+                      AI分析
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-            {/* タイムラインコンテンツ - スクロール可能エリア */}
-            <div className="flex-1 overflow-y-auto min-h-0 px-6">
-              <Tabs defaultValue="timeline" className="w-full h-full flex flex-col">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="timeline">タイムライン</TabsTrigger>
-                  <TabsTrigger value="slack">Slack</TabsTrigger>
-                  <TabsTrigger value="email">メール</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="timeline" className="flex-1">
-                  <div>
-                    {timelineData.map((entry) => (
-                      <div 
-                        key={entry.id} 
-                        className="pt-6 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0 relative group hover:bg-gray-50 rounded-lg px-2 py-2 transition-colors"
-                        onMouseEnter={() => setHoveredEntry(entry.id)}
-                        onMouseLeave={() => setHoveredEntry(null)}
-                      >
-                        {/* ホバー時のアクションアイコン */}
-                        {hoveredEntry === entry.id && (
-                          <div className="absolute top-0 right-0 flex items-center gap-3 bg-white border border-gray-200 rounded-lg shadow-sm px-3 py-1">
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
-                              <Star className="w-3 h-3" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
-                              <Info className="w-3 h-3" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
-                              <RotateCcw className="w-3 h-3" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
-                              <MoreVertical className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        )}
-
-                        {entry.type === 'email' && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <Mail className="w-4 h-4 text-gray-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="text-base font-semibold text-gray-700">{entry.title}</div>
-                                <div className="text-xs text-gray-500">
-                                  {entry.timestamp.toLocaleDateString('ja-JP', {
-                                    month: 'numeric',
-                                    day: 'numeric'
-                                  })} {entry.timestamp.toLocaleTimeString('ja-JP', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="ml-11">
-                              <div className="text-base text-gray-700 mb-1">{entry.content}</div>
-                              {entry.attachments && (
-                                <div className="flex items-center gap-1 mb-1">
-                                  <FileText className="w-3 h-3 text-gray-400" />
-                                  <span className="text-xs text-gray-500">{entry.attachments.join(', ')}</span>
-                                </div>
-                              )}
-                              {entry.replies && (
-                                <div className="text-xs text-gray-500">{entry.replies}件の返信</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {entry.type === 'comment' && (
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarFallback className="text-xs">{entry.author?.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-base font-semibold text-gray-700">{entry.author}</span>
-                                  <span className="text-xs text-gray-500">
-                                    {entry.timestamp.toLocaleTimeString('ja-JP', {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                </div>
-                                <div className="text-base text-gray-700">{entry.content}</div>
-                                {entry.replies && (
-                                  <div className="text-xs text-gray-500 mt-2">{entry.replies}件の返信</div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {entry.type === 'ai' && (
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="w-8 h-8 bg-gray-100">
-                                <AvatarFallback className="text-gray-600 text-xs">AI</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-base font-semibold text-gray-700">{entry.author}</span>
-                                  <span className="text-xs text-gray-500">
-                                    {entry.timestamp.toLocaleTimeString('ja-JP', {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                </div>
-                                {entry.warning && (
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <AlertTriangle className="w-4 h-4 text-gray-600" />
-                                    <span className="text-base text-gray-700">{entry.title}</span>
-                                  </div>
-                                )}
-                                <div className="text-base text-gray-700 whitespace-pre-line">{entry.content}</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {entry.type === 'meeting' && (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <Calendar className="w-4 h-4 text-gray-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="text-base font-semibold text-gray-700">{entry.title}</div>
-                                <div className="text-xs text-gray-500">
-                                  {entry.timestamp.toLocaleDateString('ja-JP', {
-                                    month: 'numeric',
-                                    day: 'numeric'
-                                  })} {entry.timestamp.toLocaleTimeString('ja-JP', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="ml-11">
-                              <div className="text-base text-gray-700 mb-1">{entry.content}</div>
-                              <div className="text-xs text-gray-500">参加者: {entry.author}</div>
-                            </div>
-                          </div>
-                        )}
+                {/* 顧客心理タブ */}
+                <TabsContent value="customer" className="mt-6">
+                  <div className="space-y-6">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow">
+                      <div className="pt-6 px-6">
+                        <SectionTitle
+                          icon={Heart}
+                          title="顧客の課題・感情"
+                        />
                       </div>
-                    ))}
+                      <div className="p-6 space-y-6">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">現在の課題</h4>
+                          <div className="space-y-2">
+                            {caseData.customerPsychology.challenges.map((challenge, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <AlertTriangle className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{challenge}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">ニーズ</h4>
+                          <div className="space-y-2">
+                            {caseData.customerPsychology.needs.map((need, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <Target className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{need}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">感情的要因</h4>
+                          <div className="space-y-2">
+                            {caseData.customerPsychology.emotionalFactors.map((factor, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <Heart className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{factor}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-xl shadow">
+                      <div className="pt-6 px-6">
+                        <SectionTitle
+                          icon={Zap}
+                          title="日常業務への効果"
+                        />
+                      </div>
+                      <div className="p-6">
+                        <div className="space-y-2">
+                          {caseData.customerPsychology.dailyBenefits.map((benefit, index) => (
+                            <div key={index} className="flex items-start gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                              <span className="text-sm text-gray-700">{benefit}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-6">
+                          <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                            <Lightbulb className="w-4 h-4 text-gray-600" />
+                            提案のポイント
+                          </h4>
+                          <p className="text-sm text-gray-700">
+                            佐藤様は業務改善への強い意欲を持っている一方で、新しいツール導入への不安も感じています。
+                            具体的な数値と安心できる導入サポートを強調することが重要です。
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
-                
-                <TabsContent value="slack" className="">
-                  <div className="text-center py-8 text-gray-500">
-                    Slackのメッセージがここに表示されます
+
+                {/* 決裁者タブ */}
+                <TabsContent value="decision" className="mt-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow">
+                      <div className="pt-6 px-6">
+                        <SectionTitle
+                          icon={PieChart}
+                          title="経営指標・ROI"
+                        />
+                      </div>
+                      <div className="p-6 space-y-6">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">経営指標</h4>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                              <span className="text-sm text-gray-700">ROI</span>
+                              <span className="font-semibold text-gray-900">{caseData.decisionMaker.businessMetrics.roi}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                              <span className="text-sm text-gray-700">コスト削減</span>
+                              <span className="font-semibold text-gray-900">{caseData.decisionMaker.businessMetrics.costSaving}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                              <span className="text-sm text-gray-700">売上への影響</span>
+                              <span className="font-semibold text-gray-900">{caseData.decisionMaker.businessMetrics.revenueImpact}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-xl shadow">
+                      <div className="pt-6 px-6">
+                        <SectionTitle
+                          icon={TrendingUp}
+                          title="競合優位性"
+                        />
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">企業への影響</h4>
+                          <div className="space-y-2">
+                            {caseData.decisionMaker.companyImpact.map((impact, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{impact}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">競合優位性</h4>
+                          <div className="space-y-2">
+                            {caseData.decisionMaker.competitiveAdvantage.map((advantage, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <Star className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{advantage}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
-                
-                <TabsContent value="email" className="">
-                  <div className="text-center py-8 text-gray-500">
-                    メールの履歴がここに表示されます
+
+                {/* AI分析タブ */}
+                <TabsContent value="analysis" className="mt-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow">
+                      <div className="pt-6 px-6">
+                        <SectionTitle
+                          icon={Brain}
+                          title="次のアクション"
+                        />
+                      </div>
+                      <div className="p-6 space-y-4">
+                        {caseData.aiInsights.nextActions.map((action, index) => (
+                          <div key={index} className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                            <Target className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-xl shadow">
+                      <div className="pt-6 px-6">
+                        <SectionTitle
+                          icon={CheckCircle2}
+                          title="推奨事項"
+                        />
+                      </div>
+                      <div className="p-6 space-y-4">
+                        {caseData.aiInsights.recommendations.map((recommendation, index) => (
+                          <div key={index} className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
+                            <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-blue-700">{recommendation}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* 履歴タブ */}
+                <TabsContent value="timeline" className="mt-6">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow">
+                    <div className="pt-6 px-6">
+                      <SectionTitle
+                        icon={Calendar}
+                        title="営業活動履歴"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="relative">
+                        {/* タイムラインの縦線 */}
+                        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+                        <div className="space-y-8">
+                          {timelineData.map((entry, index) => (
+                            <div key={entry.id} className="relative">
+                              <div className="flex items-start gap-4">
+                                {/* タイムラインアイコン */}
+                                <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white ${
+                                  entry.aiGenerated
+                                    ? 'bg-gray-100 text-gray-600'
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {entry.type === 'analysis' && <Brain className="w-5 h-5" />}
+                                  {entry.type === 'ai' && <Zap className="w-5 h-5" />}
+                                  {entry.type === 'comment' && <MessageSquare className="w-5 h-5" />}
+                                  {entry.type === 'meeting' && <Calendar className="w-5 h-5" />}
+                                  {entry.type === 'email' && <Mail className="w-5 h-5" />}
+                                  {entry.type === 'slack' && <MessageSquare className="w-5 h-5" />}
+                                </div>
+
+                                {/* コンテンツ */}
+                                <div className="flex-1 min-w-0 bg-gray-50 rounded-lg p-4">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="font-medium text-gray-900">{entry.title}</h4>
+                                    {entry.aiGenerated && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                                        AI生成
+                                      </span>
+                                    )}
+                                    {entry.humanApproved && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                                        承認済み
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="text-sm text-gray-700 mb-3 whitespace-pre-line">
+                                    {entry.content}
+                                  </div>
+
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span className="font-medium">{entry.author}</span>
+                                    {entry.channel && (
+                                      <span className="text-blue-600 font-medium">#{entry.channel}</span>
+                                    )}
+                                    <span>
+                                      {`${entry.timestamp.getFullYear()}/${String(entry.timestamp.getMonth() + 1).padStart(2, '0')}/${String(entry.timestamp.getDate()).padStart(2, '0')}`} {' '}
+                                      {entry.timestamp.toLocaleTimeString('ja-JP', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                    {entry.replies && <span>{entry.replies}件の返信</span>}
+                                    {entry.threadCount && <span>{entry.threadCount}件のスレッド</span>}
+                                  </div>
+                                </div>
+
+                                {/* アクションボタン */}
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* コメント入力 */}
+                      <div className="mt-8 pt-6 border-t border-gray-200">
+                        <Textarea
+                          placeholder="コメントを入力..."
+                          className="w-full mb-4"
+                          rows={3}
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                        />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm">
+                              <FileText className="w-4 h-4 mr-2" />
+                              ファイル
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Brain className="w-4 h-4 mr-2" />
+                              AI分析依頼
+                            </Button>
+                          </div>
+                          <Button onClick={handleAddComment} disabled={!commentText.trim()}>
+                            投稿
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Slackタブ */}
+                <TabsContent value="slack" className="mt-6">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow">
+                    <div className="pt-6 px-6">
+                      <SectionTitle
+                        icon={MessageSquare}
+                        title="Slack履歴"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="relative">
+                        {/* タイムラインの縦線 */}
+                        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+                        <div className="space-y-8">
+                          {timelineData
+                            .filter(entry => entry.type === 'slack')
+                            .map((entry, index) => (
+                            <div key={entry.id} className="relative">
+                              <div className="flex items-start gap-4">
+                                {/* タイムラインアイコン */}
+                                <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white bg-blue-50 text-blue-600">
+                                  <MessageSquare className="w-5 h-5" />
+                                </div>
+
+                                {/* コンテンツ */}
+                                <div className="flex-1 min-w-0 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="font-medium text-gray-900">{entry.title}</h4>
+                                    {entry.aiGenerated && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                                        AI生成
+                                      </span>
+                                    )}
+                                    {entry.humanApproved && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                                        承認済み
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="text-sm text-gray-700 mb-3 whitespace-pre-line">
+                                    {entry.content}
+                                  </div>
+
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span className="font-medium">{entry.author}</span>
+                                    {entry.channel && (
+                                      <span className="text-blue-600 font-medium bg-blue-100 px-2 py-1 rounded">
+                                        #{entry.channel}
+                                      </span>
+                                    )}
+                                    <span>
+                                      {`${entry.timestamp.getFullYear()}/${String(entry.timestamp.getMonth() + 1).padStart(2, '0')}/${String(entry.timestamp.getDate()).padStart(2, '0')}`} {' '}
+                                      {entry.timestamp.toLocaleTimeString('ja-JP', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                    {entry.replies && <span>{entry.replies}件の返信</span>}
+                                    {entry.threadCount && (
+                                      <span className="text-blue-600 font-medium">
+                                        {entry.threadCount}件のスレッド
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* アクションボタン */}
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Slack統計 */}
+                      <div className="mt-8 pt-6 border-t border-gray-200">
+                        <h4 className="font-medium text-gray-900 mb-4">Slack統計</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-lg font-semibold text-gray-900">
+                              {timelineData.filter(entry => entry.type === 'slack').length}
+                            </div>
+                            <div className="text-sm text-gray-600">総メッセージ数</div>
+                          </div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-lg font-semibold text-gray-900">
+                              {timelineData
+                                .filter(entry => entry.type === 'slack')
+                                .reduce((sum, entry) => sum + (entry.threadCount || 0), 0)}
+                            </div>
+                            <div className="text-sm text-gray-600">総スレッド数</div>
+                          </div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-lg font-semibold text-gray-900">
+                              {new Set(timelineData
+                                .filter(entry => entry.type === 'slack')
+                                .map(entry => entry.channel)
+                                .filter(Boolean)).size}
+                            </div>
+                            <div className="text-sm text-gray-600">使用チャンネル数</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* コメント入力 */}
+                      <div className="mt-8 pt-6 border-t border-gray-200">
+                        <Textarea
+                          placeholder="Slackでのやりとりについてコメントを入力..."
+                          className="w-full mb-4"
+                          rows={3}
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                        />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm">
+                              <FileText className="w-4 h-4 mr-2" />
+                              ファイル
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Brain className="w-4 h-4 mr-2" />
+                              AI分析依頼
+                            </Button>
+                          </div>
+                          <Button onClick={handleAddComment} disabled={!commentText.trim()}>
+                            投稿
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* タスクタブ */}
+                <TabsContent value="tasks" className="mt-6">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow">
+                    <div className="pt-6 px-6">
+                      <SectionTitle
+                        icon={CheckCircle2}
+                        title="関連タスク"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">タスクA</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">タスクB</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">タスクC</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* メールタブ */}
+                <TabsContent value="emails" className="mt-6">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow">
+                    <div className="pt-6 px-6">
+                      <SectionTitle
+                        icon={Mail}
+                        title="関連メール"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">メールA</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">メールB</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">メールC</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* 商談タブ */}
+                <TabsContent value="meetings" className="mt-6">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow">
+                    <div className="pt-6 px-6">
+                      <SectionTitle
+                        icon={Calendar}
+                        title="商談履歴"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">商談A</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">商談B</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">商談C</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
             </div>
 
-            {/* コメント入力エリア - 最下部に固定 */}
-            <div className="p-6 pt-4 border-t border-gray-200 bg-white">
-              <Textarea
-                placeholder="コメントを入力..."
-                className="w-full mb-4 resize-none"
-                rows={3}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="w-8 h-8">
-                    <FileText className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="w-8 h-8">
-                    <User className="w-4 h-4" />
-                  </Button>
-                </div>
-                <Button onClick={handleAddComment} disabled={!commentText.trim()}>
-                  投稿
-                </Button>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        {/* 右サイドバー: 案件情報 */}
-        <aside className="w-80 bg-white border border-gray-200 rounded-lg shadow-sm">
-          <div className="">
-            {/* 案件主担当者 */}
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">案件主担当者</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Avatar className="w-5 h-5">
-                  <AvatarFallback className="text-xs">HT</AvatarFallback>
-                </Avatar>
-                <span className="text-sm text-gray-700">{caseData.assignee}</span>
-              </div>
-            </div>
-
-            {/* 案件関係者 */}
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">案件関係者</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {caseData.stakeholders.map((stakeholder, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Avatar className="w-5 h-5">
-                      <AvatarFallback className="text-xs">{stakeholder.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-gray-700">{stakeholder}</span>
+            {/* 右カラム - 基本情報 */}
+            <div className="w-96">
+              {/* 基本情報セクション */}
+              <div className="space-y-6">
+                <div className="bg-white border border-gray-200 rounded-xl shadow">
+                  <div className="pt-6 px-6">
+                    <SectionTitle
+                      icon={FileText}
+                      title="基本情報"
+                    />
                   </div>
-                ))}
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">案件ID</div>
+                      <div className="text-sm text-gray-900">{caseData.id}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">案件名</div>
+                      <div className="text-sm text-gray-900">{caseData.name}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">案件状況</div>
+                      <div className="text-sm text-gray-900">{caseData.status}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">優先度</div>
+                      <div className="text-sm text-gray-900">{caseData.priority}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">担当者</div>
+                      <div className="text-sm text-gray-900">{caseData.assignee}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">顧客担当者</div>
+                      <div className="text-sm text-gray-900">{caseData.customerOwner}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">プロジェクト</div>
+                      <div className="text-sm text-gray-900">{caseData.project}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">説明</div>
+                      <div className="text-sm text-gray-900">{caseData.description}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">予算</div>
+                      <div className="text-sm text-gray-900">{caseData.budget}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">期限</div>
+                      <div className="text-sm text-gray-900">{caseData.deadline}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">進捗率</div>
+                      <div>
+                        <div className="font-semibold text-gray-900">{caseData.progress}%</div>
+                        <div className="mt-1 w-full bg-gray-200 rounded-full h-1">
+                          <div
+                            className="bg-gray-800 h-1 rounded-full transition-all duration-300"
+                            style={{ width: `${caseData.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">最終連絡</div>
+                      <div className="font-semibold text-gray-900">{caseData.lastContact}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-1">連絡日数</div>
+                      <div className="font-semibold text-gray-900">{caseData.daysSinceLastContact}日</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            {/* 企業 */}
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">企業</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700">{caseData.company}</span>
-              </div>
-            </div>
-
-            {/* 顧客主担当者 */}
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">顧客主担当者</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <span className="text-sm text-gray-700">{caseData.customerOwner}</span>
-            </div>
-
-            {/* 顧客関係者 */}
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">顧客関係者</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <div className="space-y-1">
-                {caseData.customerStakeholders.map((stakeholder, index) => (
-                  <div key={index} className="text-sm text-gray-700">{stakeholder}</div>
-                ))}
-              </div>
-            </div>
-
-            {/* プロジェクト */}
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">プロジェクト</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <span className="text-sm text-gray-700">{caseData.project}</span>
-            </div>
-
-            {/* 説明 */}
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-medium text-gray-700">説明</h3>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                  <Settings className="w-3 h-3" />
-                </Button>
-              </div>
-              <p className="text-sm text-gray-700 leading-relaxed">{caseData.description}</p>
             </div>
           </div>
-        </aside>
+        </div>
       </div>
     </div>
   );
