@@ -2,9 +2,6 @@
 
 ## 📋 情報抽出元
 - **出典**: [LegalOn営業術（基礎編）](https://www.notion.so/legalforce/LegalOn-a1a6b3f0cdba456b8acb2ef1fa188022?source=copy_link)
-- **抽出日**: 2024年12月
-- **抽出方法**: Notionページ内容の直接分析
-
 ---
 
 ## 👥 登場人物・アクター定義

@@ -324,7 +324,7 @@ export default function CaseDetailPage() {
     <div className="min-h-screen w-full flex flex-col bg-gray-50">
       {/* ヘッダー */}
       <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white border-b shadow-sm">
-        <span className="text-xl font-bold tracking-tight">営業支援システム</span>
+        <span className="text-base font-bold tracking-tight text-gray-700">デモ環境</span>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon">
             <Calendar className="w-5 h-5" />
@@ -466,7 +466,7 @@ export default function CaseDetailPage() {
                                 <span className="text-sm font-semibold text-gray-900">顧客心理スコア</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">信頼度: 85%</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">関心度: 高</span>
-                              </div>
+                      </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 最終更新: 7月20日 | 分析者: Sela
                               </div>
@@ -489,8 +489,8 @@ export default function CaseDetailPage() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                          </div>
+                        </div>
 
                     {/* セクション2: 課題・ニーズ */}
                     <div className="bg-gray-50 rounded-lg p-4">
@@ -510,10 +510,10 @@ export default function CaseDetailPage() {
                               </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 契約書レビューに時間がかかりすぎる、法務担当者の負荷が高い、レビュー品質のばらつきがある
-                              </div>
-                            </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
 
                         {/* 優先ニーズ */}
                         <div className="p-3 bg-white border border-gray-100 rounded-md">
@@ -523,10 +523,10 @@ export default function CaseDetailPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-semibold text-gray-900">優先ニーズ</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">レビュー時間の短縮</span>
-                              </div>
+                      </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 レビュー時間が70%短縮される、リスク検出精度が向上する、法務担当者の負荷が軽減される
-                              </div>
+                            </div>
                             </div>
                           </div>
                         </div>
@@ -539,13 +539,13 @@ export default function CaseDetailPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-semibold text-gray-900">感情的要因</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">不安要素あり</span>
-                              </div>
+                        </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 業務効率化への強い期待、AIツール導入への慎重な姿勢、法的リスク軽減への安心感
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
+                  </div>
+                      </div>
                       </div>
                     </div>
 
@@ -555,7 +555,7 @@ export default function CaseDetailPage() {
                         <PieChart className="w-4 h-4" />
                         ビジネス価値
                       </h3>
-                      <div className="space-y-3">
+                          <div className="space-y-3">
                         {/* ROI・経営指標 */}
                         <div className="p-3 bg-white border border-gray-100 rounded-md">
                           <div className="flex items-start gap-3">
@@ -565,10 +565,10 @@ export default function CaseDetailPage() {
                                 <span className="text-sm font-semibold text-gray-900">ROI・経営指標</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">ROI: 200%</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">リスク軽減効果</span>
-                              </div>
+                            </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 年間200万円削減、リスク軽減効果、コンプライアンス強化
-                              </div>
+                            </div>
                             </div>
                           </div>
                         </div>
@@ -587,8 +587,8 @@ export default function CaseDetailPage() {
                                 迅速な契約締結、リスク管理の向上、法務コストの削減
                               </div>
                             </div>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
 
                         {/* 企業への影響 */}
                         <div className="p-3 bg-white border border-gray-100 rounded-md">
@@ -598,7 +598,7 @@ export default function CaseDetailPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-semibold text-gray-900">企業への影響</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">全社効果</span>
-                              </div>
+                      </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 営業効率向上、顧客満足度向上、競合他社との差別化、他部門展開可能
                               </div>
@@ -617,11 +617,11 @@ export default function CaseDetailPage() {
                               </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 リアルタイム進捗把握、いつでもどこでも顧客情報確認、レポート作成時間70%短縮
-                              </div>
-                            </div>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
                     </div>
 
                     {/* セクション4: 対応策・リスク */}
@@ -639,13 +639,13 @@ export default function CaseDetailPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-semibold text-gray-900">推奨アプローチ</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Sela提案</span>
-                              </div>
+                      </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 ROI数値を前面に、競合比較資料準備、他社導入事例の具体的効果を提示
-                              </div>
-                            </div>
                           </div>
-                        </div>
+                            </div>
+                      </div>
+                    </div>
 
                         {/* リスク・機会 */}
                         <div className="p-3 bg-white border border-gray-100 rounded-md">
@@ -655,10 +655,10 @@ export default function CaseDetailPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-semibold text-gray-900">リスク・機会</span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">要注意</span>
-                              </div>
+                      </div>
                               <div className="text-[13px] leading-normal text-gray-600 mb-1">
                                 リスク: 予算承認遅れ、競合参入 | 機会: 早期導入利益、他部門展開
-                              </div>
+                          </div>
                             </div>
                           </div>
                         </div>
@@ -729,7 +729,7 @@ export default function CaseDetailPage() {
                                 
                                 contentParts.forEach((part, index) => {
                                   if (index === 0) return;
-                                  const [tag, ...contentParts] = part.split("】");
+                                const [tag, ...contentParts] = part.split("】");
                                   const content = contentParts.join("】").trim();
                                   
                                   if (tag === "What" && content) {
@@ -830,7 +830,7 @@ export default function CaseDetailPage() {
 
 特に過去の契約書との比較分析機能は、リスク管理の観点から非常に重要だと思います。明日のミーティングで詳細を確認させていただきます。</p>
                             </div>
-                          </div>
+                                </div>
                         </div>
                       </div>
                     </div>
