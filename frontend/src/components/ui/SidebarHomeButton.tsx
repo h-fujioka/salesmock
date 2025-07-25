@@ -10,11 +10,11 @@ export default function SidebarHomeButton() {
     <Button
       variant="ghost"
       size="icon"
-      className="w-10 h-10 p-1 mb-2"
+      className="p-1 mb-6"
       onClick={() => router.push("/")}
       aria-label="ホームに戻る"
     >
-      <Home className="w-8 h-8" />
+      <Home className="w-6 h-6" />
     </Button>
   );
 } 

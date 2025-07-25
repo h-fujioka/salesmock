@@ -31,11 +31,11 @@ function SidebarCasesButton() {
     <Button
       variant="ghost"
       size="icon"
-      className="w-10 h-10 p-1 mb-2"
+      className="p-1 mb-6"
       onClick={() => router.push("/cases")}
       aria-label="案件一覧"
     >
-      <Briefcase className="w-8 h-8" />
+      <Briefcase className="w-6 h-6" />
     </Button>
   );
 }
@@ -49,10 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* サイドバー */}
           <aside className="w-[72px] bg-gray-50 border-r flex flex-col h-full py-0">
             <div className="flex flex-col items-center pt-4 h-full">
-              <GridDotsIcon className="w-7 h-7 text-gray-700 mb-6" />
+              <GridDotsIcon className="w-6 h-6 text-gray-700 mb-6" />
               <SidebarHomeButton />
               <SidebarCasesButton />
-              <Button variant="ghost" size="icon" className="w-10 h-10 p-1"><Settings className="w-8 h-8" /></Button>
+              <Button variant="ghost" size="icon" className="p-1 mb-6"><Settings className="w-6 h-6" /></Button>
             </div>
           </aside>
           {/* メインエリア */}
