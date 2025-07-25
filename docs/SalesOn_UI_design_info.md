@@ -23,12 +23,19 @@
 - **テーブル**: 白背景（`bg-white`）、グレーセパレーター（`border-gray-200`）
 - **バッジ・タグ**: グレー背景（`bg-gray-100`）、濃いグレーテキスト（`text-gray-800`）
 - **プログレスバー**: グレー背景（`bg-gray-200`）、グレー塗りつぶし（`bg-gray-400`）
+- **ヘッダータイトル**: 
+  - コンポーネント: `@/components/ui/header-title`
+  - テキスト: 「デモ環境」で固定（プロトタイプ環境表示用）
+  - スタイル: 16px（`text-base`）、太字（`font-bold`）、文字間隔（`tracking-tight`）
+  - テキストカラー: 濃いグレー（`text-gray-700`）
+  - 用途: 全画面共通のヘッダー部分のタイトル表示
 
 ### 色使用の制限
 - プロトタイプ段階では色分けによる区別を避ける
 - 情報の階層は色ではなく、サイズ、太さ、配置で表現
 - 緊急性や重要度は色ではなく、テキストやアイコンで表現
 - 必要に応じてのみ、最小限のアクセントカラーを使用
+- プロトタイプ環境であることを示すため、ヘッダータイトルは「デモ環境」で統一
 
 ---
 
@@ -42,16 +49,16 @@
   - **ホーム画面**: width: 100% (フルスクリーン表示)（`w-full`）
   - **その他の画面**: 都度選択可能
     - パターンA: width: 100% (フルスクリーン)（`w-full`）
-    - パターンB: max-width: 1280px (中央寄せ)（`max-w-7xl mx-auto`）
+    - パター (中央寄せ)（`max-w-7xl mx-auto`）
 
 ### 2. タイポグラフィ
 - **フォントファミリー**: システムフォント（`font-sans`）
 - **見出し**: 
-  - H1: 24px, 太字（`text-2xl font-bold`）
+  - H1: 22px, 太字（`text-[22px] font-bold`）
   - H2: 20px, 太字（`text-xl font-bold`）
   - H3: 18px, 太字（`text-lg font-bold`）
 - **本文**: 14px, 通常（`text-sm font-normal`）
-- **キャプション**: 12px, 通常（`text-xs font-normal`）
+- **キャプション**: 13px, 通常（`text-[13px] font-normal`）
 
 ### 3. コンポーネント仕様
 
@@ -97,10 +104,10 @@
 - **フォントサイズ仕様**:
   - **ヘッダー**: 14px, セミボールド（`text-sm font-semibold`）
   - **データセル**: 14px, 通常（`text-sm font-normal`）
-  - **キャプション**: 12px, 通常（`text-xs font-normal`）
+  - **キャプション**: 13px, 通常（`text-[13px] font-normal`）
 
 ##### フォーム要素
-- **入力フィールド**: `@/components/ui/input`
+- **入力フンB: max-width: 1280pxィールド**: `@/components/ui/input`
 - **テキストエリア**: `@/components/ui/textarea`
 - **チェックボックス**: `@/components/ui/checkbox`
 - **ドロップダウン**: `@/components/ui/dropdown-menu`
@@ -267,7 +274,7 @@ import { Icon } from '@/components/icons';
 ```
 
 ##### サイズ選択ガイドライン
-- **xs (12px)**: 極小アイコン、密集したリスト内
+- **xs (13px)**: 極小アイコン、密集したリスト内
 - **sm (16px)**: 小アイコン、テーブル内、補助的な表示
 - **md (20px)**: 標準アイコン、ボタン内、ナビゲーション
 - **lg (24px)**: 大アイコン、見出し付近、強調表示

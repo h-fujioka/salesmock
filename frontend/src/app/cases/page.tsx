@@ -36,7 +36,7 @@ type Case = {
 function Header() {
   return (
     <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white border-b shadow-sm">
-      <span className="text-xl font-bold tracking-tight">デモ画面</span>
+              <span className="text-base font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
         <Button variant="ghost" size="icon"><Calendar className="w-4 h-4" /></Button>
@@ -485,7 +485,7 @@ export default function CasesPage() {
       <main className="w-full">
         <div className="w-full px-8 pb-6">
           {/* タイトル */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">案件一覧</h1>
+          <h1 className="text-[22px] font-bold text-gray-900 mb-6">案件一覧</h1>
           {/* タブと検索・フィルターを横並び */}
           <div className="flex items-center justify-between mb-6">
             {/* タブ */}

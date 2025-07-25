@@ -5,20 +5,19 @@ import { Button } from '@/components/ui/button';
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionTitle } from "@/components/ui/section-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import {
+  AlertCircle,
   AlertTriangle,
   Brain,
   Calendar,
+  CheckCircle,
   CheckCircle2,
   ChevronRight,
-  FileText,
   Heart,
   Home,
   Lightbulb,
   Mail,
   MessageSquare,
-  MoreVertical,
   PieChart,
   Plus,
   Settings,
@@ -97,12 +96,14 @@ type TimelineEntry = {
   analysisType?: 'customer' | 'decision' | 'competitive';
   channel?: string; // Slackチャンネル名
   threadCount?: number; // Slackスレッド数
+  isUnread?: boolean; // 未読状態
 };
 
 export default function CaseDetailPage() {
   const [activeTab, setActiveTab] = useState('customer');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic-info']));
   const [commentText, setCommentText] = useState('');
+  const [unreadEmails, setUnreadEmails] = useState<Set<string>>(new Set(['1', '2', '3'])); // 未読メールのIDを管理（メール1、2、3を未読に設定）
 
   // ダミーデータ
   const caseData: Case = {
@@ -195,58 +196,90 @@ export default function CaseDetailPage() {
 
   const timelineData: TimelineEntry[] = [
     {
-      id: '1',
-      timestamp: new Date('2024-07-20T10:30:00'),
-      type: 'meeting',
-      title: '最終提案ミーティング',
-      content: '経営陣を交えた最終提案を実施。ROIと導入効果について詳細な説明を行い、好意的な反応を得た。',
-      author: 'Hirokazu Tanaka',
+      id: "1",
+      timestamp: new Date("2024-07-20T10:30:00"),
+      type: "meeting",
+      title: "最終提案ミーティング",
+      content: "【When】7月20日 10:30-12:00 【Where】ABC物流本社会議室 【Who】法務部長・佐藤様、IT部長・田中様、営業担当・田中 【What】最終提案とROI説明 【Why】契約締結に向けた最終確認 【How】プレゼン資料を使用し、ROI 200%と年間500万円削減効果を説明。決裁者から前向きな反応。",
+      author: "Hirokazu Tanaka",
       aiGenerated: false
     },
     {
-      id: '2',
-      timestamp: new Date('2024-07-19T16:45:00'),
-      type: 'slack',
-      title: 'Slackでの技術相談',
-      content: 'ABC株式会社のIT部長とSlackで技術的な詳細について相談。システム要件の確認と導入スケジュールについて議論。',
-      author: 'Hirokazu Tanaka',
-      channel: '#abc-company',
+      id: "2",
+      timestamp: new Date("2024-07-19T16:45:00"),
+      type: "slack",
+      title: "IT部長との技術要件確認",
+      content: "【When】7月19日 16:45-17:30 【Where】Slack #abc-company 【Who】IT部長・田中様、営業担当・田中 【What】技術要件とシステム連携の詳細確認 【Why】導入時の技術的課題を事前に解決 【How】Slackで資料を共有しながら、既存システム連携方法とデータ移行手順を確認。セキュリティ要件も明確化。",
+      author: "Hirokazu Tanaka",
+      channel: "#abc-company",
       threadCount: 8,
       aiGenerated: false
     },
     {
-      id: '3',
-      timestamp: new Date('2024-07-18T14:15:00'),
-      type: 'analysis',
-      title: '顧客心理分析完了',
-      content: 'AIによる顧客心理分析が完了。佐藤様の業務改善への意欲と不安要素を特定。提案内容の調整が必要。',
-      author: 'AI Assistant',
+      id: "3",
+      timestamp: new Date("2024-07-18T14:15:00"),
+      type: "analysis",
+      title: "競合他社の動向確認",
+      content: "【When】7月18日 14:15-15:00 【Where】営業部オフィス 【Who】営業担当・田中、マーケティング部・鈴木 【What】競合他社A社の提案内容調査 【Why】差別化ポイントの明確化と価格戦略の策定 【How】業界情報と顧客からの情報を収集。A社は我社より20%高い価格で同等機能を提案中。",
+      author: "Hirokazu Tanaka",
+      aiGenerated: false
+    },
+    {
+      id: "4",
+      timestamp: new Date("2024-07-17T11:20:00"),
+      type: "meeting",
+      title: "法務部長との個別面談",
+      content: "【When】7月17日 11:20-12:30 【Where】ABC物流法務部会議室 【Who】法務部長・佐藤様、営業担当・田中 【What】導入への懸念事項の確認と安心感の提供 【Why】顧客の不安を解消し、契約締結への道筋を作る 【How】個別面談で懸念事項（精度、責任範囲）を確認。具体的なサポート体制と保証内容を説明。",
+      author: "Hirokazu Tanaka",
+      aiGenerated: false
+    },
+    {
+      id: "5",
+      timestamp: new Date("2024-07-16T09:30:00"),
+      type: "email",
+      title: "予算承認申請の提出",
+      content: "【When】7月16日 9:30 【Where】ABC物流経営陣 【Who】経営陣、営業担当・田中 【What】予算承認申請書の提出 【Why】契約締結に必要な予算の承認を得る 【How】ROI計算根拠と他社事例を含む詳細資料を添付してメール送信。承認プロセスは2週間程度の見込み。",
+      author: "Hirokazu Tanaka",
+      aiGenerated: false
+    },
+    {
+      id: "6",
+      timestamp: new Date("2024-07-15T14:00:00"),
+      type: "meeting",
+      title: "初回提案ミーティング",
+      content: "【When】7月15日 14:00-16:00 【Where】ABC物流本社会議室 【Who】法務部・IT部合同、営業担当・田中 【What】初回提案と現状課題の説明 【Why】顧客の課題を理解し、解決策を提示する 【How】法務部・IT部合同で現状の課題と解決策を説明。参加者から多くの質問があり、関心の高さを確認。",
+      author: "Hirokazu Tanaka",
+      aiGenerated: false
+    },
+    {
+      id: "7",
+      timestamp: new Date("2024-07-14T10:00:00"),
+      type: "analysis",
+      title: "顧客心理分析完了",
+      content: "【When】7月14日 10:00-11:00 【Where】営業部オフィス 【Who】AI Assistant、営業担当・田中 【What】顧客心理分析の実施 【Why】顧客の真のニーズと不安要素を把握する 【How】AIによる顧客心理分析が完了。佐藤法務部長の業務改善への意欲とAI導入への不安要素を特定。提案内容の調整が必要。",
+      author: "AI Assistant",
       aiGenerated: true,
       humanApproved: true
     },
     {
-      id: '4',
-      timestamp: new Date('2024-07-17T11:20:00'),
-      type: 'slack',
-      title: '営業部内での案件共有',
-      content: '営業部のSlackチャンネルでABC株式会社案件の進捗を共有。チームメンバーからのフィードバックを受けて提案内容を調整。',
-      author: 'Hirokazu Tanaka',
-      channel: '#sales-team',
-      threadCount: 12,
+      id: "8",
+      timestamp: new Date("2024-07-12T16:00:00"),
+      type: "email",
+      title: "要件定義書の送付",
+      content: "【When】7月12日 16:00 【Where】ABC物流法務部 【Who】法務部長・佐藤様、営業担当・田中 【What】要件定義書の送付 【Why】顧客の要件を明確化し、提案内容を具体化する 【How】顧客からの要件を整理した要件定義書をメール送信。契約書の自動チェック機能と承認フローの自動化について具体的な実装方法を記載。",
+      author: "Hirokazu Tanaka",
       aiGenerated: false
     },
     {
-      id: '5',
-      timestamp: new Date('2024-07-15T09:00:00'),
-      type: 'email',
-      title: '提案書送付',
-      content: '詳細な提案書を送付。予算、スケジュール、導入効果について具体的な数値を含めて説明。',
-      author: 'Hirokazu Tanaka',
+      id: "9",
+      timestamp: new Date("2024-07-10T11:00:00"),
+      type: "meeting",
+      title: "初回商談",
+      content: "【When】7月10日 11:00-12:30 【Where】ABC物流本社会議室 【Who】法務部長・佐藤様、営業担当・田中 【What】初回商談と課題ヒアリング 【Why】顧客の現状課題を把握し、ニーズを明確化する 【How】ABC物流の法務部長と初回商談。年間約500件の契約書レビュー業務の課題を確認。工数削減への強いニーズを確認。",
+      author: "Hirokazu Tanaka",
       aiGenerated: false
     }
-  ];
-
-  const toggleSection = (sectionId: string) => {
+  ];  const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
     if (newExpanded.has(sectionId)) {
       newExpanded.delete(sectionId);
@@ -260,6 +293,15 @@ export default function CaseDetailPage() {
     if (commentText.trim()) {
       setCommentText('');
     }
+  };
+
+  const handleEmailClick = (emailId: string) => {
+    // メールをクリックしたら未読状態を解除
+    setUnreadEmails(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(emailId);
+      return newSet;
+    });
   };
 
   return (
@@ -373,10 +415,6 @@ export default function CaseDetailPage() {
                     <TabsTrigger value="slack" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <MessageSquare className="w-4 h-4" />
                       Slack
-                    </TabsTrigger>
-                    <TabsTrigger value="meetings" className="text-gray-700 font-normal text-sm flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      商談
                     </TabsTrigger>
                     <TabsTrigger value="timeline" className="text-gray-700 font-normal text-sm flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
@@ -586,331 +624,400 @@ export default function CaseDetailPage() {
 
                 {/* 履歴タブ */}
                 <TabsContent value="timeline" className="mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow">
-                    <div className="pt-6 px-6">
-                      <SectionTitle
-                        icon={Calendar}
-                        title="営業活動履歴"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="relative">
-                        {/* タイムラインの縦線 */}
-                        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-
-                        <div className="space-y-8">
-                          {timelineData.map((entry, index) => (
-                            <div key={entry.id} className="relative">
-                              <div className="flex items-start gap-4">
-                                {/* タイムラインアイコン */}
-                                <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white ${
-                                  entry.aiGenerated
-                                    ? 'bg-gray-100 text-gray-600'
-                                    : 'bg-gray-100 text-gray-600'
-                                }`}>
-                                  {entry.type === 'analysis' && <Brain className="w-5 h-5" />}
-                                  {entry.type === 'ai' && <Zap className="w-5 h-5" />}
-                                  {entry.type === 'comment' && <MessageSquare className="w-5 h-5" />}
-                                  {entry.type === 'meeting' && <Calendar className="w-5 h-5" />}
-                                  {entry.type === 'email' && <Mail className="w-5 h-5" />}
-                                  {entry.type === 'slack' && <MessageSquare className="w-5 h-5" />}
-                                </div>
-
-                                {/* コンテンツ */}
-                                <div className="flex-1 min-w-0 bg-gray-50 rounded-lg p-4">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="font-medium text-gray-900">{entry.title}</h4>
-                                    {entry.aiGenerated && (
-                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                                        AI生成
-                                      </span>
-                                    )}
-                                    {entry.humanApproved && (
-                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                                        承認済み
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  <div className="text-sm text-gray-700 mb-3 whitespace-pre-line">
-                                    {entry.content}
-                                  </div>
-
-                                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                                    <span className="font-medium">{entry.author}</span>
-                                    {entry.channel && (
-                                      <span className="text-blue-600 font-medium">#{entry.channel}</span>
-                                    )}
-                                    <span>
-                                      {`${entry.timestamp.getFullYear()}/${String(entry.timestamp.getMonth() + 1).padStart(2, '0')}/${String(entry.timestamp.getDate()).padStart(2, '0')}`} {' '}
-                                      {entry.timestamp.toLocaleTimeString('ja-JP', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
+                  <div className="relative">
+                    {/* タイムラインの縦線 */}
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                    
+                    <div className="space-y-4">
+                      {timelineData.map((entry, index) => (
+                        <div key={entry.id} className="relative flex items-start gap-4">
+                          {/* タイムラインのアイコン（縦線上に配置） */}
+                          <div className="relative z-10 flex-shrink-0 w-8 h-8 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center">
+                            {entry.type === "analysis" && <Brain className="w-4 h-4 text-gray-600" />}
+                            {entry.type === "ai" && <Zap className="w-4 h-4 text-gray-600" />}
+                            {entry.type === "comment" && <MessageSquare className="w-4 h-4 text-gray-600" />}
+                            {entry.type === "meeting" && <Calendar className="w-4 h-4 text-gray-600" />}
+                            {entry.type === "email" && <Mail className="w-4 h-4 text-gray-600" />}
+                            {entry.type === "slack" && <MessageSquare className="w-4 h-4 text-gray-600" />}
+                          </div>
+                          
+                          {/* イベント内容 */}
+                          <div className="flex-1 min-w-0 pt-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-900">{entry.title}</span>
+                                <div className="flex gap-1">
+                                  {entry.aiGenerated && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                      AI生成
                                     </span>
-                                    {entry.replies && <span>{entry.replies}件の返信</span>}
-                                    {entry.threadCount && <span>{entry.threadCount}件のスレッド</span>}
-                                  </div>
-                                </div>
-
-                                {/* アクションボタン */}
-                                <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
+                                  )}
+                                  {entry.humanApproved && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                      承認済み
+                                    </span>
+                                  )}
                                 </div>
                               </div>
+                              <span className="text-sm text-gray-500 underline">
+                                {`${entry.timestamp.getFullYear()}/${String(entry.timestamp.getMonth() + 1).padStart(2, "0")}/${String(entry.timestamp.getDate()).padStart(2, "0")}`}
+                              </span>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* コメント入力 */}
-                      <div className="mt-8 pt-6 border-t border-gray-200">
-                        <Textarea
-                          placeholder="コメントを入力..."
-                          className="w-full mb-4"
-                          rows={3}
-                          value={commentText}
-                          onChange={(e) => setCommentText(e.target.value)}
-                        />
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm">
-                              <FileText className="w-4 h-4 mr-2" />
-                              ファイル
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Brain className="w-4 h-4 mr-2" />
-                              AI分析依頼
-                            </Button>
+                            <div className="text-sm text-gray-600 mb-2">
+                              <span className="font-medium">{entry.author}</span>
+                              {entry.channel && ` • #${entry.channel}`}
+                              {entry.threadCount && ` • ${entry.threadCount}件`}
+                            </div>
+                            <div className="text-sm text-gray-700 leading-relaxed space-y-2">
+                              {entry.content.split("【").map((part, index) => {
+                                if (index === 0) return null;
+                                const [tag, ...contentParts] = part.split("】");
+                                const content = contentParts.join("】");
+                                return (
+                                  <div key={index} className="flex items-start gap-2">
+                                    <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">
+                                      {tag}
+                                    </span>
+                                    <span className="text-sm text-gray-700">{content}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                          <Button onClick={handleAddComment} disabled={!commentText.trim()}>
-                            投稿
-                          </Button>
                         </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </TabsContent>
-
                 {/* Slackタブ */}
                 <TabsContent value="slack" className="mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow">
-                    <div className="pt-6 px-6">
-                      <SectionTitle
-                        icon={MessageSquare}
-                        title="Slack履歴"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="relative">
-                        {/* タイムラインの縦線 */}
-                        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-
-                        <div className="space-y-8">
-                          {timelineData
-                            .filter(entry => entry.type === 'slack')
-                            .map((entry, index) => (
-                            <div key={entry.id} className="relative">
-                              <div className="flex items-start gap-4">
-                                {/* タイムラインアイコン */}
-                                <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white bg-blue-50 text-blue-600">
-                                  <MessageSquare className="w-5 h-5" />
+                  <div className="space-y-0">
+                    {/* スレッドの詳細表示 */}
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="flex-1 min-w-0 space-y-1">
+                        {/* メインメッセージ */}
+                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                              <img src="/avatars/yamada.jpg" alt="山田太郎" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className="text-sm font-semibold text-gray-900">山田太郎</span>
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">#abc-company</span>
                                 </div>
-
-                                {/* コンテンツ */}
-                                <div className="flex-1 min-w-0 bg-blue-50 rounded-lg p-4 border border-blue-100">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="font-medium text-gray-900">{entry.title}</h4>
-                                    {entry.aiGenerated && (
-                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                                        AI生成
-                                      </span>
-                                    )}
-                                    {entry.humanApproved && (
-                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                                        承認済み
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  <div className="text-sm text-gray-700 mb-3 whitespace-pre-line">
-                                    {entry.content}
-                                  </div>
-
-                                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                                    <span className="font-medium">{entry.author}</span>
-                                    {entry.channel && (
-                                      <span className="text-blue-600 font-medium bg-blue-100 px-2 py-1 rounded">
-                                        #{entry.channel}
-                                      </span>
-                                    )}
-                                    <span>
-                                      {`${entry.timestamp.getFullYear()}/${String(entry.timestamp.getMonth() + 1).padStart(2, '0')}/${String(entry.timestamp.getDate()).padStart(2, '0')}`} {' '}
-                                      {entry.timestamp.toLocaleTimeString('ja-JP', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
-                                    </span>
-                                    {entry.replies && <span>{entry.replies}件の返信</span>}
-                                    {entry.threadCount && (
-                                      <span className="text-blue-600 font-medium">
-                                        {entry.threadCount}件のスレッド
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* アクションボタン */}
-                                <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </div>
+                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                              <p className="text-sm leading-relaxed text-gray-700">ABC物流様向けの契約書レビュー支援ツールの提案について、法務部門の要件を確認したところ、以下の点について検討が必要かと思います：
 
-                      {/* Slack統計 */}
-                      <div className="mt-8 pt-6 border-t border-gray-200">
-                        <h4 className="font-medium text-gray-900 mb-4">Slack統計</h4>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="text-center p-3 bg-gray-50 rounded-lg">
-                            <div className="text-lg font-semibold text-gray-900">
-                              {timelineData.filter(entry => entry.type === 'slack').length}
+1. 契約書の自動チェック機能の範囲
+2. 社内規定との整合性確認の仕組み
+3. 承認フローの自動化レベル
+
+これらの要件について、開発チームと確認したいのですが、ミーティングの設定をお願いできますでしょうか？</p>
                             </div>
-                            <div className="text-sm text-gray-600">総メッセージ数</div>
-                          </div>
-                          <div className="text-center p-3 bg-gray-50 rounded-lg">
-                            <div className="text-lg font-semibold text-gray-900">
-                              {timelineData
-                                .filter(entry => entry.type === 'slack')
-                                .reduce((sum, entry) => sum + (entry.threadCount || 0), 0)}
-                            </div>
-                            <div className="text-sm text-gray-600">総スレッド数</div>
-                          </div>
-                          <div className="text-center p-3 bg-gray-50 rounded-lg">
-                            <div className="text-lg font-semibold text-gray-900">
-                              {new Set(timelineData
-                                .filter(entry => entry.type === 'slack')
-                                .map(entry => entry.channel)
-                                .filter(Boolean)).size}
-                            </div>
-                            <div className="text-sm text-gray-600">使用チャンネル数</div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* コメント入力 */}
-                      <div className="mt-8 pt-6 border-t border-gray-200">
-                        <Textarea
-                          placeholder="Slackでのやりとりについてコメントを入力..."
-                          className="w-full mb-4"
-                          rows={3}
-                          value={commentText}
-                          onChange={(e) => setCommentText(e.target.value)}
-                        />
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm">
-                              <FileText className="w-4 h-4 mr-2" />
-                              ファイル
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Brain className="w-4 h-4 mr-2" />
-                              AI分析依頼
-                            </Button>
+                        {/* 返信1 */}
+                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                              <img src="/avatars/suzuki.jpg" alt="鈴木花子" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className="text-sm font-semibold text-gray-900">鈴木花子</span>
+                                </div>
+                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
+                              </div>
+                              <p className="text-sm leading-relaxed text-gray-700">承知しました。開発チームのスケジュールを確認したところ、来週火曜日の14時から1時間程度であれば調整可能です。その時間帯でミーティングを設定させていただいてもよろしいでしょうか？</p>
+                            </div>
                           </div>
-                          <Button onClick={handleAddComment} disabled={!commentText.trim()}>
-                            投稿
-                          </Button>
+                        </div>
+
+                        {/* 返信2 */}
+                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                              <img src="/avatars/yamada.jpg" alt="山田太郎" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className="text-sm font-semibold text-gray-900">山田太郎</span>
+                                </div>
+                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
+                              </div>
+                              <p className="text-sm leading-relaxed text-gray-700">はい、火曜日14時で問題ありません。ABC物流様の法務部門からの具体的な要件も整理できていますので、その内容も含めて議論できればと思います。</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 返信3 */}
+                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                              <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className="text-sm font-semibold text-gray-900">佐藤美咲</span>
+                                </div>
+                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
+                              </div>
+                              <p className="text-sm leading-relaxed text-gray-700">コスト面での詳細分析も含めて検討したいと思います。導入効果の測定方法についても議論できればと思います。</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 返信4 */}
+                        <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                              <img src="/avatars/tanaka.jpg" alt="田中博一" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className="text-sm font-semibold text-gray-900">田中博一</span>
+                                </div>
+                                <span className="text-sm leading-normal text-gray-600">7月19日</span>
+                              </div>
+                              <p className="text-sm leading-relaxed text-gray-700">セキュリティ要件の確認も重要ですね。特に契約書データの暗号化と アクセス制御について詳しく確認したいと思います。</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </TabsContent>
-
                 {/* タスクタブ */}
                 <TabsContent value="tasks" className="mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow">
-                    <div className="pt-6 px-6">
-                      <SectionTitle
-                        icon={CheckCircle2}
-                        title="関連タスク"
-                      />
+                  <div className="space-y-0">
+                    {/* タスク1 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">契約条件の最終確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 7月25日 | 担当: 田中博一 | ステータス: 進行中
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">タスクA</span>
+
+                    {/* タスク2 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">導入スケジュールの調整</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 7月30日 | 担当: 佐藤美咲 | ステータス: 待機中
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">タスクB</span>
+                      </div>
+                    </div>
+
+                    {/* タスク3 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">技術要件の詳細確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">低</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 8月5日 | 担当: 山田太郎 | ステータス: 未着手
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">タスクC</span>
+                      </div>
+                    </div>
+
+                    {/* タスク4 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">セキュリティ要件の確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 7月28日 | 担当: 鈴木花子 | ステータス: 進行中
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* タスク5 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">導入後サポート体制の準備</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 8月10日 | 担当: 田中博一 | ステータス: 計画中
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* タスク6 */}
+                    <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">契約書の最終確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">完了</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 7月20日 | 担当: 佐藤美咲 | ステータス: 完了
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </TabsContent>
-
                 {/* メールタブ */}
                 <TabsContent value="emails" className="mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow">
-                    <div className="pt-6 px-6">
-                      <SectionTitle
-                        icon={Mail}
-                        title="関連メール"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">メールA</span>
+                  <div className="space-y-0">
+                    {/* メール1 */}
+                    <div 
+                      className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md"
+                      onClick={() => handleEmailClick('1')}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                          <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex items-center gap-3">
-                          <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">メールB</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Mail className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">メールC</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className={`text-sm ${unreadEmails.has('1') ? 'font-bold' : 'font-semibold'} text-gray-900`}>佐藤美咲</span>
+                              {unreadEmails.has('1') && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                                  未読
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-sm leading-normal text-gray-600">7月20日</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('1') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>最終提案について、経営陣への説明資料をお送りいただきありがとうございます。ROIの詳細な計算根拠が明確で非常に分かりやすかったです。</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </TabsContent>
 
-                {/* 商談タブ */}
-                <TabsContent value="meetings" className="mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow">
-                    <div className="pt-6 px-6">
-                      <SectionTitle
-                        icon={Calendar}
-                        title="商談履歴"
-                      />
+                    {/* メール2 */}
+                    <div 
+                      className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md"
+                      onClick={() => handleEmailClick('2')}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                          <img src="/avatars/tanaka.jpg" alt="田中博一" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className={`text-sm ${unreadEmails.has('2') ? 'font-bold' : 'font-semibold'} text-gray-900`}>田中博一</span>
+                              {unreadEmails.has('2') && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                                  未読
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-sm leading-normal text-gray-600">7月18日</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('2') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>技術的な質問についてご回答いただき、ありがとうございます。既存システムとの連携について、追加で確認したい点があります。</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">商談A</span>
+
+                    {/* メール3 */}
+                    <div 
+                      className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md"
+                      onClick={() => handleEmailClick('3')}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                          <img src="/avatars/yamada.jpg" alt="山田太郎" className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">商談B</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className={`text-sm ${unreadEmails.has('3') ? 'font-bold' : 'font-normal'} text-gray-900`}>山田太郎</span>
+                              {unreadEmails.has('3') && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                                  未読
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-sm leading-normal text-gray-600">7月16日</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('3') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>競合他社分析資料をお送りします。機能比較表と価格体系の違いについてまとめましたので、ご参考ください。</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">商談C</span>
+                      </div>
+                    </div>
+
+                    {/* メール4 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                          <img src="/avatars/suzuki.jpg" alt="鈴木花子" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className="text-sm font-normal text-gray-900">鈴木花子</span>
+                            </div>
+                            <span className="text-sm leading-normal text-gray-600">7月14日</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm leading-relaxed font-normal text-gray-700 flex-1 line-clamp-1">導入スケジュールの詳細案を作成いたしました。段階的な導入により、業務への影響を最小限に抑える計画となっています。</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* メール5 */}
+                    <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                          <img src="/avatars/sato.jpg" alt="佐藤美咲" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className="text-sm font-normal text-gray-900">佐藤美咲</span>
+                            </div>
+                            <span className="text-sm leading-normal text-gray-600">7月12日</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm leading-relaxed font-normal text-gray-700 flex-1 line-clamp-1">予算申請の承認を得るために、ROIの詳細な計算根拠をお示しいただけますでしょうか。経営陣への説明資料として使用したいと思います。</p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -924,13 +1031,7 @@ export default function CaseDetailPage() {
               {/* 基本情報セクション */}
               <div className="space-y-6">
                 <div className="bg-white border border-gray-200 rounded-xl shadow">
-                  <div className="pt-6 px-6">
-                    <SectionTitle
-                      icon={FileText}
-                      title="基本情報"
-                    />
-                  </div>
-                  <div className="p-6 space-y-4">
+                  <div className="p-6 space-y-7">
                     <div>
                       <div className="text-sm font-semibold text-gray-700 mb-1">案件ID</div>
                       <div className="text-sm text-gray-900">{caseData.id}</div>

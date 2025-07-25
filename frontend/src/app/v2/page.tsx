@@ -27,7 +27,7 @@ function DashboardCard({ title, children }: { title: string; children: React.Rea
 function Header({ onClear }: { onClear: () => void }) {
   return (
     <header className="h-14 min-h-14 w-full flex items-center justify-between bg-white/80 border-b shadow-sm">
-      <span className="text-xl font-bold tracking-tight">デモ画面</span>
+              <span className="text-base font-bold tracking-tight">デモ画面</span>
       <div className="flex items-center gap-4">
         <input className="rounded-lg border px-3 py-1.5 text-sm focus:outline-none" placeholder="検索..." />
         <Button variant="ghost" size="icon"><Calendar className="w-4 h-4" /></Button>
