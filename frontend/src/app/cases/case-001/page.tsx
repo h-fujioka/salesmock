@@ -324,7 +324,7 @@ export default function CaseDetailPage() {
     <div className="min-h-screen w-full flex flex-col bg-gray-50">
       {/* ヘッダー */}
       <header className="h-14 min-h-14 w-full flex items-center justify-between px-8 bg-white border-b shadow-sm">
-        <span className="text-base font-bold tracking-tight text-gray-700">デモ環境</span>
+        <span className="text-base font-semibold tracking-tight text-gray-700">デモ環境</span>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon">
             <Calendar className="w-5 h-5" />
@@ -354,7 +354,7 @@ export default function CaseDetailPage() {
           <div className="mb-6">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{caseData.name}</h1>
+                <h1 className="text-2xl font-semibold text-gray-900">{caseData.name}</h1>
                 <div className="flex items-center gap-4 mt-2">
                   <span className="text-sm text-gray-700">担当: Hirokazu Tanaka</span>
                 </div>
@@ -940,6 +940,91 @@ export default function CaseDetailPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* タスク7 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">セキュリティ要件の確認</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 7月29日 | 担当: 田中次郎
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* タスク8 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">ユーザートレーニング計画の策定</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">計画中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 8月5日 | 担当: 佐藤美咲
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* タスク9 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">データ移行計画の詳細化</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">待機中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 8月15日 | 担当: 田中博一
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* タスク10 */}
+                    <div className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">運用マニュアルの作成</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">中</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">計画中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 8月20日 | 担当: 佐藤美咲
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* タスク11 */}
+                    <div className="p-3 hover:bg-gray-50 cursor-pointer rounded-md">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900">最終プレゼンテーション資料の準備</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">高</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">進行中</span>
+                          </div>
+                          <div className="text-[13px] leading-normal text-gray-600 mb-1">
+                            期限: 7月30日 | 担当: 田中博一
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
                 {/* メールタブ */}
@@ -957,7 +1042,7 @@ export default function CaseDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className={`text-sm ${unreadEmails.has('1') ? 'font-bold' : 'font-semibold'} text-gray-900`}>田中次郎</span>
+                              <span className={`text-sm ${unreadEmails.has('1') ? 'font-semibold' : 'font-semibold'} text-gray-900`}>田中次郎</span>
                               {unreadEmails.has('1') && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                                   未読
@@ -967,7 +1052,7 @@ export default function CaseDetailPage() {
                             <span className="text-sm leading-normal text-gray-600">7月20日</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm leading-relaxed ${unreadEmails.has('1') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>最終提案について、経営陣への説明資料をお送りいただきありがとうございます。ROIの詳細な計算根拠が明確で非常に分かりやすかったです。</p>
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('1') ? 'font-semibold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>最終提案について、経営陣への説明資料をお送りいただきありがとうございます。ROIの詳細な計算根拠が明確で非常に分かりやすかったです。</p>
                           </div>
                         </div>
                       </div>
@@ -985,7 +1070,7 @@ export default function CaseDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className={`text-sm ${unreadEmails.has('2') ? 'font-bold' : 'font-semibold'} text-gray-900`}>佐藤太郎</span>
+                              <span className={`text-sm ${unreadEmails.has('2') ? 'font-semibold' : 'font-semibold'} text-gray-900`}>佐藤太郎</span>
                               {unreadEmails.has('2') && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                                   未読
@@ -995,7 +1080,7 @@ export default function CaseDetailPage() {
                             <span className="text-sm leading-normal text-gray-600">7月18日</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm leading-relaxed ${unreadEmails.has('2') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>技術的な質問についてご回答いただき、ありがとうございます。既存システムとの連携について、追加で確認したい点があります。</p>
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('2') ? 'font-semibold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>技術的な質問についてご回答いただき、ありがとうございます。既存システムとの連携について、追加で確認したい点があります。</p>
                           </div>
                         </div>
                       </div>
@@ -1013,7 +1098,7 @@ export default function CaseDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-2 flex-1">
-                              <span className={`text-sm ${unreadEmails.has('3') ? 'font-bold' : 'font-semibold'} text-gray-900`}>佐藤美咲</span>
+                              <span className={`text-sm ${unreadEmails.has('3') ? 'font-semibold' : 'font-semibold'} text-gray-900`}>佐藤美咲</span>
                               {unreadEmails.has('3') && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                                   未読
@@ -1023,7 +1108,7 @@ export default function CaseDetailPage() {
                             <span className="text-sm leading-normal text-gray-600">7月17日</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm leading-relaxed ${unreadEmails.has('3') ? 'font-bold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>契約書レビュー支援ツールの機能について、追加要件を整理いたしました。社内規定との自動照合機能について詳しく説明いただけますでしょうか。</p>
+                            <p className={`text-sm leading-relaxed ${unreadEmails.has('3') ? 'font-semibold' : 'font-normal'} text-gray-700 flex-1 line-clamp-1`}>契約書レビュー支援ツールの機能について、追加要件を整理いたしました。社内規定との自動照合機能について詳しく説明いただけますでしょうか。</p>
                           </div>
                         </div>
                       </div>
