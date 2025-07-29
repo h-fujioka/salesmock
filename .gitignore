@@ -22,6 +22,9 @@ build/
 .vscode/
 .idea/
 
+# Documentation
+docs/
+
 # その他
 *.pem
 *.key
