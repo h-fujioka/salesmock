@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import SidebarHomeButton from "@/components/ui/SidebarHomeButton";
 import { Briefcase, Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import "./globals.css";
 
@@ -26,16 +26,36 @@ function GridDotsIcon({ className = "w-6 h-6" }) {
 
 function SidebarCasesButton() {
   const router = useRouter();
+  const pathname = usePathname();
+  const isActive = pathname === "/cases";
 
   return (
     <Button
-      variant="ghost"
+      variant={isActive ? "secondary" : "ghost"}
       size="icon"
-      className="p-1 mb-6"
+      className={`p-1 mb-6 ${isActive ? "bg-blue-100 text-blue-700" : ""}`}
       onClick={() => router.push("/cases")}
-      aria-label="案件一覧"
+      aria-label="ダッシュボード"
     >
       <Briefcase className="w-6 h-6" />
+    </Button>
+  );
+}
+
+function SidebarSettingsButton() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const isActive = pathname === "/settings";
+
+  return (
+    <Button 
+      variant={isActive ? "secondary" : "ghost"} 
+      size="icon" 
+      className={`p-1 mb-6 ${isActive ? "bg-blue-100 text-blue-700" : ""}`}
+      onClick={() => router.push("/settings")}
+      aria-label="設定"
+    >
+      <Settings className="w-6 h-6" />
     </Button>
   );
 }
@@ -52,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <GridDotsIcon className="w-6 h-6 text-gray-700 mb-6" />
               <SidebarHomeButton />
               <SidebarCasesButton />
-              <Button variant="ghost" size="icon" className="p-1 mb-6"><Settings className="w-6 h-6" /></Button>
+              <SidebarSettingsButton />
             </div>
           </aside>
           {/* メインエリア */}

@@ -3,14 +3,13 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/ui/data-table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnDef } from "@tanstack/react-table";
-import { Bell, Calendar, CheckCircle2, ChevronDown, Plus, User } from "lucide-react";
+import { Bell, Calendar, CheckCircle2, ChevronDown, Clock, Mail, MessageSquare, Plus, User, Users, XCircle } from "lucide-react";
 import React, { useState } from "react";
 
 // 検索結果テンプレートコンポーネント
@@ -595,11 +594,8 @@ const competitorData = [
 const slipData = [
   { project: "システム更改案件", company: "株式会社ABC", currentMonth: "2024/07", slipMonth: "2024/08", reason: "要件定義の遅延" },
   { project: "クラウド移行案件", company: "DEF工業", currentMonth: "2024/07", slipMonth: "2024/09", reason: "社内決裁の遅れ" },
-  { project: "データ連携案件", company: "GHI商事", currentMonth: "2024/07", slipMonth: "2024/08", reason: "技術検証の追加" },
-  { project: "AI導入案件", company: "JKL株式会社", currentMonth: "2024/07", slipMonth: "2024/10", reason: "技術検証の追加" },
-  { project: "DX推進案件", company: "MNO工業", currentMonth: "2024/07", slipMonth: "2024/11", reason: "予算見直し" },
-  { project: "セキュリティ強化案件", company: "PQR商事", currentMonth: "2024/07", slipMonth: "2024/12", reason: "社内体制の変更" }
-]
+  { project: "データ連携案件", company: "GHI商事", currentMonth: "2024/07", slipMonth: "2024/08", reason: "技術検証の追加" }
+];
 
 // AI提案・アラートデータ
 const aiProposalData = [
@@ -660,87 +656,7 @@ const aiProposalData = [
   }
 ]
 
-// AI提案・アラートカラム定義
-const aiProposalColumns: ColumnDef<any>[] = [
-  {
-    accessorKey: "type",
-    header: "種類",
-    cell: ({ row }) => {
-      const type = row.getValue("type") as string;
-      return (
-        <span className="inline-block rounded-full px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 whitespace-nowrap">
-          {type}
-        </span>
-      );
-    }
-  },
-  {
-    accessorKey: "priority",
-    header: "優先度",
-    cell: ({ row }) => (
-      <span className="inline-block bg-gray-100 text-gray-800 text-sm font-normal rounded-full px-2 py-0.5 whitespace-nowrap">
-        {row.getValue("priority") as string}
-      </span>
-    )
-  },
-  {
-    accessorKey: "title",
-    header: "タイトル",
-    cell: ({ row }) => (
-      <span className="text-sm font-normal">
-        {row.getValue("title") as string}
-      </span>
-    )
-  },
-  {
-    accessorKey: "description",
-    header: "説明",
-    cell: ({ row }) => (
-      <span className="text-sm font-normal text-gray-600">
-        {row.getValue("description") as string}
-      </span>
-    )
-  },
-  {
-    accessorKey: "status",
-    header: "ステータス",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return (
-        <span className="inline-block rounded-full px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 whitespace-nowrap">
-          {status}
-        </span>
-      );
-    }
-  },
-  {
-    accessorKey: "assignee",
-    header: "担当者",
-    cell: ({ row }) => (
-      <span className="text-sm font-normal">
-        {row.getValue("assignee") as string}
-      </span>
-    )
-  },
-  {
-    accessorKey: "createdAt",
-    header: "作成日時",
-    cell: ({ row }) => (
-      <span className="text-sm font-normal text-gray-600">
-        {row.getValue("createdAt") as string}
-      </span>
-    )
-  },
-  {
-    accessorKey: "relatedCase",
-    header: "関連案件",
-    cell: ({ row }) => (
-      <span className="text-sm font-normal text-gray-600">
-        {row.getValue("relatedCase") as string}
-      </span>
-    )
-  }
-]
+
 
 // 今日のアクションデータ（営業担当者視点）
 const todayActionData = [
@@ -794,6 +710,667 @@ const todayActionData = [
     relatedCase: "E社向けプロジェクトの遅延対応",
     relatedTask: "E社向け技術検証実施"
   }
+];
+
+// 朝一ダッシュボードデータ
+const morningData = [
+  { id: "1", item: "未読メール", count: 12, priority: "高", action: "確認" },
+  { id: "2", item: "Slack通知", count: 5, priority: "中", action: "確認" },
+  { id: "3", item: "今日の商談", count: 3, priority: "高", action: "準備" },
+  { id: "4", item: "追客案件", count: 8, priority: "中", action: "フォロー" },
+];
+
+// 今日の予定の詳細データ
+const emailData = [
+  { id: "1", sender: "A社 田中様", subject: "見積書について", time: "09:15", priority: "高", status: "未読" },
+  { id: "2", sender: "B社 佐藤様", subject: "商談の日程調整", time: "09:30", priority: "高", status: "未読" },
+  { id: "3", sender: "C社 鈴木様", subject: "提案書のご確認", time: "10:00", priority: "中", status: "未読" },
+  { id: "4", sender: "D社 高橋様", subject: "契約書の修正依頼", time: "10:15", priority: "高", status: "未読" },
+  { id: "5", sender: "E社 渡辺様", subject: "技術検証の結果", time: "10:30", priority: "中", status: "未読" },
+  { id: "6", sender: "F社 中村様", subject: "価格交渉について", time: "11:00", priority: "高", status: "未読" },
+  { id: "7", sender: "G社 小林様", subject: "進捗報告", time: "11:15", priority: "中", status: "未読" },
+  { id: "8", sender: "H社 加藤様", subject: "新規案件のご相談", time: "11:30", priority: "高", status: "未読" },
+  { id: "9", sender: "I社 伊藤様", subject: "保守契約の更新", time: "12:00", priority: "中", status: "未読" },
+  { id: "10", sender: "J社 山田様", subject: "システム障害について", time: "12:15", priority: "高", status: "未読" },
+  { id: "11", sender: "K社 佐々木様", subject: "競合他社の情報", time: "12:30", priority: "中", status: "未読" },
+  { id: "12", sender: "L社 井上様", subject: "プロジェクト完了報告", time: "12:45", priority: "中", status: "未読" },
+];
+
+const slackData = [
+  { id: "1", channel: "#営業チーム", sender: "田中", message: "A社案件の進捗について", time: "09:00", priority: "高" },
+  { id: "2", channel: "#案件管理", sender: "佐藤", message: "B社の契約書レビュー完了", time: "09:30", priority: "中" },
+  { id: "3", channel: "#営業チーム", sender: "鈴木", message: "今日の商談スケジュール", time: "10:00", priority: "高" },
+  { id: "4", channel: "#技術サポート", sender: "高橋", message: "C社の技術検証結果", time: "10:30", priority: "中" },
+  { id: "5", channel: "#営業チーム", sender: "渡辺", message: "D社からの緊急連絡", time: "11:00", priority: "高" },
+];
+
+const meetingData = [
+  { id: "1", company: "A社", time: "10:00-11:00", type: "新規案件", assignee: "田中", status: "準備中", priority: "高" },
+  { id: "2", company: "B社", time: "14:00-15:00", type: "既存案件", assignee: "佐藤", status: "準備中", priority: "高" },
+  { id: "3", company: "C社", time: "16:00-17:00", type: "フォローアップ", assignee: "鈴木", status: "準備中", priority: "中" },
+];
+
+const followupData = [
+  { id: "1", company: "A社", type: "提案書送付済み", daysAgo: 3, assignee: "田中", status: "フォロー待ち", priority: "高" },
+  { id: "2", company: "B社", type: "見積書送付済み", daysAgo: 5, assignee: "佐藤", status: "フォロー待ち", priority: "高" },
+  { id: "3", company: "C社", type: "提案書送付済み", daysAgo: 7, assignee: "鈴木", status: "フォロー待ち", priority: "中" },
+  { id: "4", company: "D社", type: "見積書送付済み", daysAgo: 2, assignee: "高橋", status: "フォロー待ち", priority: "高" },
+  { id: "5", company: "E社", type: "提案書送付済み", daysAgo: 4, assignee: "渡辺", status: "フォロー待ち", priority: "中" },
+  { id: "6", company: "F社", type: "見積書送付済み", daysAgo: 6, assignee: "中村", status: "フォロー待ち", priority: "中" },
+  { id: "7", company: "G社", type: "提案書送付済み", daysAgo: 1, assignee: "小林", status: "フォロー待ち", priority: "高" },
+  { id: "8", company: "H社", type: "見積書送付済み", daysAgo: 8, assignee: "加藤", status: "フォロー待ち", priority: "中" },
+];
+
+// AI提案データ
+const aiProposalsData = [
+  { 
+    id: "1", 
+    title: "A社向けフォローアップメール自動送信", 
+    priority: "高", 
+    status: "確認待ち", 
+    action: "案件に追加",
+    description: "前回商談から1週間経過。顧客の期待に応える機会として、フォローアップメールを自動送信することを提案します。",
+    expectedOutcome: "顧客の関心維持・次の商談機会創出",
+    confidence: "85%"
+  },
+  { 
+    id: "2", 
+    title: "B社向け提案書の競合分析追加", 
+    priority: "高", 
+    status: "確認待ち", 
+    action: "案件に追加",
+    description: "競合他社の動向を分析し、差別化ポイントを明確にした提案書の更新を提案します。",
+    expectedOutcome: "競合優位性の明確化・受注確率向上",
+    confidence: "78%"
+  },
+  { 
+    id: "3", 
+    title: "C社向け価格交渉戦略の自動生成", 
+    priority: "中", 
+    status: "確認待ち", 
+    action: "案件に追加",
+    description: "顧客の予算制約と価値提案を分析し、最適な価格交渉戦略を自動生成します。",
+    expectedOutcome: "価格最適化・顧客満足度向上",
+    confidence: "72%"
+  },
+  { 
+    id: "4", 
+    title: "D社向け技術検証結果の自動報告", 
+    priority: "高", 
+    status: "却下済み", 
+    action: "詳細",
+    description: "技術検証の結果を自動分析し、顧客向け報告書を生成することを提案しました。",
+    expectedOutcome: "技術課題解決・顧客の安心感向上",
+    confidence: "90%"
+  },
+  { 
+    id: "5", 
+    title: "E社向けナーチャリング戦略の最適化", 
+    priority: "中", 
+    status: "確認待ち", 
+    action: "案件に追加",
+    description: "顧客の購買サイクルを分析し、最適なタイミングでのアプローチ戦略を提案します。",
+    expectedOutcome: "顧客関係強化・長期的な売上向上",
+    confidence: "81%"
+  },
+  { 
+    id: "6", 
+    title: "F社向けリスクアラート：予算超過の可能性", 
+    priority: "高", 
+    status: "確認待ち", 
+    action: "案件に追加",
+    description: "プロジェクト進捗を分析した結果、予算超過のリスクが検出されました。早期対策を提案します。",
+    expectedOutcome: "リスク回避・プロジェクト成功確率向上",
+    confidence: "92%"
+  }
+];
+
+// AI実行履歴データ
+const historyData = [
+  { 
+    id: "1", 
+    timestamp: "09:15", 
+    content: "A社向けフォローアップメール自動送信", 
+    status: "AI自動", 
+    result: "完了",
+    impact: "顧客からの返信あり",
+    efficiency: "営業時間30分短縮"
+  },
+  { 
+    id: "2", 
+    timestamp: "09:30", 
+    content: "B社向け競合分析レポート生成", 
+    status: "人間確認", 
+    result: "承認済み",
+    impact: "提案書品質向上",
+    efficiency: "分析時間2時間短縮"
+  },
+  { 
+    id: "3", 
+    timestamp: "10:00", 
+    content: "C社向け価格交渉戦略提案", 
+    status: "人間確認", 
+    result: "確認中",
+    impact: "交渉戦略最適化",
+    efficiency: "戦略立案時間1時間短縮"
+  },
+  { 
+    id: "4", 
+    timestamp: "10:15", 
+    content: "D社向け技術検証結果報告", 
+    status: "却下", 
+    result: "却下済み",
+    impact: "手動対応が必要",
+    efficiency: "報告書作成時間短縮"
+  },
+  { 
+    id: "5", 
+    timestamp: "10:30", 
+    content: "E社向けナーチャリング戦略最適化", 
+    status: "AI自動", 
+    result: "完了",
+    impact: "顧客接触頻度最適化",
+    efficiency: "戦略立案時間短縮"
+  },
+  { 
+    id: "6", 
+    timestamp: "10:45", 
+    content: "F社向けリスクアラート：予算超過検知", 
+    status: "人間確認", 
+    result: "承認済み",
+    impact: "早期対策実施",
+    efficiency: "リスク検知時間短縮"
+  }
+];
+
+// ナレッジデータ
+const knowledgeData = [
+  {
+    id: "1",
+    title: "高単価案件の成功パターン",
+    category: "成功事例",
+    author: "田中営業",
+    date: "2024/01/15",
+    views: 45,
+    rating: 4.8,
+    summary: "単価500万円以上の案件で共通する成功要因を分析。決裁者へのアプローチ方法と価値提案のポイントをまとめました。",
+    tags: ["高単価", "決裁者", "価値提案"],
+    content: "高単価案件では、顧客の課題を深く理解し、ROIを明確に示すことが重要です。決裁者へのアプローチでは、経営課題に焦点を当てた提案が効果的です。"
+  },
+  {
+    id: "2",
+    title: "競合他社への対応戦略",
+    category: "ベストプラクティス",
+    author: "佐藤マネージャー",
+    date: "2024/01/10",
+    views: 32,
+    rating: 4.5,
+    summary: "主要競合他社との差別化ポイントと、競合が登場した際の対応フローを整理。",
+    tags: ["競合対応", "差別化", "戦略"],
+    content: "競合が登場した際は、自社の強みを明確に伝え、顧客の課題解決に焦点を当てた提案を行います。価格競争ではなく、価値提案で勝負することが重要です。"
+  },
+  {
+    id: "3",
+    title: "顧客の心を動かす提案書作成法",
+    category: "スキル向上",
+    author: "山田営業",
+    date: "2024/01/08",
+    views: 67,
+    rating: 4.9,
+    summary: "顧客の課題を深く理解し、感情に訴える提案書の作成方法。具体的なテンプレートと事例を紹介。",
+    tags: ["提案書", "テンプレート", "感情訴求"],
+    content: "効果的な提案書は、顧客の課題を明確にし、解決策の価値を具体的に示します。データとストーリーを組み合わせることで、より説得力のある提案になります。"
+  },
+  {
+    id: "4",
+    title: "新規顧客のアプローチ成功事例",
+    category: "成功事例",
+    author: "鈴木営業",
+    date: "2024/01/05",
+    views: 28,
+    rating: 4.6,
+    summary: "コールドアプローチから商談成立までの全プロセス。最初の接触から契約締結までの具体的なステップ。",
+    tags: ["新規顧客", "コールドアプローチ", "商談"],
+    content: "新規顧客へのアプローチでは、まず顧客の業界や課題をリサーチし、価値のある情報を提供することから始めます。信頼関係を築いてから商談に進むことが成功の鍵です。"
+  },
+  {
+    id: "5",
+    title: "既存顧客の拡販戦略",
+    category: "ベストプラクティス",
+    author: "高橋営業",
+    date: "2024/01/03",
+    views: 41,
+    rating: 4.7,
+    summary: "既存顧客からの追加受注を獲得するための戦略と実践方法。顧客の成長段階に応じた提案方法。",
+    tags: ["既存顧客", "拡販", "成長段階"],
+    content: "既存顧客の拡販では、現在の利用状況を把握し、追加価値を提供できる領域を特定します。顧客の成長に合わせた提案が重要です。"
+  },
+  {
+    id: "6",
+    title: "商談での質問テクニック",
+    category: "スキル向上",
+    author: "伊藤営業",
+    date: "2024/01/01",
+    views: 55,
+    rating: 4.6,
+    summary: "顧客の真のニーズを引き出す質問の仕方と、効果的な商談の進め方。",
+    tags: ["商談", "質問", "ニーズ発掘"],
+    content: "効果的な質問は、顧客の課題を深く理解するために重要です。オープンクエスチョンとクローズドクエスチョンを適切に使い分けることで、より良い提案ができます。"
+  },
+  {
+    id: "7",
+    title: "失敗事例から学ぶ営業の教訓",
+    category: "学習",
+    author: "渡辺営業",
+    date: "2023/12/28",
+    views: 38,
+    rating: 4.4,
+    summary: "実際の失敗事例を分析し、再発防止策と改善点をまとめました。",
+    tags: ["失敗事例", "学習", "改善"],
+    content: "失敗から学ぶことは成長の重要な要素です。失敗の原因を分析し、同じ過ちを繰り返さないための対策を立てることが重要です。"
+  },
+  {
+    id: "8",
+    title: "営業活動の効率化テクニック",
+    category: "ベストプラクティス",
+    author: "中村営業",
+    date: "2023/12/25",
+    views: 62,
+    rating: 4.8,
+    summary: "時間管理と優先順位付けによる営業活動の効率化方法。",
+    tags: ["効率化", "時間管理", "優先順位"],
+    content: "営業活動の効率化には、適切な時間管理と優先順位付けが重要です。重要な案件に集中し、効果的な活動を行うことで成果を最大化できます。"
+  },
+  {
+    id: "9",
+    title: "効果的な営業メール作成テンプレート集",
+    category: "スキル向上",
+    author: "小林営業",
+    date: "2023/12/20",
+    views: 89,
+    rating: 4.7,
+    summary: "顧客の興味を喚起するメールの作成テンプレートと、適切な送信タイミングの判断方法。",
+    tags: ["メール", "テンプレート", "タイミング", "興味喚起"],
+    content: "効果的な営業メールは、顧客の課題に直接アプローチし、具体的な価値を提示します。送信タイミングは顧客の行動パターンを分析して決定し、パーソナライズされた内容で反応率を向上させます。"
+  },
+  {
+    id: "10",
+    title: "提案資料作成の実践テンプレート",
+    category: "ベストプラクティス",
+    author: "斎藤マネージャー",
+    date: "2023/12/18",
+    views: 73,
+    rating: 4.9,
+    summary: "業界別・案件規模別の提案資料テンプレートと、効率的なカスタマイズ手法。",
+    tags: ["提案資料", "テンプレート", "カスタマイズ", "効率化"],
+    content: "提案資料のテンプレート化により、作成時間を大幅に短縮できます。業界特性や案件規模に応じたテンプレートを活用し、顧客の課題に合わせてカスタマイズすることで、高品質な提案資料を効率的に作成できます。"
+  },
+  {
+    id: "11",
+    title: "顧客タイプ別アプローチ戦略",
+    category: "スキル向上",
+    author: "田村営業",
+    date: "2023/12/15",
+    views: 51,
+    rating: 4.5,
+    summary: "顧客の性格・役職・業界に応じた効果的なアプローチ方法とコミュニケーション戦略。",
+    tags: ["顧客タイプ", "アプローチ", "コミュニケーション", "戦略"],
+    content: "顧客のタイプに応じたアプローチは成功確率を大幅に向上させます。決裁者、技術者、経営者など役職別のアプローチ方法と、業界特性を考慮したコミュニケーション戦略を実践することで、より効果的な営業活動が可能になります。"
+  },
+  {
+    id: "12",
+    title: "営業活動のデータ分析と改善手法",
+    category: "学習",
+    author: "山本営業",
+    date: "2023/12/12",
+    views: 44,
+    rating: 4.6,
+    summary: "営業活動のデータを分析し、継続的な改善を実現する手法とツールの活用方法。",
+    tags: ["データ分析", "改善", "KPI", "継続的改善"],
+    content: "営業活動のデータ分析により、効果的な活動と非効率な活動を明確に区別できます。KPIの設定と定期的な分析により、営業手法の継続的な改善を実現し、成果の向上につなげることができます。"
+  },
+  {
+    id: "13",
+    title: "ハイパフォーマーの商談トーク完全パターン集",
+    category: "成功事例",
+    author: "AI分析チーム",
+    date: "2023/12/10",
+    views: 156,
+    rating: 4.9,
+    summary: "ハイパフォーマーの商談をAI分析し、成功パターンを体系化。状況別の具体的なトークスクリプトを提供。",
+    tags: ["商談トーク", "パターン化", "AI分析", "ハイパフォーマー"],
+    content: "ハイパフォーマーの商談をAI分析した結果、共通する成功パターンが明らかになりました。顧客の反応に応じた適切なトークスクリプトと、状況別の対応パターンを体系化しています。これにより、ローパフォーマーでも効果的な商談が可能になります。"
+  },
+  {
+    id: "14",
+    title: "フォローアップサイクルの最適化手法",
+    category: "ベストプラクティス",
+    author: "AI分析チーム",
+    date: "2023/12/08",
+    views: 134,
+    rating: 4.8,
+    summary: "ハイパフォーマーのフォローアップサイクルを分析し、最適なタイミングと内容をパターン化。",
+    tags: ["フォローアップ", "サイクル", "タイミング", "パターン化"],
+    content: "ハイパフォーマーのフォローアップサイクルを分析した結果、顧客の行動パターンに応じた最適なタイミングと内容が明らかになりました。段階的なアプローチと適切な間隔でフォローアップを行うことで、成約率を大幅に向上させることができます。"
+  },
+  {
+    id: "15",
+    title: "ローパフォーマー向け段階的学習プログラム",
+    category: "学習",
+    author: "教育チーム",
+    date: "2023/12/05",
+    views: 98,
+    rating: 4.7,
+    summary: "ローパフォーマーが段階的にスキルを向上させるための学習プログラム。基礎から応用まで体系的に学習。",
+    tags: ["段階的学習", "ローパフォーマー", "育成", "基礎から応用"],
+    content: "ローパフォーマーの育成には、基礎から応用まで段階的な学習が重要です。各段階で必要なスキルとマインドセットを明確にし、実践的な演習を通じて確実にスキルを向上させることができます。"
+  },
+  {
+    id: "16",
+    title: "営業マインドセット育成ガイド",
+    category: "学習",
+    author: "心理カウンセラー",
+    date: "2023/12/03",
+    views: 112,
+    rating: 4.6,
+    summary: "営業成功に必要なマインドセットの育成方法。90%がマインドセット、10%がスキルという考えに基づく実践的ガイド。",
+    tags: ["マインドセット", "心理", "育成", "成功思考"],
+    content: "営業成功の90%はマインドセット、10%がスキルと言われています。成功する営業担当者に共通する思考パターンと行動習慣を分析し、ローパフォーマーがマインドセットを育成するための具体的な方法を提供します。"
+  },
+  {
+    id: "17",
+    title: "案件確認の実践手法とチェックポイント",
+    category: "ベストプラクティス",
+    author: "リーダー育成チーム",
+    date: "2023/12/01",
+    views: 87,
+    rating: 4.5,
+    summary: "リーダーが行う案件確認の具体的な手法と、ローパフォーマーの対応できないパターンを補完する方法。",
+    tags: ["案件確認", "リーダー", "チェックポイント", "補完"],
+    content: "リーダーによる案件確認は、ローパフォーマーの育成に重要な施策です。商談内容や追客ロードマップを確認し、対応できないパターンを事前に特定して補完することで、成功率を大幅に向上させることができます。"
+  },
+  {
+    id: "18",
+    title: "顧客状況別カスタマイズ対応パターン集",
+    category: "スキル向上",
+    author: "AI分析チーム",
+    date: "2023/11/28",
+    views: 145,
+    rating: 4.8,
+    summary: "定型的なシナリオを顧客の状況や変数に合わせてカスタマイズする手法。ローパフォーマーが不足している柔軟性を補完。",
+    tags: ["カスタマイズ", "柔軟性", "状況対応", "変数対応"],
+    content: "営業には定型的なシナリオが存在しますが、顧客の状況や変数に合わせてカスタマイズする能力がローパフォーマーには不足しています。この能力を補完するため、様々な状況に対応できるカスタマイズパターンを体系化しました。"
+  },
+  {
+    id: "19",
+    title: "受注に繋がるケース対応パターン大全",
+    category: "成功事例",
+    author: "AI分析チーム",
+    date: "2023/11/25",
+    views: 178,
+    rating: 4.9,
+    summary: "ハイパフォーマーとローパフォーマーの決定的な差である「受注に繋がるケース対応パターンの多さ」を体系化。",
+    tags: ["ケース対応", "受注パターン", "ハイパフォーマー", "差別化"],
+    content: "ハイパフォーマーとローパフォーマーの決定的な差は「受注に繋がるケース対応パターンの多さ」です。様々な状況に対応できるパターンを蓄積し、ローパフォーマーでも効果的な対応ができるよう体系化しました。"
+  },
+  {
+    id: "20",
+    title: "知識不足を解消する営業基礎知識大全",
+    category: "学習",
+    author: "教育チーム",
+    date: "2023/11/22",
+    views: 203,
+    rating: 4.7,
+    summary: "ローパフォーマーが受注できない主な原因である「知らない」（知識不足）を解消するための基礎知識集。",
+    tags: ["基礎知識", "知識不足解消", "ローパフォーマー", "受注要因"],
+    content: "ローパフォーマーが受注できない主な原因として「知らない」（知識不足）が8〜9割を占めているという推測があります。この知識不足を解消するため、営業に必要な基礎知識を体系的に整理しました。"
+  }
+];
+
+// 朝一ダッシュボードカラム定義
+const morningColumns: ColumnDef<any>[] = [
+  {
+    accessorKey: "item",
+    header: "項目",
+    cell: ({ row }) => {
+      const item = row.getValue("item") as string;
+      const getIcon = (item: string) => {
+        switch (item) {
+          case "未読メール": return <Mail className="w-4 h-4 mr-2" />;
+          case "Slack通知": return <MessageSquare className="w-4 h-4 mr-2" />;
+          case "今日の商談": return <Calendar className="w-4 h-4 mr-2" />;
+          case "追客案件": return <Users className="w-4 h-4 mr-2" />;
+          default: return null;
+        }
+      };
+      return (
+        <div className="flex items-center">
+          {getIcon(item)}
+          <span>{item}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "count",
+    header: "件数",
+    cell: ({ row }) => {
+      const count = row.getValue("count") as number;
+      return (
+        <span className="inline-block bg-gray-100 text-gray-800 text-sm font-semibold rounded-full px-2 py-0.5">
+          {count}件
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "priority",
+    header: "優先度",
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const getPriorityColor = (priority: string) => {
+        switch (priority) {
+          case "高": return "bg-red-100 text-red-800";
+          case "中": return "bg-yellow-100 text-yellow-800";
+          case "低": return "bg-green-100 text-green-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getPriorityColor(priority)}`}>
+          {priority}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "action",
+    header: "アクション",
+    cell: ({ row }) => {
+      const action = row.getValue("action") as string;
+      return (
+        <Button variant="outline" size="sm">
+          {action}
+        </Button>
+      );
+    },
+  },
+];
+
+// AI提案カラム定義
+const aiProposalColumns: ColumnDef<any>[] = [
+  {
+    accessorKey: "title",
+    header: "提案タイトル",
+    cell: ({ row }) => {
+      const title = row.getValue("title") as string;
+      return <span className="font-medium">{title}</span>;
+    },
+  },
+  {
+    accessorKey: "priority",
+    header: "優先度",
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const getPriorityColor = (priority: string) => {
+        switch (priority) {
+          case "高": return "bg-red-100 text-red-800";
+          case "中": return "bg-yellow-100 text-yellow-800";
+          case "低": return "bg-green-100 text-green-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getPriorityColor(priority)}`}>
+          {priority}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "description",
+    header: "提案内容",
+    cell: ({ row }) => {
+      const description = row.getValue("description") as string;
+      return (
+        <span className="text-sm text-gray-600 max-w-xs truncate" title={description}>
+          {description}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "expectedOutcome",
+    header: "期待効果",
+    cell: ({ row }) => {
+      const outcome = row.getValue("expectedOutcome") as string;
+      return (
+        <span className="text-sm text-gray-700 max-w-xs truncate" title={outcome}>
+          {outcome}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "action",
+    header: "アクション",
+    cell: ({ row }) => {
+      const action = row.getValue("action") as string;
+      const status = row.getValue("status") as string;
+      
+      if (status === "確認待ち") {
+        return (
+          <div className="flex gap-2">
+            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+              <CheckCircle2 className="w-4 h-4 mr-1" />
+              案件に追加
+            </Button>
+            <Button size="sm" variant="destructive">
+              <XCircle className="w-4 h-4 mr-1" />
+              却下
+            </Button>
+          </div>
+        );
+      }
+      
+      return (
+        <Button variant="outline" size="sm">
+          {action}
+        </Button>
+      );
+    },
+  },
+];
+
+// AI実行履歴カラム定義
+const historyColumns: ColumnDef<any>[] = [
+  {
+    accessorKey: "timestamp",
+    header: "実行日時",
+    cell: ({ row }) => {
+      const timestamp = row.getValue("timestamp") as string;
+      return (
+        <div className="flex items-center">
+          <Clock className="w-4 h-4 mr-2 text-gray-500" />
+          <span className="font-mono">{timestamp}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "content",
+    header: "実行内容",
+    cell: ({ row }) => {
+      const content = row.getValue("content") as string;
+      return <span>{content}</span>;
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "ステータス",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      const getStatusColor = (status: string) => {
+        switch (status) {
+          case "AI自動": return "bg-purple-100 text-purple-800";
+          case "人間確認": return "bg-blue-100 text-blue-800";
+          case "判断": return "bg-orange-100 text-orange-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getStatusColor(status)}`}>
+          {status}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "result",
+    header: "結果",
+    cell: ({ row }) => {
+      const result = row.getValue("result") as string;
+      const getResultColor = (result: string) => {
+        switch (result) {
+          case "完了": return "bg-green-100 text-green-800";
+          case "確認中": return "bg-yellow-100 text-yellow-800";
+          case "承認済み": return "bg-green-100 text-green-800";
+          case "却下済み": return "bg-red-100 text-red-800";
+          case "エラー": return "bg-red-100 text-red-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getResultColor(result)}`}>
+          {result}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "impact",
+    header: "影響",
+    cell: ({ row }) => {
+      const impact = row.getValue("impact") as string;
+      return (
+        <span className="text-sm text-gray-700 max-w-xs truncate" title={impact}>
+          {impact}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "efficiency",
+    header: "効率化",
+    cell: ({ row }) => {
+      const efficiency = row.getValue("efficiency") as string;
+      return (
+        <span className="text-sm text-green-700 max-w-xs truncate" title={efficiency}>
+          {efficiency}
+        </span>
+      );
+    },
+  },
 ];
 
 // 今日のアクションカラム定義
@@ -868,6 +1445,284 @@ const todayActionColumns: ColumnDef<any>[] = [
   }
 ];
 
+// 詳細データ用のカラム定義
+const emailColumns: ColumnDef<any>[] = [
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const getPriorityColor = (priority: string) => {
+        switch (priority) {
+          case "高": return "bg-red-100 text-red-800";
+          case "中": return "bg-yellow-100 text-yellow-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getPriorityColor(priority)}`}>
+          {priority}
+        </span>
+      );
+    },
+  },
+  { accessorKey: "sender", header: "送信者", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("sender") as string}
+    </span>
+  ) },
+  { accessorKey: "subject", header: "件名", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("subject") as string}
+    </span>
+  ) },
+  { accessorKey: "time", header: "受信時刻", cell: ({ row }) => (
+    <span className="text-sm font-normal text-gray-600">
+      {row.getValue("time") as string}
+    </span>
+  ) },
+  { accessorKey: "status", header: "ステータス", cell: ({ row }) => (
+    <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium rounded-full px-2 py-0.5">
+      {row.getValue("status") as string}
+    </span>
+  ) },
+];
+
+const slackColumns: ColumnDef<any>[] = [
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const getPriorityColor = (priority: string) => {
+        switch (priority) {
+          case "高": return "bg-red-100 text-red-800";
+          case "中": return "bg-yellow-100 text-yellow-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getPriorityColor(priority)}`}>
+          {priority}
+        </span>
+      );
+    },
+  },
+  { accessorKey: "channel", header: "チャンネル", cell: ({ row }) => (
+    <span className="text-sm font-normal text-blue-600">
+      {row.getValue("channel") as string}
+    </span>
+  ) },
+  { accessorKey: "sender", header: "送信者", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("sender") as string}
+    </span>
+  ) },
+  { accessorKey: "message", header: "メッセージ", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("message") as string}
+    </span>
+  ) },
+  { accessorKey: "time", header: "時刻", cell: ({ row }) => (
+    <span className="text-sm font-normal text-gray-600">
+      {row.getValue("time") as string}
+    </span>
+  ) },
+];
+
+const meetingColumns: ColumnDef<any>[] = [
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const getPriorityColor = (priority: string) => {
+        switch (priority) {
+          case "高": return "bg-red-100 text-red-800";
+          case "中": return "bg-yellow-100 text-yellow-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getPriorityColor(priority)}`}>
+          {priority}
+        </span>
+      );
+    },
+  },
+  { accessorKey: "company", header: "顧客名", cell: ({ row }) => (
+    <span className="text-sm font-normal font-medium">
+      {row.getValue("company") as string}
+    </span>
+  ) },
+  { accessorKey: "time", header: "時間", cell: ({ row }) => (
+    <span className="text-sm font-normal text-gray-600">
+      {row.getValue("time") as string}
+    </span>
+  ) },
+  { accessorKey: "type", header: "商談種別", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("type") as string}
+    </span>
+  ) },
+  { accessorKey: "assignee", header: "担当者", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("assignee") as string}
+    </span>
+  ) },
+  { accessorKey: "status", header: "ステータス", cell: ({ row }) => (
+    <span className="inline-block bg-orange-100 text-orange-800 text-sm font-medium rounded-full px-2 py-0.5">
+      {row.getValue("status") as string}
+    </span>
+  ) },
+];
+
+const followupColumns: ColumnDef<any>[] = [
+  { 
+    accessorKey: "priority", 
+    header: "優先度", 
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const getPriorityColor = (priority: string) => {
+        switch (priority) {
+          case "高": return "bg-red-100 text-red-800";
+          case "中": return "bg-yellow-100 text-yellow-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getPriorityColor(priority)}`}>
+          {priority}
+        </span>
+      );
+    },
+  },
+  { accessorKey: "company", header: "顧客名", cell: ({ row }) => (
+    <span className="text-sm font-normal font-medium">
+      {row.getValue("company") as string}
+    </span>
+  ) },
+  { accessorKey: "type", header: "種別", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("type") as string}
+    </span>
+  ) },
+  { accessorKey: "daysAgo", header: "送付日数", cell: ({ row }) => (
+    <span className="text-sm font-normal text-gray-600">
+      {row.getValue("daysAgo") as number}日前
+    </span>
+  ) },
+  { accessorKey: "assignee", header: "担当者", cell: ({ row }) => (
+    <span className="text-sm font-normal">
+      {row.getValue("assignee") as string}
+    </span>
+  ) },
+  { accessorKey: "status", header: "ステータス", cell: ({ row }) => (
+    <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium rounded-full px-2 py-0.5">
+      {row.getValue("status") as string}
+    </span>
+  ) },
+];
+
+// ナレッジカラム定義
+const knowledgeColumns: ColumnDef<any>[] = [
+  {
+    accessorKey: "title",
+    header: "タイトル",
+    cell: ({ row }) => {
+      const title = row.getValue("title") as string;
+      return <span className="font-medium text-gray-900">{title}</span>;
+    },
+  },
+  {
+    accessorKey: "category",
+    header: "カテゴリー",
+    cell: ({ row }) => {
+      const category = row.getValue("category") as string;
+      const getCategoryColor = (category: string) => {
+        switch (category) {
+          case "成功事例": return "bg-green-100 text-green-800";
+          case "ベストプラクティス": return "bg-blue-100 text-blue-800";
+          case "スキル向上": return "bg-purple-100 text-purple-800";
+          case "学習": return "bg-orange-100 text-orange-800";
+          default: return "bg-gray-100 text-gray-800";
+        }
+      };
+      return (
+        <span className={`inline-block rounded-full px-2 py-0.5 text-sm font-medium ${getCategoryColor(category)}`}>
+          {category}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "author",
+    header: "作成者",
+    cell: ({ row }) => (
+      <span className="text-sm text-gray-600">
+        {row.getValue("author") as string}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "date",
+    header: "作成日",
+    cell: ({ row }) => (
+      <span className="text-sm text-gray-600">
+        {row.getValue("date") as string}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "views",
+    header: "閲覧数",
+    cell: ({ row }) => (
+      <span className="text-sm text-gray-600">
+        {row.getValue("views") as number}回
+      </span>
+    ),
+  },
+  {
+    accessorKey: "rating",
+    header: "評価",
+    cell: ({ row }) => {
+      const rating = row.getValue("rating") as number;
+      return (
+        <span className="text-sm text-gray-600">
+          ⭐ {rating}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "summary",
+    header: "概要",
+    cell: ({ row }) => {
+      const summary = row.getValue("summary") as string;
+      return (
+        <span className="text-sm text-gray-600 max-w-xs truncate" title={summary}>
+          {summary}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "tags",
+    header: "タグ",
+    cell: ({ row }) => {
+      const tags = row.getValue("tags") as string[];
+      return (
+        <div className="flex flex-wrap gap-1">
+          {tags.map((tag, index) => (
+            <span key={index} className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded">
+              {tag}
+            </span>
+          ))}
+        </div>
+      );
+    },
+  },
+];
 
 export default function Home() {
   // State定義
@@ -882,10 +1737,17 @@ export default function Home() {
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
   const [editingMailId, setEditingMailId] = useState<string | null>(null)
   const [editedMails, setEditedMails] = useState<{[key: string]: {subject: string, body: string}}>({})
-  const [currentTab, setCurrentTab] = useState('today')
+  const [currentTab, setCurrentTab] = useState('meetings')
   const [taskColumnVisibility, setTaskColumnVisibility] = useState(taskColumns.map(() => true))
   const [riskColumnVisibility, setRiskColumnVisibility] = useState(riskColumns.map(() => true))
-  
+  const [morningColumnVisibility, setMorningColumnVisibility] = useState(morningColumns.map(() => true))
+  const [historyColumnVisibility, setHistoryColumnVisibility] = useState(historyColumns.map(() => true))
+  const [meetingColumnVisibility, setMeetingColumnVisibility] = useState(meetingColumns.map(() => true))
+  const [followupColumnVisibility, setFollowupColumnVisibility] = useState(followupColumns.map(() => true))
+  const [knowledgeColumnVisibility, setKnowledgeColumnVisibility] = useState(knowledgeColumns.map(() => true))
+  const [knowledgeFilter, setKnowledgeFilter] = useState<string>("all")
+  const [selectedKnowledge, setSelectedKnowledge] = useState<any>(null)
+
   const [competitorColumnVisibility, setCompetitorColumnVisibility] = useState(competitorColumns.map(() => true))
   const [slipColumnVisibility, setSlipColumnVisibility] = useState(slipColumns.map(() => true))
   const [aiProposalColumnVisibility, setAiProposalColumnVisibility] = useState(aiProposalColumns.map(() => true))
@@ -1048,68 +1910,7 @@ export default function Home() {
 
 
 
-  // フォローアップ候補テーブルのカラム定義
-  const followupColumns: ColumnDef<any, React.ReactNode>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="全て選択"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
-          aria-label="行を選択"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    { 
-      accessorKey: "name",
-      header: "担当者名",
-      cell: info => <span className="text-black font-normal">{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "company",
-      header: "顧客名",
-      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "project",
-      header: "案件名",
-      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "lastContact",
-      header: "最終接触日",
-      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "status",
-      header: "案件ステータス",
-      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "lastAction",
-      header: "前回接触内容",
-      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "priority",
-      header: "優先度",
-      cell: info => <span className={`text-black rounded px-2 py-0.5 font-normal ${info.getValue()==='高' ? 'bg-gray-200' : info.getValue()==='中' ? 'bg-gray-100' : 'bg-gray-200'}`}>{info.getValue()}</span>
-    },
-    { 
-      accessorKey: "nextAction",
-      header: "次のアクション",
-      cell: info => <span className="text-gray-700 font-normal">{info.getValue()}</span>
-    },
-  ];
+
 
   // 質問リストをファイルから取得（現状は静的に記述）
   const questionList = [
@@ -1205,7 +2006,7 @@ export default function Home() {
 
 
 
-  // Selaの提案実行ハンドラー
+  // 対応提案実行ハンドラー
   const [executingSuggestions, setExecutingSuggestions] = useState<Set<string>>(new Set());
 
   const handleExecuteSuggestion = (suggestion: string) => {
@@ -1234,7 +2035,7 @@ export default function Home() {
                 実行完了
               </AlertTitle>
               <AlertDescription className="mt-1 text-gray-600 text-sm">
-                Selaが「{suggestion}」を実行しました。結果はAI対応状況タブで確認できます。
+                対応提案「{suggestion}」を実行しました。結果は対応提案タブで確認できます。
               </AlertDescription>
             </div>
             <div className="ml-4 flex-shrink-0 flex">
@@ -1287,7 +2088,7 @@ export default function Home() {
     
     // 模擬的なAI応答（実際のAPI呼び出しに置き換え可能）
     setTimeout(() => {
-      const response = `Sela: ${userInput}について対応いたします。詳細な分析と提案を準備中です。`;
+      const response = `対応提案: ${userInput}について対応いたします。詳細な分析と提案を準備中です。`;
       setAgentHistory(prev => prev.map((item, index) => 
         index === prev.length - 1 ? { ...item, response } : item
       ));
@@ -1467,25 +2268,36 @@ export default function Home() {
             <div className="w-full">
               {/* タブ付きテーブル */}
               <div className="w-full bg-white border border-gray-100 rounded-xl shadow p-4">
-                <Tabs defaultValue="today" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
+                <Tabs defaultValue="meetings" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
                   <div className="flex items-center justify-between mb-2 gap-4">
                     <TabsList className="bg-gray-100 flex-shrink-0">
-                      <TabsTrigger value="today" className="text-gray-700 font-normal text-sm flex items-center gap-1">
-                        今日やること
-                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{todayActionData.filter(item => item.priority === '緊急').length}</span>
+                      <TabsTrigger value="meetings" className="text-gray-700 font-normal text-sm flex items-center gap-1">
+                        今日の商談
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{meetingData.length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="followup" className="text-gray-700 font-normal text-sm flex items-center gap-1">
+                        追客案件
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{followupData.length}</span>
                       </TabsTrigger>
                       <TabsTrigger value="tasks" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                         優先タスク
                         <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{taskData.filter(task => task.priority === '高').length}</span>
                       </TabsTrigger>
-
                       <TabsTrigger value="risks" className="text-gray-700 font-normal text-sm flex items-center gap-1">
                         リスク案件
                         <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{riskData.filter(risk => risk.priority === '高').length}</span>
                       </TabsTrigger>
+                      <TabsTrigger value="knowledge" className="text-gray-700 font-normal text-sm flex items-center gap-1">
+                        ナレッジ
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{knowledgeData.length}</span>
+                      </TabsTrigger>
                       <TabsTrigger value="ai-proposals" className="text-gray-700 font-normal text-sm flex items-center gap-1">
-                        AI提案・アラート
-                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiProposalData.filter(item => item.priority === '高').length}</span>
+                        対応提案
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{aiProposalsData.length}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="history" className="text-gray-700 font-normal text-sm flex items-center gap-1">
+                        履歴
+                        <span className="inline-block bg-gray-300 text-gray-800 text-xs font-semibold rounded-full px-2 py-0.5 ml-1">{historyData.length}</span>
                       </TabsTrigger>
                       <Button 
                         variant="ghost" 
@@ -1545,13 +2357,49 @@ export default function Home() {
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
                               </DropdownMenuCheckboxItem>
                             ))
-                          ) : currentTab === 'today' ? (
-                            todayActionColumns.map((col, idx) => (
+                          ) : currentTab === 'meetings' ? (
+                            meetingColumns.map((col, idx) => (
                               <DropdownMenuCheckboxItem
                                 key={typeof col.header === 'string' ? col.header : `col${idx}`}
-                                checked={todayActionColumnVisibility[idx]}
+                                checked={meetingColumnVisibility[idx]}
                                 onCheckedChange={checked => {
-                                  setTodayActionColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                  setMeetingColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'followup' ? (
+                            followupColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={followupColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setFollowupColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'knowledge' ? (
+                            knowledgeColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={knowledgeColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setKnowledgeColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
+                                }}
+                              >
+                                {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : currentTab === 'history' ? (
+                            historyColumns.map((col, idx) => (
+                              <DropdownMenuCheckboxItem
+                                key={typeof col.header === 'string' ? col.header : `col${idx}`}
+                                checked={historyColumnVisibility[idx]}
+                                onCheckedChange={checked => {
+                                  setHistoryColumnVisibility(prev => prev.map((v, i) => i === idx ? checked : v));
                                 }}
                               >
                                 {typeof col.header === 'string' ? col.header : `カラム${idx+1}`}
@@ -1563,37 +2411,170 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <TabsContent value="today" className="mt-0">
-                    <div className="space-y-4">
-                       {/* 今日のタスク一覧 */}
-                                               <DataTable
-                          columns={todayActionColumns.filter((_, idx) => todayActionColumnVisibility[idx])}
-                          data={todayActionData}
-                      />
-                    </div>
+                  <TabsContent value="meetings" className="mt-0 w-full">
+                    <DataTable
+                      columns={meetingColumns}
+                      data={meetingData}
+                      showSearch={true}
+                      showColumnSelector={false}
+                      showPagination={true}
+                    />
                   </TabsContent>
 
-                  <TabsContent value="tasks" className="mt-0">
+                  <TabsContent value="followup" className="mt-0 w-full">
+                    <DataTable
+                      columns={followupColumns}
+                      data={followupData}
+                      showSearch={true}
+                      showColumnSelector={false}
+                      showPagination={true}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="ai-proposals" className="mt-0 w-full">
+                    <DataTable
+                      columns={aiProposalColumns.filter((_, idx) => aiProposalColumnVisibility[idx])}
+                      data={aiProposalsData}
+                      showSearch={false}
+                      showColumnSelector={false}
+                      showPagination={false}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="tasks" className="mt-0 w-full">
                     <DataTable
                       columns={taskColumns.filter((_, idx) => taskColumnVisibility[idx])}
                       data={taskData}
+                      showSearch={false}
+                      showColumnSelector={false}
+                      showPagination={false}
                     />
                   </TabsContent>
 
-                  <TabsContent value="risks" className="mt-0">
+                  <TabsContent value="risks" className="mt-0 w-full">
                     <DataTable
                       columns={riskColumns.filter((_, idx) => riskColumnVisibility[idx])}
                       data={riskData}
+                      showSearch={false}
+                      showColumnSelector={false}
+                      showPagination={false}
                     />
                   </TabsContent>
 
-                  <TabsContent value="ai-proposals" className="mt-0">
+                  <TabsContent value="history" className="mt-0 w-full">
                     <DataTable
-                      columns={aiProposalColumns.filter((_, idx) => aiProposalColumnVisibility[idx])}
-                      data={aiProposalData}
+                      columns={historyColumns.filter((_, idx) => historyColumnVisibility[idx])}
+                      data={historyData}
+                      showSearch={false}
+                      showColumnSelector={false}
+                      showPagination={false}
                     />
                   </TabsContent>
 
+                  <TabsContent value="knowledge" className="mt-0 w-full">
+                    <div className="space-y-4">
+                      {/* フィルターと検索 */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={knowledgeFilter}
+                            onChange={(e) => setKnowledgeFilter(e.target.value)}
+                            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                          >
+                            <option value="all">すべてのカテゴリー</option>
+                            <option value="成功事例">成功事例</option>
+                            <option value="ベストプラクティス">ベストプラクティス</option>
+                            <option value="スキル向上">スキル向上</option>
+                            <option value="学習">学習</option>
+                          </select>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {knowledgeData.filter(item => knowledgeFilter === "all" || item.category === knowledgeFilter).length}件
+                        </div>
+                      </div>
+
+                      {/* ナレッジ詳細表示 */}
+                      {selectedKnowledge ? (
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900">{selectedKnowledge.title}</h3>
+                            <button
+                              onClick={() => setSelectedKnowledge(null)}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span>作成者: {selectedKnowledge.author}</span>
+                              <span>作成日: {selectedKnowledge.date}</span>
+                              <span>閲覧数: {selectedKnowledge.views}回</span>
+                              <span>評価: ⭐ {selectedKnowledge.rating}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              {selectedKnowledge.tags.map((tag: string, index: number) => (
+                                <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="border-t pt-4">
+                              <h4 className="font-medium text-gray-900 mb-2">概要</h4>
+                              <p className="text-gray-700 mb-4">{selectedKnowledge.summary}</p>
+                              <h4 className="font-medium text-gray-900 mb-2">詳細内容</h4>
+                              <p className="text-gray-700">{selectedKnowledge.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        /* ナレッジ一覧カード表示 */
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {knowledgeData
+                            .filter(item => knowledgeFilter === "all" || item.category === knowledgeFilter)
+                            .map((item) => (
+                              <div 
+                                key={item.id} 
+                                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow"
+                                onClick={() => setSelectedKnowledge(item)}
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <h3 className="font-medium text-gray-900 text-sm line-clamp-2">{item.title}</h3>
+                                  <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                                    item.category === "成功事例" ? "bg-green-100 text-green-800" :
+                                    item.category === "ベストプラクティス" ? "bg-blue-100 text-blue-800" :
+                                    item.category === "スキル向上" ? "bg-purple-100 text-purple-800" :
+                                    "bg-orange-100 text-orange-800"
+                                  }`}>
+                                    {item.category}
+                                  </span>
+                                </div>
+                                <p className="text-gray-600 text-xs mb-3 line-clamp-3">{item.summary}</p>
+                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                  <span>{item.author}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span>⭐ {item.rating}</span>
+                                    <span>{item.views}回</span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {item.tags.slice(0, 3).map((tag, index) => (
+                                    <span key={index} className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                  {item.tags.length > 3 && (
+                                    <span className="text-gray-400 text-xs">+{item.tags.length - 3}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
 
                 </Tabs>
                 </div>
